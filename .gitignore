@@ -9,6 +9,9 @@ Manifest.toml.bak
 
 # Jupyter
 .ipynb_checkpoints/
+case-studies/*/.jupyter/
+case-studies/*/.julia-depot-nbconvert/
+case-studies/*/*_executed.ipynb
 
 # Python and tooling caches
 __pycache__/

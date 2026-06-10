@@ -24,6 +24,21 @@ The notebook has executed outputs and explanatory text. Read the first markdown
 sections before running cells; they explain the file layout, the flow/auxiliary
 bit convention, and the cached result folders.
 
+## Fresh Clone Check
+
+From this folder, instantiate the recorded Julia environment and run the smoke
+test before attempting the full notebook:
+
+```bash
+julia --project=. -e 'import Pkg; Pkg.instantiate()'
+julia --project=. scripts/smoke_test.jl
+```
+
+The smoke test imports the Julia and Python packages used by the notebook,
+checks that required artifacts exist, and validates key cached result summaries.
+It does not rerun QAOA or VQE, so it should complete much faster than executing
+the notebook.
+
 ## Main Takeaway
 
 The original Gurobi model is the 19-variable DS-MFG flow problem. The exported
@@ -103,7 +118,8 @@ scripts/nbconvert_ds_mfg.sh
 
 The helper creates a local IJulia kernel and executes the notebook with
 `nbconvert`. It uses the `julia` and `jupyter` commands on your `PATH`. Julia
-1.10 or newer is recommended. If Julia or Jupyter are not on your `PATH`, set:
+1.10 or newer is required by `Project.toml`. If Julia or Jupyter are not on
+your `PATH`, set:
 
 ```bash
 export JULIA_BIN=/path/to/julia

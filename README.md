@@ -16,11 +16,25 @@ instances can be added without changing the existing DS-MFG artifact paths.
 
 ## Start Here
 
-For the current DS-MFG case:
+Clone the repository and enter the current DS-MFG case study:
 
 ```bash
+git clone https://github.com/SECQUOIA/pse-quantum-discrete-optimization.git
+cd pse-quantum-discrete-optimization
 cd case-studies/ds-mfg-qubo-qiskitopt
 ```
+
+Set up the Julia project and run the lightweight reproducibility check:
+
+```bash
+julia --project=. -e 'import Pkg; Pkg.instantiate()'
+julia --project=. scripts/smoke_test.jl
+```
+
+The smoke test verifies that the Julia and Python dependencies import, the
+case-study artifacts are present, and the cached result summaries contain the
+expected DS-MFG optimum and sampler hit counts. It is the fastest way for a new
+user to confirm that a fresh clone is usable before rerunning the full notebook.
 
 Then read:
 
@@ -28,6 +42,15 @@ Then read:
    cached results, and rerun commands.
 2. `MANUSCRIPT_FINDINGS.tex` for the manuscript-ready formulation and results.
 3. `ds_mfg_qubo_qiskitopt.ipynb` for the executed analysis record.
+
+To execute the full notebook non-interactively from the case-study directory:
+
+```bash
+scripts/nbconvert_ds_mfg.sh
+```
+
+The full notebook run uses local Qiskit Aer emulation and can take much longer
+than the smoke test.
 
 All quantum-algorithm results currently tracked here are local classical
 emulations. No IBM hardware results are included in the initial DS-MFG bundle.
