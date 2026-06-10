@@ -74,6 +74,8 @@ function require_float(row, key, expected; atol = 1e-8)
 end
 
 println("Checking Julia and Python package imports...")
+Base.pkgversion(QiskitOpt) == v"0.4.2" ||
+    smoke_error("expected QiskitOpt v0.4.2, got $(Base.pkgversion(QiskitOpt))")
 PythonCall.pyimport("qiskit")
 PythonCall.pyimport("qiskit_aer")
 PythonCall.pyimport("qiskit_optimization")
