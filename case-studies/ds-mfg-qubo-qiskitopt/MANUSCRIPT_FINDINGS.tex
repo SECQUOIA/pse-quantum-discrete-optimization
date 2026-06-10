@@ -1,0 +1,524 @@
+% Manuscript-ready draft material for the DS-MFG QUBO case study.
+% Tables use standard LaTeX only. Equations assume amsmath and amssymb, which
+% are present in most journal templates. A manuscript template may replace the
+% \hline table styling with booktabs if desired.
+
+\section{DS-MFG QUBO Case Study}
+\label{sec:ds-mfg-qubo}
+
+This case study evaluates local classical emulations of QAOA and VQE on the
+DS-MFG discrete manufacturing QUBO instance using \texttt{QiskitOpt.jl}. The
+input data are the exported \texttt{scalars.csv}, \texttt{L\_vector.csv}, and
+\texttt{Q\_matrix.csv} files from the DS-MFG archive, with the Gurobi solution
+pool used as ground truth for the original integer-programming variables. The
+experiments were run in the reproducibility bundle
+\texttt{/home/bernalde/repos/QiskitOpt.jl/ds\_mfg\_student\_package\_20260605};
+all artifact paths reported below are relative to that bundle.
+
+\subsection{Problem Statement}
+\label{subsec:ds-mfg-problem-statement}
+
+The original DS-MFG instance is a binary integer-programming model for a
+discrete manufacturing capital-expenditure selection problem. In the Gurobi
+export used here the model is named \texttt{capex}; it has 19 binary flow
+variables, 20 constraints, 58 nonzeros, and a minimization objective. The Gurobi
+solve was run with solution-pool search enabled and returned 36 pool solutions.
+We use this pool as classical ground truth over the original 19-variable
+decision space.
+
+The computational task in this case study is not merely to recover one bitstring
+with low raw QUBO energy. Rather, for each quantum-emulation method $A$, the
+task is to generate an empirical distribution
+\[
+    \widehat{p}_A(x), \qquad x \in \{0,1\}^{36},
+\]
+then compare its mass against the Gurobi solution pool after projecting onto the
+original 19 flow variables and, when needed, repairing the QUBO auxiliary
+variables exactly. The reported performance quantities are therefore:
+\begin{enumerate}
+    \item the best repaired objective sampled by the method;
+    \item the number of sampled reads whose flow projection appears in the
+    Gurobi pool;
+    \item the number of sampled reads whose flow projection is the Gurobi global
+    optimum;
+    \item the concentration of the distribution on the top repaired flow
+    assignments.
+\end{enumerate}
+
+The Gurobi global optimum has IP objective $11.7095$ and flow bitstring
+\texttt{1001110100111100011} when the flow variables are ordered as
+\texttt{f00}, \texttt{f01}, \ldots, \texttt{f18}. The first scientific question
+is whether local QAOA or VQE emulations place observable probability on this
+flow. The second is whether problem-specific postprocessing and reduction make
+that probability easier to observe.
+
+\subsection{QUBO Formulation}
+\label{subsec:ds-mfg-qubo-formulation}
+
+The QUBO archive provides a scalar file, a linear coefficient vector, and a
+quadratic coefficient matrix. Let
+\[
+    x = (x_1,\ldots,x_{36}) \in \{0,1\}^{36}
+\]
+denote the complete QUBO bitstring. The objective encoded by the CSV files is
+\begin{equation}
+    E_{\mathrm{QUBO}}(x)
+    =
+    a\left(
+        \ell^\top x + x^\top Qx + b
+    \right),
+    \label{eq:ds-mfg-full-qubo}
+\end{equation}
+with $a=1.0$, $b=601.4761999999997$, $\ell \in \mathbb{R}^{36}$, and
+$Q \in \mathbb{R}^{36 \times 36}$. The optimization problem passed to
+\texttt{QiskitOpt.jl} is
+\begin{equation}
+    \min_{x \in \{0,1\}^{36}} E_{\mathrm{QUBO}}(x).
+    \label{eq:ds-mfg-full-qubo-problem}
+\end{equation}
+
+The 36 QUBO variables split naturally into original variables and reformulation
+variables:
+\[
+    x = (y,z), \qquad
+    y \in \{0,1\}^{19}, \quad z \in \{0,1\}^{17}.
+\]
+Here $y$ is the vector of original DS-MFG flow decisions and $z$ contains the
+auxiliary/slack bits introduced by the QUBO reformulation. With the same
+partition applied to $\ell$ and $Q$, the QUBO can be written as
+\begin{equation}
+\begin{aligned}
+    E_{\mathrm{QUBO}}(y,z)
+    = a\{&
+        b + \ell_y^\top y + \ell_z^\top z
+        + y^\top Q_{yy}y + y^\top Q_{yz}z \\
+        &+ z^\top Q_{zy}y + z^\top Q_{zz}z
+    \}.
+\end{aligned}
+\label{eq:ds-mfg-partitioned-qubo}
+\end{equation}
+The Gurobi pool is defined only over $y$. Consequently, a sampled bitstring
+$(y,z)$ can have a Gurobi-pool flow projection while still carrying a poor
+auxiliary assignment $z$ and therefore a misleadingly large raw QUBO energy.
+
+\subsection{Exact Auxiliary Elimination}
+\label{subsec:ds-mfg-auxiliary-elimination}
+
+For a fixed flow assignment $y$, define the repaired or reduced flow objective
+\begin{equation}
+    F(y)
+    =
+    \min_{z \in \{0,1\}^{17}} E_{\mathrm{QUBO}}(y,z).
+    \label{eq:ds-mfg-repaired-objective}
+\end{equation}
+This objective is the correct bridge between the QUBO formulation and the
+original IP solution pool: it asks what QUBO energy is obtained by the best
+auxiliary completion of the sampled flow decision. If $y$ appears in the Gurobi
+pool, $F(y)$ is also directly comparable to the Gurobi objective value; for the
+global optimum above, $F(y^\star)=11.7095$ up to floating-point roundoff.
+
+The reduction is tractable because fixing $y$ removes all flow-variable
+uncertainty from Eq.~\eqref{eq:ds-mfg-partitioned-qubo}. The remaining
+minimization over $z$ is a binary quadratic problem whose only free variables
+are auxiliary bits. In this instance, the auxiliary interaction graph
+decomposes into 13 connected components after the flow bits are fixed. Each
+component contains either one or two auxiliary variables. Therefore,
+\begin{equation}
+    F(y)
+    =
+    c(y) + \sum_{k=1}^{13}
+    \min_{z_{C_k} \in \{0,1\}^{|C_k|}}
+    \phi_k\!\left(z_{C_k}; y_{N(C_k)}\right),
+    \label{eq:ds-mfg-component-repair}
+\end{equation}
+where $C_k$ is an auxiliary component, $N(C_k)$ is the set of flow variables
+that couple to that component, $c(y)$ collects terms independent of auxiliary
+variables, and $\phi_k$ is the component-local auxiliary contribution including
+the fixed flow-neighbor terms. Since $|C_k| \le 2$ for all components in this
+instance, exact repair requires only one- and two-bit local minimizations once a
+flow assignment is fixed.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Auxiliary components used for exact repair after fixing the 19 flow
+variables. Flow-neighbor indices use the 1-based indexing stored in the cached
+artifact \texttt{auxiliary\_components.csv}.}
+\label{tab:ds-mfg-aux-components}
+\begin{tabular}{p{0.12\linewidth}p{0.18\linewidth}p{0.30\linewidth}p{0.12\linewidth}p{0.16\linewidth}}
+\hline
+Component & Auxiliary indices & Flow-neighbor set & Aux. vars. & Flow-neighbor count \\
+\hline
+1 & 20 & 17;18 & 1 & 2 \\
+2 & 21 & 2;3;4 & 1 & 3 \\
+3 & 22 & 6;7 & 1 & 2 \\
+4 & 23 & 9;10;11 & 1 & 3 \\
+5 & 24 & 14;15;16;17 & 1 & 4 \\
+6 & 25;26 & 2;7;11 & 2 & 3 \\
+7 & 27;28 & 3;7;11 & 2 & 3 \\
+8 & 29;30 & 4;7;11 & 2 & 3 \\
+9 & 31;32 & 2;3;6 & 2 & 3 \\
+10 & 33 & 6;11 & 1 & 2 \\
+11 & 34 & 14;18 & 1 & 2 \\
+12 & 35 & 15;18 & 1 & 2 \\
+13 & 36 & 16;18 & 1 & 2 \\
+\hline
+\end{tabular}
+\end{table}
+
+The notebook evaluates $F(y)$ for all $2^{19}$ flow assignments and verifies
+that the exact reduced objective recovers the Gurobi global optimum. This
+enumeration also gives a ranked list of the best repaired flow assignments and
+is used to score every sampled QAOA and VQE distribution.
+
+Although $F(y)$ is exact, it is not generally quadratic in $y$. The minimization
+over auxiliary bits in Eq.~\eqref{eq:ds-mfg-repaired-objective} creates a
+piecewise Boolean function of the flow variables. The current
+\texttt{QiskitOpt.jl} QAOA and VQE interfaces accept quadratic QUBOs, so the
+notebook constructs a quadratic surrogate
+\begin{equation}
+    \widetilde{F}(y)
+    =
+    \widetilde{b}
+    + \widetilde{\ell}^{\top} y
+    + y^{\top} \widetilde{Q} y
+    \label{eq:ds-mfg-quadratic-surrogate}
+\end{equation}
+by least-squares fitting Eq.~\eqref{eq:ds-mfg-quadratic-surrogate} to
+$F(y)$ over all $2^{19}$ flow assignments. The fitted surrogate is stored as
+\texttt{reduced\_scalars.csv}, \texttt{reduced\_L\_vector.csv}, and
+\texttt{reduced\_Q\_matrix.csv}. Its offset is $144.603743749989$ and its
+scale is $1.0$.
+
+The surrogate has high global fit quality ($R^2 = 0.9990819$), but the
+surrogate optimum is not the repaired global optimum. The fitted surrogate is
+minimized by flow \texttt{1001110110011100011}, whose exact repaired objective
+is $14.5505$, whereas the true repaired optimum is
+\texttt{1001110100111100011} with objective $11.7095$. This is why all
+surrogate-based QAOA and VQE samples are evaluated against $F(y)$, not only
+against $\widetilde{F}(y)$.
+
+\subsection{Computational Setup}
+\label{subsec:ds-mfg-computational-setup}
+
+All QAOA and VQE experiments reported here are local classical simulations, not
+IBM hardware executions. The notebook was executed through
+\texttt{scripts/nbconvert\_ds\_mfg.sh}, which activates the Julia project
+\texttt{DSMFGQiskitOptStudent}. The project pins \texttt{QiskitOpt.jl v0.4.1},
+\texttt{QUBODrivers v0.6}, \texttt{QUBOTools v0.13}, \texttt{PythonCall v0.9},
+and a Julia compatibility target of \texttt{1.10}. The QAOA and VQE solves use
+Qiskit Aer through \texttt{QiskitOpt.jl}. The expensive local simulations use
+Aer's matrix-product-state method with single precision; the cached full-QUBO
+notebook rows record the fast MPS settings used there, while the reduced QAOA
+and VQE revisit scripts explicitly set truncation threshold $10^{-10}$,
+maximum MPS bond dimension 64, \texttt{mps\_heuristic} measurement sampling,
+and a thread cap of \texttt{min(Sys.CPU\_THREADS, 8)}. Optimizer reads and final
+sampling reads were separated with \texttt{QUBODrivers.FinalNumberOfReads()}
+when supported by the package.
+
+The strongest QAOA workflow used an additional offline angle-search step. That
+step was run from the local sibling clone of LANL's \texttt{JuliQAOA.jl}. The
+script enumerates all $2^{19}$ reduced-surrogate energies for statevector
+probability evaluation, normalizes those energies, and then uses
+\texttt{find\_angles\_bh} for basin-hopping angle optimization. The resulting
+angles were transferred back into \texttt{QiskitOpt.QAOA} for Aer sampling with
+\texttt{MaximumIterations() = 0}. Thus, the final QAOA sampling distribution is
+still a \texttt{QiskitOpt.jl}/Aer result, but the angles were learned by
+\texttt{JuliQAOA.jl}.
+
+\subsection{Distribution Scoring}
+\label{subsec:ds-mfg-scoring}
+
+The full sampled state is still retained during scoring. For a sampled state
+$x=(y,z)$, the raw QUBO energy is $E_{\mathrm{QUBO}}(y,z)$, the repaired energy
+is $F(y)$, and the auxiliary gap is
+\[
+    \Delta_{\mathrm{aux}}(y,z)
+    =
+    E_{\mathrm{QUBO}}(y,z) - F(y).
+\]
+This gap is zero only when the sampled auxiliary bits are already a
+minimum-energy completion for the sampled flow projection.
+
+For each sampled state, the notebook reports three related quantities:
+\begin{enumerate}
+    \item \emph{projected match}: whether the first 19 bits appear in the
+    Gurobi pool;
+    \item \emph{encoded match}: whether the full 36-bit state matches the
+    minimum-energy auxiliary completion for that projected flow;
+    \item \emph{repaired objective}: the QUBO objective after fixing the 19
+    flow bits and choosing the exact best auxiliary completion.
+\end{enumerate}
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Experiment campaigns and execution backends. Artifact paths are
+relative to the reproducibility bundle.}
+\label{tab:ds-mfg-campaigns}
+\begin{tabular}{p{0.22\linewidth}p{0.20\linewidth}p{0.28\linewidth}p{0.22\linewidth}}
+\hline
+Campaign & Problem & Execution settings & Cached evidence \\
+\hline
+Baseline QAOA/VQE and iteration sweep & Full 36-variable QUBO &
+Local \texttt{QiskitOpt.jl}/Aer emulation; small read counts used to verify
+the interface and runtime; QAOA iteration limits swept from 3 to 40. &
+\texttt{ds\_mfg\_saved\_distributions/};
+\texttt{ds\_mfg\_iteration\_sweep/sweep\_summary.csv} \\
+\hline
+Fixed-angle QAOA, $p=1,\ldots,5$ & Full 36-variable QUBO &
+Local Aer MPS; 128 reads, 25 optimizer iterations; Wurtz-Lykov
+3-regular MaxCut fixed-angle table used only as a warm start; negative gamma
+sign convention. &
+\texttt{ds\_mfg\_fixed\_angle\_sweep/fixed\_angle\_qaoa\_summary.csv};
+\texttt{ds\_mfg\_aux\_repair\_analysis/repair\_summary.csv} \\
+\hline
+Perturbed fixed-angle QAOA & Full 36-variable QUBO &
+Local Aer MPS; $p=2$ fixed-angle warm start perturbed with
+$\sigma \in \{0.05,0.10,0.20\}$; 128 reads, 10 optimizer iterations. &
+\texttt{ds\_mfg\_p2\_perturbation\_sweep\_v3/p2\_perturbation\_summary.csv} \\
+\hline
+QAOA final-sampling separation & Full 36-variable QUBO &
+Local Aer MPS; $p=2$; 128 optimizer reads, 512 final reads, 25 optimizer
+iterations. &
+\texttt{ds\_mfg\_final\_sampling\_sweep\_v2/final\_sampling\_summary.csv} \\
+\hline
+Auxiliary repair and reduced objective & Exact repaired 19-flow objective &
+Deterministic Julia/QUBOTools enumeration of all $2^{19}$ flow assignments;
+17 auxiliary variables eliminated by exact component-wise repair. &
+\texttt{ds\_mfg\_reduced\_flow\_objective/reduced\_flow\_summary.csv};
+\texttt{ds\_mfg\_reduced\_flow\_objective/reduced\_exact\_top\_flows.csv} \\
+\hline
+Offline QAOA angle search & 19-variable quadratic surrogate &
+Local \texttt{JuliQAOA.jl} statevector probability evaluation over all $2^{19}$
+surrogate states; basin-hopping angle optimization for $p=1,\ldots,5$;
+basin-hopping iterations set to 5 in the cached run; energies z-score
+normalized before angle search. &
+\texttt{ds\_mfg\_qaoa\_juliqaoa\_angle\_search/juliqaoa\_angle\_summary.csv} \\
+\hline
+Transferred-angle QAOA & 19-variable quadratic surrogate &
+Local \texttt{QiskitOpt.QAOA}/Aer MPS sampling with JuliQAOA angles; 16
+optimizer reads, \texttt{MaximumIterations() = 0}; 32768 final reads for
+$p=2,\ldots,5$ and 262144 final reads for the best $p=5$ follow-up. &
+\texttt{ds\_mfg\_qaoa\_juliqaoa\_transfer/};
+\texttt{ds\_mfg\_qaoa\_juliqaoa\_transfer\_highread/} \\
+\hline
+VQE full-QUBO sweep & Full 36-variable QUBO &
+Local \texttt{QiskitOpt.VQE}/Aer emulation with \texttt{EfficientSU2}; five
+random initializations; 128 optimizer reads, 8192 final reads, 25 COBYLA
+iterations. &
+\texttt{ds\_mfg\_vqe\_final\_sampling\_sweep\_v2/vqe\_final\_sampling\_summary.csv} \\
+\hline
+VQE reduced-surrogate sweeps & 19-variable quadratic surrogate &
+Local \texttt{QiskitOpt.VQE}/Aer emulation with \texttt{EfficientSU2}; first
+five seeds with 8192 final reads, then 20 seeds with 32768 final reads, then
+selected high-read follow-ups at 262144 and 524288 reads. &
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_v2/};
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_v3/};
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_v4/};
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_final/} \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{QAOA Results}
+\label{subsec:ds-mfg-qaoa-results}
+
+The initial full-QUBO QAOA experiments did not concentrate probability mass on
+encoded Gurobi-pool solutions. Fixed-angle QAOA with $p=2$ produced one
+projected Gurobi-pool read in 128 samples, but no encoded pool read. After
+exact auxiliary repair, that projected flow had objective $18.0745$, well above
+the global optimum. Perturbing those $p=2$ fixed angles did not improve the
+result. Separating optimizer reads from final sampling on the full QUBO improved
+the best repaired pool objective to $14.5505$ and produced three projected pool
+reads in 512 samples, but still did not sample the global optimum.
+
+The strongest QAOA result was obtained by optimizing angles offline on the
+reduced surrogate with \texttt{JuliQAOA.jl} and then transferring those angles
+into \texttt{QiskitOpt.QAOA}. For $p=5$, the offline statevector calculation
+predicted a probability of $0.1506823$ on the top 50 repaired flows, $0.0340277$
+on the top 10 repaired flows, and $0.00263256$ on the exact global optimum. The
+high-read Aer follow-up sampled the global optimum 664 times in 262144 reads,
+corresponding to an empirical global-hit rate of $0.002533$.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{QAOA experiments scored by exact auxiliary repair. ``Global'' means
+the Gurobi global optimum \texttt{1001110100111100011}.}
+\label{tab:ds-mfg-qaoa-results}
+\begin{tabular}{p{0.25\linewidth}p{0.19\linewidth}p{0.22\linewidth}p{0.25\linewidth}}
+\hline
+Experiment & Settings & Hit counts & Best repaired result \\
+\hline
+Fixed-angle QAOA, best full-QUBO case & $p=2$; 128 reads; 25 iterations; full
+36-variable QUBO & 1 projected pool read; 0 encoded pool reads; 0 global reads &
+Objective $18.0745$; flow \texttt{1001110101011100011}; artifact
+\texttt{repair\_summary.csv} \\
+\hline
+Perturbed $p=2$ fixed-angle QAOA & $\sigma=0.05,0.10,0.20$; 128 reads; 10
+iterations; full 36-variable QUBO & 0 projected pool reads and 0 global reads
+for all three perturbations & Best repaired objective $86.8695$ at
+$\sigma=0.10$; artifact \texttt{p2\_perturbation\_summary.csv} \\
+\hline
+Full-QUBO QAOA with separated final sampling & $p=2$; 128 optimizer reads; 512
+final reads; 25 iterations & 3 projected pool reads; 0 encoded pool reads; 0
+global reads & Objective $14.5505$; flow
+\texttt{1001110110011100011}; artifact
+\texttt{final\_sampling\_summary.csv} \\
+\hline
+Reduced-surrogate QAOA before offline angle transfer & $p=2$; 128 optimizer
+reads; 512 final reads; 25 iterations & 0 pool reads and 0 global reads &
+Best sampled repaired objective $102.7385$; artifact
+\texttt{reduced\_flow\_summary.csv} \\
+\hline
+Transferred-angle QAOA, sweep & $p=2,\ldots,5$; 32768 final reads per depth;
+\texttt{MaximumIterations() = 0} & Global reads increased from 16 at $p=2$ to
+96 at $p=5$ & Every depth sampled the global optimum at least once; artifact
+\texttt{qaoa\_juliqaoa\_transfer\_summary.csv} \\
+\hline
+Transferred-angle QAOA, high-read follow-up & $p=5$; 16 optimizer reads;
+262144 final reads; \texttt{MaximumIterations() = 0} & 39661 top-50 reads;
+8964 top-10 reads; 664 global reads & Objective $11.7095$; flow
+\texttt{1001110100111100011}; artifact
+\texttt{qaoa\_juliqaoa\_transfer\_highread/qaoa\_juliqaoa\_transfer\_summary.csv} \\
+\hline
+\end{tabular}
+\end{table}
+
+The $p=5$ transferred QAOA parameters are stored in beta-then-gamma order after
+undoing the JuliQAOA energy normalization:
+\begin{verbatim}
+2.33962976942;2.63487051398;2.8837299086;2.94861783352;3.01149134351;
+0.00156283712269;0.00374327754686;0.00643793480657;0.0100189310157;
+0.0141285087419
+\end{verbatim}
+These are the fixed parameters used by the QAOA hardware placeholder in the
+notebook.
+
+\subsection{VQE Results}
+\label{subsec:ds-mfg-vqe-results}
+
+The initial VQE experiments were less concentrated than the best QAOA workflow.
+On the full 36-variable QUBO, a five-seed \texttt{EfficientSU2} sweep with
+8192 final reads per seed produced one projected pool read and no encoded or
+global read. The best repaired full-QUBO VQE objective was $14.6515$.
+
+The reduced-surrogate VQE runs performed better. A five-seed sweep with 8192
+final reads found a near-optimal pool flow with repaired objective $11.8105$,
+but no global read. A 20-seed sweep with 32768 final reads per seed then
+sampled the global optimum three times in 655360 total reads. Subsequent
+high-read follow-ups on seeds 74001, 74007, and 74018 increased the total
+number of observed global reads to 19 at 262144 reads per seed, and to 28 at
+524288 reads per seed. The final follow-up identified seed 74018 as the best
+VQE candidate, with 20 global reads, 152 top-10 reads, and 391 top-50 reads in
+524288 final samples.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{VQE experiments scored by exact auxiliary repair. All VQE runs used
+\texttt{EfficientSU2} and local \texttt{QiskitOpt.VQE}/Aer emulation.}
+\label{tab:ds-mfg-vqe-results}
+\begin{tabular}{p{0.26\linewidth}p{0.20\linewidth}p{0.22\linewidth}p{0.23\linewidth}}
+\hline
+Experiment & Settings & Hit counts & Best repaired result \\
+\hline
+Full-QUBO VQE, five seeds & Seeds 73001--73005; 128 optimizer reads; 8192
+final reads per seed; 25 iterations & 1 projected pool read; 0 encoded pool
+reads; 0 global reads & Objective $14.6515$ from seed 73005; artifact
+\texttt{vqe\_final\_sampling\_summary.csv} \\
+\hline
+Reduced-surrogate VQE, five seeds & Seeds 73001--73005; 128 optimizer reads;
+8192 final reads per seed; 25 iterations & 2 pool reads total; 0 global reads &
+Objective $11.8105$ from seed 73003; flow
+\texttt{1001110100111010011}; artifact
+\texttt{vqe\_reduced\_flow\_summary.csv} \\
+\hline
+Reduced-surrogate VQE, 20 seeds & Seeds 74001--74020; 32768 final reads per
+seed; 25 iterations & 3 global reads in 655360 total reads; seed 74018 had the
+largest top-50 count but no global read at this read count & Objective
+$11.7095$ observed at seeds 74001 and 74007; artifact
+\texttt{vqe\_reduced\_top50\_sampling\_summary.csv} \\
+\hline
+Reduced-surrogate VQE, high-read selected seeds & Seeds 74001, 74007, 74018;
+262144 final reads per seed & 19 global reads in 786432 total reads; seed
+74018 produced 13 global reads & Objective $11.7095$; artifact
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_v4/} \\
+\hline
+Reduced-surrogate VQE, final follow-up & Seeds 74018, 74007, 74001; 524288
+final reads per seed & 28 global reads in 1572864 total reads; seed 74018
+produced 20 global reads, 152 top-10 reads, and 391 top-50 reads & Objective
+$11.7095$; artifact
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_final/} \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Interpretation}
+\label{subsec:ds-mfg-interpretation}
+
+The dominant methodological point is that the original IP variables and the
+QUBO auxiliary variables must be separated in the analysis. A sample can be
+useful at the IP-variable level even when its auxiliary bits give a poor raw
+QUBO energy. Exact auxiliary repair therefore provides the correct comparison
+to the Gurobi solution pool and the original IP objective.
+
+The dominant algorithmic point is that transferred-angle QAOA was the strongest
+workflow tested. Direct local optimization of the full 36-variable QUBO was weak
+for both QAOA and VQE. Reducing the problem to the 19 flow variables and
+repairing auxiliary variables exactly made the problem interpretable, and
+offline statevector QAOA angle search on the reduced surrogate produced a
+distribution with visible mass on the global optimum. VQE also reached the
+global optimum on the reduced surrogate, but at a much lower empirical rate:
+the best final VQE follow-up saw 20 global reads in 524288 samples for seed
+74018, whereas the transferred $p=5$ QAOA follow-up saw 664 global reads in
+262144 samples.
+
+\subsection{Hardware Run Plan}
+\label{subsec:ds-mfg-hardware-plan}
+
+The notebook includes placeholder cells for hardware execution, but no hardware
+results are included in this bundle. The QAOA hardware candidate is ready as a
+fixed-parameter sampling experiment. The VQE hardware candidate is less mature
+because the cache identifies the best random seed and sampled distribution, but
+does not yet persist the optimized \texttt{EfficientSU2} parameter vector.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Hardware placeholders recorded in the notebook.}
+\label{tab:ds-mfg-hardware-placeholders}
+\begin{tabular}{p{0.20\linewidth}p{0.30\linewidth}p{0.38\linewidth}}
+\hline
+Method & Local evidence supporting the candidate & Placeholder hardware action \\
+\hline
+QAOA & Reduced 19-flow surrogate; $p=5$; JuliQAOA-learned angles transferred
+to \texttt{QiskitOpt.QAOA}; 664 global reads in 262144 local Aer samples. &
+Submit a fixed-angle $p=5$ QAOA sampling run with
+\texttt{MaximumIterations() = 0} and the beta-then-gamma parameter vector
+listed in Section~\ref{subsec:ds-mfg-qaoa-results}. \\
+\hline
+VQE & Reduced 19-flow surrogate; \texttt{EfficientSU2}; best final follow-up
+seed 74018; 20 global reads in 524288 local Aer samples. & Rerun VQE from
+seed 74018 unless the scripts are extended to persist and reload the optimized
+ansatz parameter vector. For a hardware experiment, persisting that vector
+should be done before submission so optimization and hardware sampling can be
+separated. \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Limitations}
+\label{subsec:ds-mfg-limitations}
+
+The local results are classical Aer simulations and should not be interpreted as
+hardware performance. The reduced objective is exact after auxiliary repair,
+but the QAOA and VQE experiments use a quadratic surrogate fit to that exact
+objective. Although the surrogate has high global $R^2$, its minimizer is not
+the true repaired global optimum. Future work should test either an interface
+that optimizes the exact reduced objective directly or a surrogate fit weighted
+toward the low-energy region of the repaired objective. The VQE workflow should
+also persist optimized ansatz parameters so that future hardware studies can
+run fixed-parameter sampling rather than rerunning the classical optimization
+loop on hardware.

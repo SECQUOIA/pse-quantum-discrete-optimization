@@ -1,0 +1,2 @@
+algorithm,angle_target,p,seed,optimizer_reads,final_reads,maximum_iterations,solve_time_sec,unique_states,total_reads,top50_hits,top10_hits,global_hits,best_top50_rank,best_top50_exact_repaired_qubo_energy,best_top50_match,best_top50_flow_bits,juliqaoa_top50_probability,juliqaoa_top10_probability,juliqaoa_global_probability
+QAOA_reduced_surrogate_JuliQAOA_transfer,energy,5,92001,16,262144,0,53.936006713,17009,262144,39661,8964,664,1,11.70949999999975,global_optimum,1001110100111100011,0.15068229084189524,0.03402770663198957,0.0026325613174018516

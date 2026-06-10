@@ -1,0 +1,23 @@
+# Julia
+.julia/
+.CondaPkg/
+LocalPreferences.toml
+Manifest.toml.bak
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python and tooling caches
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+*~
+*.swp

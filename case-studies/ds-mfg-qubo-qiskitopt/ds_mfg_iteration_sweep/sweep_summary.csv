@@ -1,0 +1,6 @@
+algorithm,trial,seed,number_of_reads,maximum_iterations,number_of_layers,solve_time_sec,unique_states,total_reads,global_reads,pool_reads,encoded_global_reads,encoded_pool_reads,best_qubo_energy,best_match,best_encoded_match,best_flow_bits,initial_parameters,distribution_csv
+QAOA,1,15001,128,3,1,5.450504167,128,128,0,0,0,0,347.0678999999998,not_in_gurobi_pool,not_in_gurobi_pool,1001001100000000001,4.89933001834;2.2044018228,ds_mfg_iteration_sweep/qaoa_iter3_trial1_distribution.csv
+QAOA,1,17001,128,5,1,11.985918733,128,128,0,0,0,0,440.5429999999999,not_in_gurobi_pool,not_in_gurobi_pool,1000110101001101011,1.55944101132;4.03967585672,ds_mfg_iteration_sweep/qaoa_iter5_trial1_distribution.csv
+QAOA,1,22001,128,10,1,25.25503564,128,128,0,0,0,0,476.4231999999997,not_in_gurobi_pool,not_in_gurobi_pool,1100000100011000000,0.178854343596;4.45599511068,ds_mfg_iteration_sweep/qaoa_iter10_trial1_distribution.csv
+QAOA,1,32001,128,20,1,50.140459627,128,128,0,0,0,0,392.19759999999974,not_in_gurobi_pool,not_in_gurobi_pool,1100110000011001000,4.39947126081;0.573956956638,ds_mfg_iteration_sweep/qaoa_iter20_trial1_distribution.csv
+QAOA,1,52001,128,40,1,76.710180861,128,128,0,0,0,0,490.6461999999997,not_in_gurobi_pool,not_in_gurobi_pool,0100101100111110011,3.3998556911;5.3535782272,ds_mfg_iteration_sweep/qaoa_iter40_trial1_distribution.csv
