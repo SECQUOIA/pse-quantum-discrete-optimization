@@ -17,8 +17,9 @@ installable project is the DS-MFG QUBO case study in
 You do not need to install Python, Conda, Qiskit, Gurobi, or IBM credentials
 manually for the smoke test. The Python/Qiskit stack is described by
 `CondaPkg.toml` and created locally by `PythonCall.jl`/`CondaPkg.jl` on first
-use. The tracked DS-MFG results are local classical emulations, not IBM
-hardware jobs.
+use. The Qiskit package versions are pinned for reproducible local emulation.
+The tracked DS-MFG results are local classical emulations, not IBM hardware
+jobs.
 
 ## Fresh Clone Check
 
