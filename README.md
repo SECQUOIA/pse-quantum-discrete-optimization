@@ -27,7 +27,13 @@ cd case-studies/ds-mfg-qubo-qiskitopt
 Set up the Julia project and run the lightweight reproducibility check:
 
 ```bash
-julia --project=. -e 'import Pkg; Pkg.instantiate()'
+scripts/bootstrap_ds_mfg.sh
+```
+
+Equivalently, run the setup steps manually:
+
+```bash
+julia --project=. -e 'import Pkg; Pkg.instantiate(); Pkg.precompile()'
 julia --project=. scripts/smoke_test.jl
 ```
 
@@ -35,6 +41,8 @@ The smoke test verifies that the Julia and Python dependencies import, the
 case-study artifacts are present, and the cached result summaries contain the
 expected DS-MFG optimum and sampler hit counts. It is the fastest way for a new
 user to confirm that a fresh clone is usable before rerunning the full notebook.
+See `INSTALL.md` for fresh-device prerequisites, expected generated files, and
+notebook execution details.
 
 Then read:
 

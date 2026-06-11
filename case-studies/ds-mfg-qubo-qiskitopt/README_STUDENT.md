@@ -30,7 +30,13 @@ From this folder, instantiate the recorded Julia environment and run the smoke
 test before attempting the full notebook:
 
 ```bash
-julia --project=. -e 'import Pkg; Pkg.instantiate()'
+scripts/bootstrap_ds_mfg.sh
+```
+
+This is equivalent to:
+
+```bash
+julia --project=. -e 'import Pkg; Pkg.instantiate(); Pkg.precompile()'
 julia --project=. scripts/smoke_test.jl
 ```
 
