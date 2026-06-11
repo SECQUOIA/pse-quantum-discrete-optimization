@@ -136,6 +136,11 @@ scripts/nbconvert_ds_mfg.sh
 The helper uses `--compiled-modules=no` for the IJulia kernel because this
 environment had a ZMQ precompile failure otherwise.
 
+The baseline QAOA/VQE notebook solve uses fixed local simulator seeds. The
+tracked metadata intentionally avoids volatile timestamps, absolute
+machine-local paths, and solve timings so reproducibility checks do not change
+cached artifacts for environment-only reasons.
+
 The local kernel environment includes both `IJulia` and `PythonCall`, and this
 packaged project also includes `IJulia` as a notebook dependency. This is
 intentional: when the notebook activates this folder's project and loads

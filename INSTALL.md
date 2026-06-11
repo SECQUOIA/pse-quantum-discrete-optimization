@@ -89,6 +89,11 @@ The full notebook uses local Qiskit Aer simulation and can take much longer
 than the smoke test. Several expensive experiment cells use cached CSVs when
 the tracked result files are present.
 
+The baseline QAOA/VQE notebook solve uses fixed local simulator seeds, and the
+tracked metadata avoids volatile timestamps, absolute machine-local paths, and
+solve timings so rerunning the notebook does not dirty cached artifacts for
+environment-only reasons.
+
 ## Local Generated Files
 
 First runs may create local directories such as `.CondaPkg/`, `.jupyter/`, and
