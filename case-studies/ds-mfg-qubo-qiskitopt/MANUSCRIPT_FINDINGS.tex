@@ -15,6 +15,49 @@ experiments were run in the reproducibility bundle
 \texttt{/home/bernalde/repos/QiskitOpt.jl/ds\_mfg\_student\_package\_20260605};
 all artifact paths reported below are relative to that bundle.
 
+\subsection{Audit Framing and Evidence Boundary}
+\label{subsec:ds-mfg-audit-framing}
+
+The central claim of this case study is practical rather than asymptotic:
+current quantum-optimization tooling can be made to sample meaningful
+DS-MFG process-design candidates, but only after substantial formulation,
+reduction, parameter-search, backend-configuration, and postprocessing work.
+The evidence does not support a speedup claim over Gurobi, nor does it support
+hardware-performance superiority. Instead, the study audits what practical
+value remains after the engineering effort required to use QAOA and VQE is made
+explicit.
+
+The guiding question is therefore: for a PSE process-design problem with a known
+classical optimum, what do current QAOA/VQE workflows provide beyond a classical
+solve, and what workflow burden is required to obtain and interpret those
+samples? The answer is organized around three separate evidence tiers:
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Evidence tiers used in the practical quantum-optimization audit.}
+\label{tab:ds-mfg-evidence-tiers}
+\begin{tabular}{p{0.22\linewidth}p{0.32\linewidth}p{0.34\linewidth}}
+\hline
+Evidence tier & Role in this case study & Claim supported \\
+\hline
+Gurobi ground truth & Original 19-flow-variable integer program and solution
+pool. & Defines the global optimum, near-optimal flow assignments, and the
+reference objective values used for scoring. \\
+\hline
+Local Aer emulation & \texttt{QiskitOpt.jl}/Qiskit Aer QAOA and VQE runs on
+the 36-variable QUBO and the 19-flow quadratic surrogate. & Shows whether
+simulated QAOA/VQE sampling distributions place observable mass on useful
+repaired flow assignments. \\
+\hline
+IBM hardware feasibility & Disabled notebook placeholders and fixed-parameter
+candidate workflows selected from local evidence. & Identifies hardware-ready
+experiments to run later; no IBM hardware performance or superiority result is
+claimed here. \\
+\hline
+\end{tabular}
+\end{table}
+
 \subsection{Problem Statement}
 \label{subsec:ds-mfg-problem-statement}
 
@@ -47,10 +90,12 @@ variables exactly. The reported performance quantities are therefore:
 
 The Gurobi global optimum has IP objective $11.7095$ and flow bitstring
 \texttt{1001110100111100011} when the flow variables are ordered as
-\texttt{f00}, \texttt{f01}, \ldots, \texttt{f18}. The first scientific question
-is whether local QAOA or VQE emulations place observable probability on this
-flow. The second is whether problem-specific postprocessing and reduction make
-that probability easier to observe.
+\texttt{f00}, \texttt{f01}, \ldots, \texttt{f18}. The first audit question is
+whether local QAOA or VQE emulations place observable probability on this flow.
+The second is whether problem-specific postprocessing and reduction make that
+probability easier to observe. The third is how much additional engineering
+workflow is required relative to solving and interpreting the original Gurobi
+model.
 
 \subsection{QUBO Formulation}
 \label{subsec:ds-mfg-qubo-formulation}
@@ -216,6 +261,11 @@ and a thread cap of \texttt{min(Sys.CPU\_THREADS, 8)}. Optimizer reads and final
 sampling reads were separated with \texttt{QUBODrivers.FinalNumberOfReads()}
 when supported by the package.
 
+Because these runs are simulator experiments, timing and hit-rate observations
+are not hardware-performance measurements. The reported results should be read
+as evidence about workflow feasibility and sampled-distribution quality under
+local Aer emulation, not as evidence of quantum speedup or hardware superiority.
+
 The strongest QAOA workflow used an additional offline angle-search step. That
 step was run from the local sibling clone of LANL's \texttt{JuliQAOA.jl}. The
 script enumerates all $2^{19}$ reduced-surrogate energies for statevector
@@ -249,6 +299,28 @@ For each sampled state, the notebook reports three related quantities:
     \item \emph{repaired objective}: the QUBO objective after fixing the 19
     flow bits and choosing the exact best auxiliary completion.
 \end{enumerate}
+
+\subsection{Practical Workflow Burden}
+\label{subsec:ds-mfg-workflow-burden}
+
+The practical audit treats the extra workflow required by QAOA and VQE as a
+result, not as incidental setup. The Gurobi baseline is solved and interpreted
+directly in the original 19 flow variables. By contrast, the quantum-emulation
+workflow required importing a 36-variable QUBO, separating flow and auxiliary
+bits, repairing auxiliary assignments exactly, enumerating all $2^{19}$ repaired
+flow values, fitting a quadratic surrogate because the exact reduced objective
+is not generally quadratic, configuring Aer MPS options, separating optimizer
+and final sampling reads, running an offline QAOA angle search in a second Julia
+package, transferring fixed parameters back into \texttt{QiskitOpt.jl}, and
+postprocessing every sampled state against the repaired objective.
+
+This burden is central to the interpretation. The local QAOA and VQE results
+show that meaningful samples can be obtained, but they were not obtained by a
+drop-in replacement for the classical solver. They required problem-specific
+reduction, manual parameter-search choices, backend-specific simulator settings,
+and postprocessing logic tied to the original IP variables. The hardware cells
+therefore represent feasibility candidates selected from local evidence, not a
+completed hardware comparison.
 
 \begin{table}[t]
 \centering
@@ -458,11 +530,13 @@ $11.7095$; artifact
 \subsection{Interpretation}
 \label{subsec:ds-mfg-interpretation}
 
-The dominant methodological point is that the original IP variables and the
-QUBO auxiliary variables must be separated in the analysis. A sample can be
-useful at the IP-variable level even when its auxiliary bits give a poor raw
-QUBO energy. Exact auxiliary repair therefore provides the correct comparison
-to the Gurobi solution pool and the original IP objective.
+The dominant methodological point is that a process-design quantum workflow
+must preserve a clear bridge back to the original optimization model. The
+original IP variables and the QUBO auxiliary variables must be separated in the
+analysis. A sample can be useful at the IP-variable level even when its
+auxiliary bits give a poor raw QUBO energy. Exact auxiliary repair therefore
+provides the correct comparison to the Gurobi solution pool and the original IP
+objective.
 
 The dominant algorithmic point is that transferred-angle QAOA was the strongest
 workflow tested. Direct local optimization of the full 36-variable QUBO was weak
@@ -475,6 +549,13 @@ the best final VQE follow-up saw 20 global reads in 524288 samples for seed
 74018, whereas the transferred $p=5$ QAOA follow-up saw 664 global reads in
 262144 samples.
 
+The practical conclusion is more conservative than the algorithmic comparison:
+the DS-MFG instance can be reformulated and sampled with current QAOA/VQE
+software, and local simulations can recover the Gurobi optimum after reduction
+and repair, but the workflow burden is substantial. The evidence supports an
+audit claim about feasibility, interpretation, and engineering effort; it does
+not support replacing Gurobi for this process-design instance.
+
 \subsection{Hardware Run Plan}
 \label{subsec:ds-mfg-hardware-plan}
 
@@ -483,6 +564,8 @@ results are included in this bundle. The QAOA hardware candidate is ready as a
 fixed-parameter sampling experiment. The VQE hardware candidate is less mature
 because the cache identifies the best random seed and sampled distribution, but
 does not yet persist the optimized \texttt{EfficientSU2} parameter vector.
+These placeholders are included to make the next experimental step explicit;
+they are not evidence of IBM hardware performance.
 
 \begin{table}[t]
 \centering

@@ -1,10 +1,14 @@
 # PSE Quantum Discrete Optimization
 
-This repository collects process systems engineering case studies that use
+This repository collects process systems engineering case studies that audit
 quantum and quantum-inspired algorithms for discrete optimization models.
 
 The initial case study is a demand-side manufacturing (DS-MFG) QUBO workflow
 using local Qiskit Aer emulations of QAOA and VQE through `QiskitOpt.jl`.
+It is framed as a practical workflow audit: Gurobi provides the 19-flow-variable
+ground truth, local Aer emulation provides the current QAOA/VQE evidence, and
+IBM hardware execution remains a planned feasibility step. The current bundle
+does not claim quantum speedup or IBM hardware-performance superiority.
 The repository layout is intentionally case-study based so that related PSE
 instances can be added without changing the existing DS-MFG artifact paths.
 
@@ -61,4 +65,5 @@ The full notebook run uses local Qiskit Aer emulation and can take much longer
 than the smoke test.
 
 All quantum-algorithm results currently tracked here are local classical
-emulations. No IBM hardware results are included in the initial DS-MFG bundle.
+emulations. No IBM hardware results are included in the initial DS-MFG bundle,
+and the manuscript narrative keeps that evidence boundary explicit.
