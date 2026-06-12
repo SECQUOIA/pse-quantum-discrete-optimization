@@ -27,8 +27,5 @@ jobs:
       - name: Cache Julia artifacts
         uses: julia-actions/cache@v2
 
-      - name: Instantiate case-study environment
-        run: julia --project=. -e 'import Pkg; Pkg.instantiate(); Pkg.precompile()'
-
-      - name: Run reproducibility smoke test
-        run: julia --project=. scripts/smoke_test.jl
+      - name: Run reproducibility bootstrap
+        run: scripts/bootstrap_ds_mfg.sh

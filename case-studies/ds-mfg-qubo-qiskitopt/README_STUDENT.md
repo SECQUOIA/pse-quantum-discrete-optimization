@@ -30,7 +30,13 @@ From this folder, instantiate the recorded Julia environment and run the smoke
 test before attempting the full notebook:
 
 ```bash
-julia --project=. -e 'import Pkg; Pkg.instantiate()'
+scripts/bootstrap_ds_mfg.sh
+```
+
+This is equivalent to:
+
+```bash
+julia --project=. -e 'import Pkg; Pkg.instantiate(); Pkg.precompile()'
 julia --project=. scripts/smoke_test.jl
 ```
 
@@ -129,6 +135,11 @@ scripts/nbconvert_ds_mfg.sh
 
 The helper uses `--compiled-modules=no` for the IJulia kernel because this
 environment had a ZMQ precompile failure otherwise.
+
+The baseline QAOA/VQE notebook solve uses fixed local simulator seeds. The
+tracked metadata intentionally avoids volatile timestamps, absolute
+machine-local paths, and solve timings so reproducibility checks do not change
+cached artifacts for environment-only reasons.
 
 The local kernel environment includes both `IJulia` and `PythonCall`, and this
 packaged project also includes `IJulia` as a notebook dependency. This is
