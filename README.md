@@ -6,9 +6,10 @@ quantum and quantum-inspired algorithms for discrete optimization models.
 The initial case study is a demand-side manufacturing (DS-MFG) QUBO workflow
 using local Qiskit Aer emulations of QAOA and VQE through `QiskitOpt.jl`.
 It is framed as a practical workflow audit: Gurobi provides the 19-flow-variable
-ground truth, local Aer emulation provides the current QAOA/VQE evidence, and
-IBM hardware execution remains a planned feasibility step. The current bundle
-does not claim quantum speedup or IBM hardware-performance superiority.
+ground truth, local Aer emulation provides the current QAOA/VQE evidence,
+simple classical sampling baselines provide non-quantum context, and IBM
+hardware execution remains a planned feasibility step. The current bundle does
+not claim quantum speedup or IBM hardware-performance superiority.
 The repository layout is intentionally case-study based so that related PSE
 instances can be added without changing the existing DS-MFG artifact paths.
 
@@ -42,9 +43,10 @@ julia --project=. scripts/smoke_test.jl
 ```
 
 The smoke test verifies that the Julia and Python dependencies import, the
-case-study artifacts are present, and the cached result summaries contain the
-expected DS-MFG optimum and sampler hit counts. It is the fastest way for a new
-user to confirm that a fresh clone is usable before rerunning the full notebook.
+case-study artifacts are present, the cached result summaries contain the
+expected DS-MFG optimum and sampler hit counts, and the classical baseline
+distribution cache is complete. It is the fastest way for a new user to confirm
+that a fresh clone is usable before rerunning the full notebook.
 See `INSTALL.md` for fresh-device prerequisites, expected generated files, and
 notebook execution details.
 
