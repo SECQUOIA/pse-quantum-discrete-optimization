@@ -137,9 +137,10 @@ julia --project=. scripts/run_classical_baselines.jl
 ```
 
 By default, the script writes `ds_mfg_classical_baselines/`. The summary CSV
-records the full sample/evaluation budgets and hit counts. The distribution CSV
-is intentionally compact: it retains sampled top-50 flows and each run's best
-sampled flow rather than every unique random sample.
+records the full sample/evaluation budgets and hit counts. The compressed
+distribution CSV records every unique sampled flow for each baseline run. A
+separate retained-flow CSV keeps the sampled top-50 flows and each run's best
+sampled flow for quick inspection.
 
 ## Re-running The Notebook
 

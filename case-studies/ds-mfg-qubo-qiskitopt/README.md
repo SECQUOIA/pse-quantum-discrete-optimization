@@ -38,7 +38,7 @@ Best cached results:
   those reads.
 - Classical baselines: uniform random repaired-flow sampling found no global
   optimum hits at 262144 or 524288 samples, while the 262144-evaluation
-  hill-climb restart baseline found 19 global hits. Cached summaries are in
+  hill-climb restart baseline found 19 global hits. Cached outputs are in
   `ds_mfg_classical_baselines/`.
 
 No IBM hardware results are included. The notebook contains disabled hardware

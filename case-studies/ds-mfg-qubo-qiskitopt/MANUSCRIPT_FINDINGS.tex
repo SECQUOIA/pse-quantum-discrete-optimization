@@ -544,9 +544,10 @@ then applies exact auxiliary repair. The second baseline uses steepest-descent
 single-bit-flip hill climbing with random restarts; each evaluated flow counts
 against the same sample/evaluation budget used in the table. Both baselines use
 fixed seeds and the same top-50, top-10, and global-optimum definitions used for
-the QAOA and VQE summaries. The compact distribution cache retains all sampled
-top-50 flows and each run's best sampled flow, while the summary records counts
-over the full budget.
+the QAOA and VQE summaries. The cached outputs include a compressed aggregate
+distribution over every unique sampled flow, a compact retained-flow file for
+sampled top-50 and best-sampled flows, and a summary that records counts over
+the full budget.
 
 \begin{table}[t]
 \centering

@@ -43,9 +43,10 @@ julia --project=. scripts/smoke_test.jl
 ```
 
 The smoke test verifies that the Julia and Python dependencies import, the
-case-study artifacts are present, and the cached result summaries contain the
-expected DS-MFG optimum and sampler hit counts. It is the fastest way for a new
-user to confirm that a fresh clone is usable before rerunning the full notebook.
+case-study artifacts are present, the cached result summaries contain the
+expected DS-MFG optimum and sampler hit counts, and the classical baseline
+distribution cache is complete. It is the fastest way for a new user to confirm
+that a fresh clone is usable before rerunning the full notebook.
 See `INSTALL.md` for fresh-device prerequisites, expected generated files, and
 notebook execution details.
 

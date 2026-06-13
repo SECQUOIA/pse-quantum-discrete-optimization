@@ -60,6 +60,13 @@ function read_member_text(base::AbstractString, member::AbstractString)
     return read(`unzip -p $archive $member`, String)
 end
 
+function gzip_file!(path::AbstractString)
+    gzip = Sys.which("gzip")
+    isnothing(gzip) && error("gzip is required to compress $(path)")
+    run(`$gzip -n -f $path`)
+    return path * ".gz"
+end
+
 function nonempty_lines(text::AbstractString)
     return [strip(line) for line in split(text, '\n') if !isempty(strip(line))]
 end
@@ -372,7 +379,45 @@ function summarize_distribution(
     ]
 end
 
-function write_distribution!(
+function write_full_distribution!(
+    io,
+    algorithm::String,
+    seed::Int,
+    sample_budget::Int,
+    distribution::Dict{String,Int},
+    repair_cache::Dict{String,NamedTuple},
+    top_flows::Dict{String,NamedTuple},
+)
+    total_samples = sum(values(distribution); init = 0)
+
+    for flow_bits in sort(collect(keys(distribution)))
+        info = rank_info(flow_bits, top_flows)
+        visits = distribution[flow_bits]
+        repair = repair_cache[flow_bits]
+        println(
+            io,
+            join(
+                csv_value.([
+                    algorithm,
+                    seed,
+                    sample_budget,
+                    flow_bits,
+                    visits,
+                    total_samples == 0 ? 0.0 : visits / total_samples,
+                    info.rank,
+                    repair.exact_repaired_qubo_energy,
+                    info.match,
+                    info.matched_ip_obj,
+                    repair.repaired_aux_bits,
+                    repair.repaired_full_bits,
+                ]),
+                ',',
+            ),
+        )
+    end
+end
+
+function write_retained_flows!(
     io,
     algorithm::String,
     seed::Int,
@@ -447,6 +492,7 @@ end
 function run_baseline!(
     summary_io,
     distribution_io,
+    retained_io,
     algorithm::String,
     seed::Int,
     sample_budget::Int,
@@ -489,9 +535,11 @@ function run_baseline!(
         max_steps_per_restart = max_steps_per_restart,
     )
     println(summary_io, join(csv_value.(summary_row), ','))
-    write_distribution!(distribution_io, algorithm, seed, sample_budget, distribution, repair_cache, top_flows)
+    write_full_distribution!(distribution_io, algorithm, seed, sample_budget, distribution, repair_cache, top_flows)
+    write_retained_flows!(retained_io, algorithm, seed, sample_budget, distribution, repair_cache, top_flows)
     flush(summary_io)
     flush(distribution_io)
+    flush(retained_io)
     @info "Completed classical baseline" algorithm seed sample_budget elapsed_sec
 end
 
@@ -519,6 +567,7 @@ function main()
 
     summary_path = joinpath(output_dir, "classical_baseline_summary.csv")
     distribution_path = joinpath(output_dir, "classical_baseline_distribution.csv")
+    retained_path = joinpath(output_dir, "classical_baseline_retained_flows.csv")
 
     summary_header = [
         "algorithm",
@@ -554,6 +603,20 @@ function main()
         "matched_ip_obj",
         "repaired_aux_bits",
         "repaired_full_bits",
+    ]
+    retained_header = [
+        "algorithm",
+        "seed",
+        "sample_budget",
+        "flow_bits",
+        "visits",
+        "probability",
+        "top50_rank",
+        "exact_repaired_qubo_energy",
+        "match",
+        "matched_ip_obj",
+        "repaired_aux_bits",
+        "repaired_full_bits",
         "retained_reason",
     ]
 
@@ -563,40 +626,47 @@ function main()
         println(summary_io, join(summary_header, ','))
         open(distribution_path, "w") do distribution_io
             println(distribution_io, join(distribution_header, ','))
+            open(retained_path, "w") do retained_io
+                println(retained_io, join(retained_header, ','))
 
-            for (seed, budget) in zip(uniform_seeds, uniform_budgets)
-                run_baseline!(
-                    summary_io,
-                    distribution_io,
-                    "uniform_random_repaired_flow",
-                    seed,
-                    budget,
-                    qubo,
-                    components,
-                    top_flows,
-                    repair_cache,
-                )
-            end
+                for (seed, budget) in zip(uniform_seeds, uniform_budgets)
+                    run_baseline!(
+                        summary_io,
+                        distribution_io,
+                        retained_io,
+                        "uniform_random_repaired_flow",
+                        seed,
+                        budget,
+                        qubo,
+                        components,
+                        top_flows,
+                        repair_cache,
+                    )
+                end
 
-            for (seed, budget) in zip(hill_seeds, hill_budgets)
-                run_baseline!(
-                    summary_io,
-                    distribution_io,
-                    "hill_climb_restarts_repaired_flow",
-                    seed,
-                    budget,
-                    qubo,
-                    components,
-                    top_flows,
-                    repair_cache;
-                    max_steps_per_restart = hill_max_steps,
-                )
+                for (seed, budget) in zip(hill_seeds, hill_budgets)
+                    run_baseline!(
+                        summary_io,
+                        distribution_io,
+                        retained_io,
+                        "hill_climb_restarts_repaired_flow",
+                        seed,
+                        budget,
+                        qubo,
+                        components,
+                        top_flows,
+                        repair_cache;
+                        max_steps_per_restart = hill_max_steps,
+                    )
+                end
             end
         end
     end
+    compressed_distribution_path = gzip_file!(distribution_path)
 
     println("Summary written to: ", summary_path)
-    println("Distribution written to: ", distribution_path)
+    println("Distribution written to: ", compressed_distribution_path)
+    println("Retained flows written to: ", retained_path)
 end
 
 main()

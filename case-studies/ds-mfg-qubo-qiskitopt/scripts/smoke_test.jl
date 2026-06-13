@@ -57,6 +57,42 @@ function parse_key_value_csv(relpath)
     return Dict(row["key"] => row["value"] for row in rows)
 end
 
+function validate_classical_distribution(relpath, summary_rows)
+    path = require_file(relpath)
+    expected = Dict(
+        (row["algorithm"], row["seed"], row["sample_budget"]) => row for row in summary_rows
+    )
+    counts = Dict{Tuple{String,String,String},Int}()
+    visits = Dict{Tuple{String,String,String},Int}()
+    probabilities = Dict{Tuple{String,String,String},Float64}()
+
+    open(`gzip -cd $path`, "r") do io
+        header = split(readline(io), ","; keepempty = true)
+        for (line_number, line) in enumerate(eachline(io))
+            isempty(strip(line)) && continue
+            fields = split(line, ","; keepempty = true)
+            length(fields) == length(header) || smoke_error(
+                "row $(line_number + 1) in $relpath has $(length(fields)) fields; expected $(length(header))",
+            )
+            row = Dict(zip(header, fields))
+            key = (row["algorithm"], row["seed"], row["sample_budget"])
+            haskey(expected, key) || smoke_error("unexpected classical distribution key: $key")
+            counts[key] = get(counts, key, 0) + 1
+            visits[key] = get(visits, key, 0) + parse(Int, row["visits"])
+            probabilities[key] = get(probabilities, key, 0.0) + parse(Float64, row["probability"])
+        end
+    end
+
+    for (key, row) in expected
+        get(counts, key, 0) == parse(Int, row["unique_flows"]) ||
+            smoke_error("classical distribution unique-flow count mismatch for $key")
+        get(visits, key, 0) == parse(Int, row["total_samples"]) ||
+            smoke_error("classical distribution visit total mismatch for $key")
+        isapprox(get(probabilities, key, 0.0), 1.0; atol = 1e-8, rtol = 0.0) ||
+            smoke_error("classical distribution probability mass mismatch for $key")
+    end
+end
+
 function require_value(row, key, expected)
     actual = get(row, key, nothing)
     actual == expected || smoke_error("expected $key=$expected, got $actual")
@@ -161,5 +197,13 @@ require_int(hill, "top10_hits", 177)
 require_int(hill, "global_hits", 19)
 require_value(hill, "best_match", "global_optimum")
 require_value(hill, "best_flow_bits", GLOBAL_FLOW_BITS)
+
+validate_classical_distribution(
+    "ds_mfg_classical_baselines/classical_baseline_distribution.csv.gz",
+    classical_rows,
+)
+retained_rows = parse_csv_rows("ds_mfg_classical_baselines/classical_baseline_retained_flows.csv")
+all(!isempty(get(row, "retained_reason", "")) for row in retained_rows) ||
+    smoke_error("every retained classical baseline row must include a retained_reason")
 
 println("DS-MFG smoke test passed.")

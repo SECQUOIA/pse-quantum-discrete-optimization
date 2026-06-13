@@ -131,7 +131,9 @@ Classical baselines were added so the QAOA/VQE hit rates are not interpreted
 only against Gurobi. The script `scripts/run_classical_baselines.jl` recomputes
 exact auxiliary repair from the original 36-variable QUBO archive, samples the
 19 flow variables, and writes cached outputs under
-`ds_mfg_classical_baselines/`.
+`ds_mfg_classical_baselines/`. The cache includes a summary CSV, a compressed
+full aggregate distribution CSV, and a smaller retained-flow CSV for quick
+inspection of top-50 and best-sampled flows.
 
 The cached baselines are:
 
