@@ -151,6 +151,31 @@ than uniform random sampling and the simple hill-climb baseline at the same
 selected VQE follow-up seed 74018 is also stronger than uniform random sampling
 at 524288 reads, with 391 top-50 reads, 152 top-10 reads, and 20 global reads.
 
+## Hit-rate uncertainty and time to solution
+
+The cached QAOA, reduced-surrogate VQE, and classical-baseline summary CSVs
+report empirical hit rates for the top-50, top-10, and global-optimum events.
+Each rate is paired with a two-sided 95% Wilson score confidence interval. The
+same rows also report empirical 95% time to solution (`tts95_sec`), computed as
+the recorded local solve or wall time per sample multiplied by
+`ceil(log(1 - 0.95) / log(1 - hit_rate))`. Rows with zero observed hits have
+infinite empirical time to solution rather than an extrapolated finite value.
+For QAOA and VQE, the timing basis is the local Aer `solve_time_sec`; for the
+classical baselines, it is the script `wall_time_sec`.
+
+Representative global-hit rows are:
+
+| Run | Global hits | Global hit rate (95% Wilson interval) | `tts95_sec` |
+| --- | ---: | ---: | ---: |
+| Transferred p=5 QAOA, high-read | 664 / 262144 | 0.002533 [0.002348, 0.002733] | 0.243 |
+| Reduced-surrogate VQE, seed 74018 | 20 / 524288 | 0.00003815 [0.00002470, 0.00005892] | 4.505 |
+| Hill-climb restarts, seed 82001 | 19 / 262144 | 0.00007248 [0.00004640, 0.00011321] | 0.147 |
+| Uniform random, seed 81001 | 0 / 262144 | 0 [0, 0.00001465] | Inf |
+
+The consolidated report is
+`ds_mfg_hit_rate_reports/time_to_solution_report.csv`; the per-run summary CSVs
+carry the corresponding top-50, top-10, and global columns.
+
 The comparison does not imply a runtime advantage for QAOA or VQE. It shows
 that sampled-distribution quality should be interpreted relative to simple
 classical sampling baselines once exact repair is available.

@@ -13,6 +13,8 @@ using QUBOTools
 const MOI = QUBODrivers.MOI
 const SampleReads = QUBOTools.__moi_num_reads()
 
+include(joinpath(@__DIR__, "hit_rate_stats.jl"))
+
 function parse_int_list(value::AbstractString)
     items = Int[]
     for part in split(value, ',')
@@ -188,7 +190,7 @@ function main()
     summary_header = [
         "algorithm", "angle_target", "p", "seed", "optimizer_reads", "final_reads",
         "maximum_iterations", "solve_time_sec", "unique_states", "total_reads",
-        "top50_hits", "top10_hits", "global_hits", "best_top50_rank",
+        "top50_hits", "top10_hits", "global_hits", hit_rate_stat_headers()..., "best_top50_rank",
         "best_top50_exact_repaired_qubo_energy", "best_top50_match", "best_top50_flow_bits",
         "juliqaoa_top50_probability", "juliqaoa_top10_probability", "juliqaoa_global_probability",
     ]
@@ -260,12 +262,13 @@ function main()
                     )
                 end
 
+                hit_stats = hit_rate_stat_values(total_reads, top50_hits, top10_hits, global_hits, solve_time)
                 summary_row = if isnothing(best_hit)
                     Any[
                         "QAOA_reduced_surrogate_JuliQAOA_transfer", target, p, seed,
                         optimizer_reads, final_reads, maximum_iterations, solve_time,
                         result_count, total_reads, top50_hits, top10_hits, global_hits,
-                        "", "", "", "", angle_record["top50_probability"],
+                        hit_stats..., "", "", "", "", angle_record["top50_probability"],
                         angle_record["top10_probability"], angle_record["global_probability"],
                     ]
                 else
@@ -273,7 +276,7 @@ function main()
                         "QAOA_reduced_surrogate_JuliQAOA_transfer", target, p, seed,
                         optimizer_reads, final_reads, maximum_iterations, solve_time,
                         result_count, total_reads, top50_hits, top10_hits, global_hits,
-                        best_hit.rank, best_hit.exact_repaired_qubo_energy, best_hit.match,
+                        hit_stats..., best_hit.rank, best_hit.exact_repaired_qubo_energy, best_hit.match,
                         best_hit.flow_bits, angle_record["top50_probability"],
                         angle_record["top10_probability"], angle_record["global_probability"],
                     ]

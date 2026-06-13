@@ -397,6 +397,12 @@ repair. &
 \texttt{ds\_mfg\_classical\_baselines/classical\_baseline\_summary.csv};
 \texttt{ds\_mfg\_classical\_baselines/classical\_baseline\_distribution.csv} \\
 \hline
+Hit-rate uncertainty and time to solution & Cached QAOA, VQE, and classical
+summary rows &
+Two-sided 95\% Wilson hit-rate intervals and empirical 95\% time to solution
+for top-50, top-10, and global-optimum events. &
+\texttt{ds\_mfg\_hit\_rate\_reports/time\_to\_solution\_report.csv} \\
+\hline
 \end{tabular}
 \end{table}
 
@@ -577,6 +583,44 @@ Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
 Reduced-surrogate VQE, seed 74018 & 524288 local Aer reads &
 391 top-50; 152 top-10; 20 global &
 Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
+\hline
+\end{tabular}
+\end{table}
+
+The cached QAOA, reduced-surrogate VQE, and classical-baseline summary CSVs
+also report empirical hit rates for the top-50, top-10, and global-optimum
+events. Each rate is paired with a two-sided 95\% Wilson score confidence
+interval. The same rows report empirical 95\% time to solution,
+\texttt{tts95\_sec}, computed as the recorded local solve or wall time per
+sample multiplied by
+$\lceil \log(1 - 0.95) / \log(1 - \hat{p}) \rceil$, where $\hat{p}$ is the
+empirical hit rate. Rows with zero observed hits are reported with infinite
+empirical time to solution rather than an extrapolated finite value. QAOA and
+VQE timing uses local Aer \texttt{solve\_time\_sec}; the classical baselines
+use script \texttt{wall\_time\_sec}. The consolidated artifact is
+\texttt{ds\_mfg\_hit\_rate\_reports/time\_to\_solution\_report.csv}.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Representative global-hit uncertainty and empirical 95\% time to
+solution from cached local runs.}
+\label{tab:ds-mfg-global-hit-uncertainty}
+\begin{tabular}{p{0.30\linewidth}p{0.17\linewidth}p{0.30\linewidth}p{0.13\linewidth}}
+\hline
+Run & Global hits & Global hit rate, 95\% Wilson interval & \texttt{tts95\_sec} \\
+\hline
+Transferred $p=5$ QAOA, high-read & 664 / 262144 &
+$0.002533$ [$0.002348$, $0.002733$] & $0.243$ \\
+\hline
+Reduced-surrogate VQE, seed 74018 & 20 / 524288 &
+$0.00003815$ [$0.00002470$, $0.00005892$] & $4.505$ \\
+\hline
+Hill-climb restarts, seed 82001 & 19 / 262144 &
+$0.00007248$ [$0.00004640$, $0.00011321$] & $0.147$ \\
+\hline
+Uniform random, seed 81001 & 0 / 262144 &
+$0$ [$0$, $0.00001465$] & $\infty$ \\
 \hline
 \end{tabular}
 \end{table}

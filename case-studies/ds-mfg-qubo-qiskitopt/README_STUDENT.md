@@ -137,10 +137,12 @@ julia --project=. scripts/run_classical_baselines.jl
 ```
 
 By default, the script writes `ds_mfg_classical_baselines/`. The summary CSV
-records the full sample/evaluation budgets and hit counts. The compressed
+records the full sample/evaluation budgets, hit counts, 95% Wilson hit-rate
+intervals, and empirical 95% time-to-solution columns. The compressed
 distribution CSV records every unique sampled flow for each baseline run. A
 separate retained-flow CSV keeps the sampled top-50 flows and each run's best
-sampled flow for quick inspection.
+sampled flow for quick inspection. A consolidated QAOA/VQE/classical report is
+written to `ds_mfg_hit_rate_reports/time_to_solution_report.csv`.
 
 ## Re-running The Notebook
 
@@ -207,6 +209,10 @@ every iteration.
 - `scripts/revisit_reduced_vqe.jl`: reduced-surrogate VQE rerun helper; set `DSMFG_REVISIT_OUTPUT_DIR`, `DSMFG_REVISIT_SEEDS`, and `DSMFG_REVISIT_FINAL_READS` to store new sweeps separately.
 - `scripts/run_classical_baselines.jl`: fixed-seed uniform random and
   hill-climb restart baselines scored by exact auxiliary repair.
+- `scripts/hit_rate_stats.jl`: shared Wilson interval and empirical
+  time-to-solution helper.
+- `scripts/update_cached_hit_rate_reports.jl`: updates cached summary CSVs with
+  hit-rate columns and writes the consolidated time-to-solution report.
 
 ## Open Research Directions
 

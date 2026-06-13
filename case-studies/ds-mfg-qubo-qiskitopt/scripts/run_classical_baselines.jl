@@ -10,6 +10,8 @@ using Random
 const STUDY_ROOT = abspath(joinpath(@__DIR__, ".."))
 const ZIP_NAME = "Fw_ DS mfg case qubo information.zip"
 
+include(joinpath(@__DIR__, "hit_rate_stats.jl"))
+
 struct QuboData
     scale::Float64
     offset::Float64
@@ -355,6 +357,7 @@ function summarize_distribution(
     settings = ismissing(max_steps_per_restart) ?
         "independent_uniform_samples" :
         "steepest_descent_restarts;max_steps_per_restart=$(max_steps_per_restart)"
+    hit_stats = hit_rate_stat_values(total_samples, top50_hits, top10_hits, global_hits, elapsed_sec)
 
     return Any[
         algorithm,
@@ -368,6 +371,7 @@ function summarize_distribution(
         top50_hits,
         top10_hits,
         global_hits,
+        hit_stats...,
         best_rank,
         isnothing(best_repair) ? "" : best_repair.exact_repaired_qubo_energy,
         best_match,
@@ -581,6 +585,7 @@ function main()
         "top50_hits",
         "top10_hits",
         "global_hits",
+        hit_rate_stat_headers()...,
         "best_top50_rank",
         "best_repaired_qubo_energy",
         "best_match",
