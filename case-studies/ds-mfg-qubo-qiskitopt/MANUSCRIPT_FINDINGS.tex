@@ -397,6 +397,12 @@ repair. &
 \texttt{ds\_mfg\_classical\_baselines/classical\_baseline\_summary.csv};
 \texttt{ds\_mfg\_classical\_baselines/classical\_baseline\_distribution.csv} \\
 \hline
+Hit-rate uncertainty and time to solution & Cached QAOA, VQE, and classical
+summary rows &
+Two-sided 95\% Wilson hit-rate intervals and empirical 99\% time to solution
+for top-50, top-10, global-optimum, and Gurobi-pool-feasible events. &
+\texttt{ds\_mfg\_hit\_rate\_reports/time\_to\_solution\_report.csv} \\
+\hline
 \end{tabular}
 \end{table}
 
@@ -577,6 +583,47 @@ Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
 Reduced-surrogate VQE, seed 74018 & 524288 local Aer reads &
 391 top-50; 152 top-10; 20 global &
 Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
+\hline
+\end{tabular}
+\end{table}
+
+The cached QAOA, reduced-surrogate VQE, and classical-baseline summary CSVs
+also report empirical hit rates for the top-50, top-10, global-optimum, and
+Gurobi-pool-feasible events. The Gurobi-pool-feasible event counts sampled
+flows whose repaired projection matches either \texttt{global\_optimum} or
+\texttt{gurobi\_pool}. Each rate is paired with a two-sided 95\% Wilson score
+confidence interval. The same rows carry \texttt{gurobi\_pool\_feasible\_*}
+columns and report empirical 99\% time to solution,
+\texttt{tts99\_sec}, computed as the recorded local solve or wall time per
+sample multiplied by
+$\lceil \log(1 - 0.99) / \log(1 - \hat{p}) \rceil$, where $\hat{p}$ is the
+empirical hit rate. Rows with zero observed hits are reported with infinite
+empirical time to solution rather than an extrapolated finite value. QAOA and
+VQE timing uses local Aer \texttt{solve\_time\_sec}; the classical baselines
+use script \texttt{wall\_time\_sec}. The consolidated artifact is
+\texttt{ds\_mfg\_hit\_rate\_reports/time\_to\_solution\_report.csv}.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Representative global-optimum and Gurobi-pool-feasible-hit empirical 99\% time to
+solution from cached local runs.}
+\label{tab:ds-mfg-global-hit-uncertainty}
+\begin{tabular}{p{0.28\linewidth}p{0.16\linewidth}p{0.15\linewidth}p{0.18\linewidth}p{0.15\linewidth}}
+\hline
+Run & Optimal hits & Optimal \texttt{tts99\_sec} & Gurobi-pool feasible hits & Gurobi-pool feasible \texttt{tts99\_sec} \\
+\hline
+Transferred $p=5$ QAOA, high-read & 664 / 262144 & $0.374$ &
+32502 / 262144 & $0.007$ \\
+\hline
+Reduced-surrogate VQE, seed 74018 & 20 / 524288 & $6.926$ &
+389 / 524288 & $0.356$ \\
+\hline
+Hill-climb restarts, seed 82001 & 19 / 262144 & $0.226$ &
+721 / 262144 & $0.006$ \\
+\hline
+Uniform random, seed 81001 & 0 / 262144 & $\infty$ &
+21 / 262144 & $0.456$ \\
 \hline
 \end{tabular}
 \end{table}

@@ -40,6 +40,11 @@ Best cached results:
   optimum hits at 262144 or 524288 samples, while the 262144-evaluation
   hill-climb restart baseline found 19 global hits. Cached outputs are in
   `ds_mfg_classical_baselines/`.
+- Hit-rate uncertainty: the QAOA, reduced-surrogate VQE, and classical-baseline
+  summary CSVs include top-50, top-10, and global hit rates with 95% Wilson
+  intervals, feasible Gurobi-pool hit rates, and empirical 99%
+  time-to-solution columns. A consolidated report is in
+  `ds_mfg_hit_rate_reports/time_to_solution_report.csv`.
 
 No IBM hardware results are included. The notebook contains disabled hardware
 placeholder cells for the best QAOA and VQE local configurations. Those cells

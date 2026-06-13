@@ -14,6 +14,8 @@ using QUBOTools
 const MOI = QUBODrivers.MOI
 const SampleReads = QUBOTools.__moi_num_reads()
 
+include(joinpath(@__DIR__, "hit_rate_stats.jl"))
+
 function parse_int_list(value::AbstractString)
     parts = split(value, ',')
     seeds = Int[]
@@ -157,7 +159,7 @@ function main()
     summary_header = [
         "algorithm", "seed", "optimizer_reads", "final_reads", "maximum_iterations",
         "solve_time_sec", "unique_states", "total_reads", "top50_hits", "top10_hits",
-        "global_hits", "best_top50_rank", "best_top50_exact_repaired_qubo_energy",
+        "global_hits", "gurobi_pool_feasible_hits", hit_rate_stat_headers()..., "best_top50_rank", "best_top50_exact_repaired_qubo_energy",
         "best_top50_match", "best_top50_flow_bits",
     ]
     hits_header = [
@@ -183,6 +185,7 @@ function main()
                 top50_hits = 0
                 top10_hits = 0
                 global_hits = 0
+                gurobi_pool_feasible_hits = 0
                 best_hit = nothing
 
                 for result in 1:result_count
@@ -197,6 +200,7 @@ function main()
                     top50_hits += reads
                     hit.rank <= 10 && (top10_hits += reads)
                     hit.rank == 1 && (global_hits += reads)
+                    is_gurobi_pool_feasible_match(hit.match) && (gurobi_pool_feasible_hits += reads)
                     if isnothing(best_hit) || hit.rank < best_hit.rank
                         best_hit = merge(hit, (flow_bits = flow_bits,))
                     end
@@ -214,17 +218,25 @@ function main()
                     )
                 end
 
+                hit_stats = hit_rate_stat_values(
+                    total_reads,
+                    top50_hits,
+                    top10_hits,
+                    global_hits,
+                    gurobi_pool_feasible_hits,
+                    solve_time,
+                )
                 summary_row = if isnothing(best_hit)
                     Any[
                         "VQE_reduced_surrogate_top50_revisit", seed, optimizer_reads, final_reads,
                         maximum_iterations, solve_time, result_count, total_reads, top50_hits, top10_hits,
-                        global_hits, "", "", "", "",
+                        global_hits, gurobi_pool_feasible_hits, hit_stats..., "", "", "", "",
                     ]
                 else
                     Any[
                         "VQE_reduced_surrogate_top50_revisit", seed, optimizer_reads, final_reads,
                         maximum_iterations, solve_time, result_count, total_reads, top50_hits, top10_hits,
-                        global_hits, best_hit.rank, best_hit.exact_repaired_qubo_energy,
+                        global_hits, gurobi_pool_feasible_hits, hit_stats..., best_hit.rank, best_hit.exact_repaired_qubo_energy,
                         best_hit.match, best_hit.flow_bits,
                     ]
                 end
