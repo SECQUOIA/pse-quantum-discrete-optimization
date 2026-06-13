@@ -2,12 +2,16 @@ using Printf
 
 const HIT_RATE_CONFIDENCE_LEVEL = 0.95
 const HIT_RATE_WILSON_Z = 1.959963984540054
-const TIME_TO_SOLUTION_CONFIDENCE = 0.95
+const TIME_TO_SOLUTION_CONFIDENCE = 0.99
 const HIT_RATE_EVENTS = (
     ("top50", "top50_hits"),
     ("top10", "top10_hits"),
     ("global", "global_hits"),
+    ("feasible", "feasible_hits"),
 )
+const FEASIBLE_MATCHES = Set(["global_optimum", "gurobi_pool"])
+
+is_feasible_match(match) = string(match) in FEASIBLE_MATCHES
 
 function validate_hit_count(hits::Integer, total::Integer)
     total >= 0 || error("Total trials must be nonnegative, got $(total)")
@@ -57,7 +61,7 @@ function hit_rate_event_stats(hits::Integer, total::Integer, elapsed_sec::Real)
         hit_rate = total == 0 ? NaN : hits / Float64(total),
         hit_rate_wilson95_low = interval.low,
         hit_rate_wilson95_high = interval.high,
-        tts95_sec = time_to_solution_seconds(hits, total, elapsed_sec),
+        tts99_sec = time_to_solution_seconds(hits, total, elapsed_sec),
     )
 end
 
@@ -77,7 +81,7 @@ function hit_rate_stat_headers()
                 "$(event)_hit_rate",
                 "$(event)_hit_rate_wilson95_low",
                 "$(event)_hit_rate_wilson95_high",
-                "$(event)_tts95_sec",
+                "$(event)_tts99_sec",
             ],
         )
     end
@@ -89,10 +93,11 @@ function hit_rate_stat_values(
     top50_hits::Integer,
     top10_hits::Integer,
     global_hits::Integer,
+    feasible_hits::Integer,
     elapsed_sec::Real,
 )
     values = String[]
-    for hits in (top50_hits, top10_hits, global_hits)
+    for hits in (top50_hits, top10_hits, global_hits, feasible_hits)
         stats = hit_rate_event_stats(hits, total_reads, elapsed_sec)
         append!(
             values,
@@ -100,7 +105,7 @@ function hit_rate_stat_values(
                 stats.hit_rate,
                 stats.hit_rate_wilson95_low,
                 stats.hit_rate_wilson95_high,
-                stats.tts95_sec,
+                stats.tts99_sec,
             ]),
         )
     end

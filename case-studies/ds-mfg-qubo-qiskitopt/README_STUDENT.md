@@ -138,7 +138,8 @@ julia --project=. scripts/run_classical_baselines.jl
 
 By default, the script writes `ds_mfg_classical_baselines/`. The summary CSV
 records the full sample/evaluation budgets, hit counts, 95% Wilson hit-rate
-intervals, and empirical 95% time-to-solution columns. The compressed
+intervals, feasible Gurobi-pool hit counts, and empirical 99%
+time-to-solution columns. The compressed
 distribution CSV records every unique sampled flow for each baseline run. A
 separate retained-flow CSV keeps the sampled top-50 flows and each run's best
 sampled flow for quick inspection. A consolidated QAOA/VQE/classical report is
