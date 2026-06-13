@@ -100,6 +100,7 @@ for relpath in (
     "ds_mfg_qaoa_juliqaoa_transfer_highread",
     "ds_mfg_vqe_reduced_flow_objective_final",
     "ds_mfg_reduced_flow_objective",
+    "ds_mfg_classical_baselines",
     "scripts",
 )
     require_dir(relpath)
@@ -133,5 +134,32 @@ all(row["best_top50_match"] == "global_optimum" for row in vqe_rows) ||
     smoke_error("not every final VQE row reaches the global optimum")
 all(row["best_top50_flow_bits"] == GLOBAL_FLOW_BITS for row in vqe_rows) ||
     smoke_error("unexpected VQE optimum flow bits")
+
+classical_rows = parse_csv_rows("ds_mfg_classical_baselines/classical_baseline_summary.csv")
+length(classical_rows) == 3 || smoke_error("expected three classical baseline rows")
+uniform_262 = only(filter(
+    row -> row["algorithm"] == "uniform_random_repaired_flow" && row["sample_budget"] == "262144",
+    classical_rows,
+))
+require_int(uniform_262, "top50_hits", 24)
+require_int(uniform_262, "top10_hits", 5)
+require_int(uniform_262, "global_hits", 0)
+require_value(uniform_262, "best_top50_rank", "2")
+
+uniform_524 = only(filter(
+    row -> row["algorithm"] == "uniform_random_repaired_flow" && row["sample_budget"] == "524288",
+    classical_rows,
+))
+require_int(uniform_524, "top50_hits", 49)
+require_int(uniform_524, "top10_hits", 11)
+require_int(uniform_524, "global_hits", 0)
+require_value(uniform_524, "best_top50_rank", "3")
+
+hill = only(filter(row -> row["algorithm"] == "hill_climb_restarts_repaired_flow", classical_rows))
+require_int(hill, "top50_hits", 883)
+require_int(hill, "top10_hits", 177)
+require_int(hill, "global_hits", 19)
+require_value(hill, "best_match", "global_optimum")
+require_value(hill, "best_flow_bits", GLOBAL_FLOW_BITS)
 
 println("DS-MFG smoke test passed.")

@@ -36,6 +36,10 @@ Best cached results:
 - VQE: the final reduced-surrogate follow-up sampled the global optimum 28
   times across three 524288-read local Aer runs; seed 74018 produced 20 of
   those reads.
+- Classical baselines: uniform random repaired-flow sampling found no global
+  optimum hits at 262144 or 524288 samples, while the 262144-evaluation
+  hill-climb restart baseline found 19 global hits. Cached summaries are in
+  `ds_mfg_classical_baselines/`.
 
 No IBM hardware results are included. The notebook contains disabled hardware
 placeholder cells for the best QAOA and VQE local configurations. Those cells

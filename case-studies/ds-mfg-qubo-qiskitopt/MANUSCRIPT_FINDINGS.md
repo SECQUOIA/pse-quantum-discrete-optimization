@@ -125,6 +125,34 @@ global optimum 28 times total, with seed 74018 producing 20 of those reads.
 
 Thus, VQE can reach the global optimum on the reduced surrogate, but its global-hit rate is much lower than the transferred-angle QAOA run.
 
+## Classical Sampling Baselines
+
+Classical baselines were added so the QAOA/VQE hit rates are not interpreted
+only against Gurobi. The script `scripts/run_classical_baselines.jl` recomputes
+exact auxiliary repair from the original 36-variable QUBO archive, samples the
+19 flow variables, and writes cached outputs under
+`ds_mfg_classical_baselines/`.
+
+The cached baselines are:
+
+- uniform random sampling with seed 81001 and 262144 samples: 24 top-50 hits, 5
+  top-10 hits, 0 global hits, and best repaired objective `11.8105`,
+- uniform random sampling with seed 81002 and 524288 samples: 49 top-50 hits,
+  11 top-10 hits, 0 global hits, and best repaired objective `12.2415`,
+- steepest-descent hill climbing with random restarts, seed 82001, and 262144
+  repaired-objective evaluations: 883 top-50 hits, 177 top-10 hits, 19 global
+  hits, and best repaired objective `11.7095`.
+
+Against these baselines, transferred p=5 QAOA remains much more concentrated
+than uniform random sampling and the simple hill-climb baseline at the same
+262144 count: 39661 top-50 reads, 8964 top-10 reads, and 664 global reads. The
+selected VQE follow-up seed 74018 is also stronger than uniform random sampling
+at 524288 reads, with 391 top-50 reads, 152 top-10 reads, and 20 global reads.
+
+The comparison does not imply a runtime advantage for QAOA or VQE. It shows
+that sampled-distribution quality should be interpreted relative to simple
+classical sampling baselines once exact repair is available.
+
 ## Practical Workflow Burden
 
 The Gurobi baseline is solved and interpreted directly in the original 19 flow
@@ -162,6 +190,14 @@ measurements.
 The main methodological finding is that model interpretation matters as much as sampler behavior. Raw QUBO energies alone can be misleading because auxiliary-variable assignments may be inconsistent even when the projected flow is meaningful. Exact auxiliary repair makes the comparison to the original IP objective coherent.
 
 The main algorithmic finding is that reduced-surrogate QAOA with offline statevector angle search is the strongest approach tested here. VQE benefits from final-sampling separation and multiple initializations, but it remains less concentrated on the global optimum. The best VQE results are useful as evidence that the reduced surrogate contains the optimum in its sampled distribution, whereas the QAOA transfer result provides the clearest candidate for hardware sampling.
+
+The classical baselines add sampling context. Uniform random repaired-flow
+sampling almost never reaches the global optimum at these budgets, so both the
+QAOA transfer result and the selected VQE follow-up are meaningfully more
+concentrated than random sampling. A simple hill-climb baseline can also reach
+the global optimum once it has direct access to the repaired objective, which
+underscores that exact repair is a strong classical tool as well as a scoring
+method.
 
 The practical conclusion is more conservative: the DS-MFG instance can be
 reformulated and sampled with current QAOA/VQE software, and local simulations

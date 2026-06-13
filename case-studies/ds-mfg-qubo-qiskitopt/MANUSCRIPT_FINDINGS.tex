@@ -390,6 +390,13 @@ selected high-read follow-ups at 262144 and 524288 reads. &
 \texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_v4/};
 \texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_final/} \\
 \hline
+Classical sampling baselines & Exact repaired 19-flow objective &
+Uniform random sampling over the 19 flow variables and steepest-descent
+hill-climbing with random restarts; all sampled flows scored by exact auxiliary
+repair. &
+\texttt{ds\_mfg\_classical\_baselines/classical\_baseline\_summary.csv};
+\texttt{ds\_mfg\_classical\_baselines/classical\_baseline\_distribution.csv} \\
+\hline
 \end{tabular}
 \end{table}
 
@@ -527,6 +534,70 @@ $11.7095$; artifact
 \end{tabular}
 \end{table}
 
+\subsection{Classical Sampling Baselines}
+\label{subsec:ds-mfg-classical-baselines}
+
+To interpret QAOA and VQE hit rates against non-quantum alternatives, two
+classical baselines were run directly on the repaired 19-flow objective
+$F(y)$. The first baseline samples flow assignments uniformly at random and
+then applies exact auxiliary repair. The second baseline uses steepest-descent
+single-bit-flip hill climbing with random restarts; each evaluated flow counts
+against the same sample/evaluation budget used in the table. Both baselines use
+fixed seeds and the same top-50, top-10, and global-optimum definitions used for
+the QAOA and VQE summaries. The compact distribution cache retains all sampled
+top-50 flows and each run's best sampled flow, while the summary records counts
+over the full budget.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Classical baseline context for the strongest local QAOA and VQE
+sampling results. ``Samples'' are reads for QAOA/VQE and repaired-flow
+objective evaluations for the classical baselines.}
+\label{tab:ds-mfg-classical-baseline-context}
+\begin{tabular}{p{0.24\linewidth}p{0.19\linewidth}p{0.23\linewidth}p{0.24\linewidth}}
+\hline
+Method & Samples / evaluations & Top-hit counts & Best repaired result \\
+\hline
+Uniform random, seed 81001 & 262144 & 24 top-50; 5 top-10; 0 global &
+Objective $11.8105$; rank 2; flow \texttt{1001110100111010011} \\
+\hline
+Uniform random, seed 81002 & 524288 & 49 top-50; 11 top-10; 0 global &
+Objective $12.2415$; rank 3; flow \texttt{1001110100111001011} \\
+\hline
+Hill-climb restarts, seed 82001 & 262144 evaluations; 2055 restarts &
+883 top-50; 177 top-10; 19 global &
+Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
+\hline
+Transferred-angle QAOA, $p=5$ & 262144 local Aer reads &
+39661 top-50; 8964 top-10; 664 global &
+Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
+\hline
+Reduced-surrogate VQE, seed 74018 & 524288 local Aer reads &
+391 top-50; 152 top-10; 20 global &
+Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
+\hline
+\end{tabular}
+\end{table}
+
+Uniform random sampling provides a useful lower baseline for concentration. At
+262144 samples it found 24 top-50 flows, 5 top-10 flows, and no global optimum
+read; at 524288 samples it found 49 top-50 flows, 11 top-10 flows, and again no
+global optimum read. Both reduced-surrogate QAOA and the selected VQE follow-up
+therefore show much stronger concentration on low repaired-objective flows than
+uniform random sampling at comparable sample counts.
+
+The hill-climbing baseline is a stronger classical comparator because it uses
+the repaired objective adaptively. With the same 262144 evaluation budget used
+for the QAOA high-read follow-up, it found the global optimum 19 times and
+reached 883 top-50 evaluations. This confirms that simple classical search can
+also exploit $F(y)$ once exact repair is available. However, the transferred
+$p=5$ QAOA distribution was still more concentrated in this cached comparison,
+with 664 global reads and 39661 top-50 reads at the same nominal count. The
+comparison does not imply a runtime advantage for QAOA; it shows that sampled
+distribution concentration should be interpreted relative to simple classical
+sampling baselines, not only relative to Gurobi.
+
 \subsection{Interpretation}
 \label{subsec:ds-mfg-interpretation}
 
@@ -548,6 +619,16 @@ global optimum on the reduced surrogate, but at a much lower empirical rate:
 the best final VQE follow-up saw 20 global reads in 524288 samples for seed
 74018, whereas the transferred $p=5$ QAOA follow-up saw 664 global reads in
 262144 samples.
+
+The classical baselines add sampling context to this conclusion. Uniform random
+sampling almost never reaches the global optimum at the budgets used here, so
+both the QAOA transfer result and the selected VQE follow-up are meaningfully
+more concentrated than random repaired-flow sampling. A simple hill-climbing
+baseline can also reach the global optimum using the repaired objective, which
+underscores that exact repair and objective access are powerful classical tools
+in their own right. The quantum-emulation results should therefore be framed as
+sampled-distribution evidence after substantial preprocessing, not as evidence
+that quantum optimization dominates simple classical search.
 
 The practical conclusion is more conservative than the algorithmic comparison:
 the DS-MFG instance can be reformulated and sampled with current QAOA/VQE
