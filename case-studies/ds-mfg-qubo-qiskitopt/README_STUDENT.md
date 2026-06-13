@@ -5,6 +5,13 @@ builds the QUBO from exported CSV files, runs local Aer emulations of QAOA and
 VQE through `QiskitOpt.jl`, and compares the sampled distributions to the
 Gurobi solution pool.
 
+The notebook is a practical audit of the quantum-optimization workflow rather
+than a speedup study. Gurobi supplies the original 19-flow-variable ground
+truth, local Aer emulation supplies the current QAOA/VQE evidence, and IBM
+hardware execution is represented only by disabled follow-up placeholders. The
+current artifacts do not support a quantum speedup or IBM hardware-performance
+superiority claim.
+
 ## Start Here
 
 Read these files in order:
@@ -46,6 +53,11 @@ It does not rerun QAOA or VQE, so it should complete much faster than executing
 the notebook.
 
 ## Main Takeaway
+
+The main takeaway is that meaningful QAOA/VQE samples can be obtained for this
+DS-MFG instance after problem-specific reduction, auxiliary repair,
+simulator-configuration, and postprocessing work. The engineering burden is part
+of the result, not just notebook setup.
 
 The original Gurobi model is the 19-variable DS-MFG flow problem. The exported
 QUBO has 36 binary variables: the first 19 bits are the original flow variables,

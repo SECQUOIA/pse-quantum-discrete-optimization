@@ -5,6 +5,12 @@ emulations of QAOA and VQE through `QiskitOpt.jl` and Qiskit Aer. It includes
 the executed notebook, cached distributions, generated figures, and a
 manuscript-ready findings draft.
 
+The case study is framed as a practical quantum-optimization audit. Gurobi
+provides the original 19-flow-variable ground truth, local Aer emulation
+provides the current QAOA/VQE evidence, and IBM hardware execution remains a
+planned feasibility step. The bundle does not claim quantum speedup or IBM
+hardware-performance superiority.
+
 Start with:
 
 - `README_STUDENT.md`: detailed guide to the notebook, environment, cached
@@ -32,4 +38,5 @@ Best cached results:
   those reads.
 
 No IBM hardware results are included. The notebook contains disabled hardware
-placeholder cells for the best QAOA and VQE local configurations.
+placeholder cells for the best QAOA and VQE local configurations. Those cells
+identify follow-up experiments rather than completed hardware evidence.
