@@ -7,7 +7,7 @@ include(joinpath(@__DIR__, "hit_rate_stats.jl"))
 
 const STAT_COLUMNS = hit_rate_stat_headers()
 const LEGACY_STAT_COLUMNS = String[]
-for event in ("top50", "top10", "global", "feasible")
+for event in ("top50", "top10", "global", "feasible", "gurobi_pool_feasible")
     append!(
         LEGACY_STAT_COLUMNS,
         [
@@ -19,7 +19,7 @@ for event in ("top50", "top10", "global", "feasible")
         ],
     )
 end
-const GENERATED_COLUMNS = Set(vcat(["feasible_hits"], LEGACY_STAT_COLUMNS))
+const GENERATED_COLUMNS = Set(vcat(["feasible_hits", "gurobi_pool_feasible_hits"], LEGACY_STAT_COLUMNS))
 const SUMMARY_TARGETS = [
     (
         relpath = "ds_mfg_qaoa_juliqaoa_transfer/qaoa_juliqaoa_transfer_summary.csv",
@@ -111,18 +111,18 @@ function required_total_trials(row::Dict{String,String})
     error("Missing required column total_reads or total_samples")
 end
 
-function feasible_key(row::Dict{String,String}, key_columns)
+function target_key(row::Dict{String,String}, key_columns)
     return Tuple(get(row, string(column), "") for column in key_columns)
 end
 
-function load_feasible_hits(target)
+function load_gurobi_pool_feasible_hits(target)
     path = joinpath(STUDY_ROOT, target.feasible_relpath)
     header, rows = read_csv_table(path)
     hits = Dict{Tuple,Int}()
     for values in rows
         row = row_dict(header, values)
-        is_feasible_match(get(row, "match", "")) || continue
-        key = feasible_key(row, target.feasible_key_columns)
+        is_gurobi_pool_feasible_match(get(row, "match", "")) || continue
+        key = target_key(row, target.feasible_key_columns)
         hits[key] = get(hits, key, 0) + required_int(row, target.feasible_count_column)
     end
     return hits
@@ -181,7 +181,7 @@ end
 function update_summary!(target)
     path = joinpath(STUDY_ROOT, target.relpath)
     header, rows = read_csv_table(path)
-    feasible_hits_by_key = load_feasible_hits(target)
+    gurobi_pool_feasible_hits_by_key = load_gurobi_pool_feasible_hits(target)
     updated_rows = Vector{String}[]
     updated_header = nothing
 
@@ -192,10 +192,17 @@ function update_summary!(target)
         top50_hits = required_int(row, "top50_hits")
         top10_hits = required_int(row, "top10_hits")
         global_hits = required_int(row, "global_hits")
-        key = feasible_key(row, target.feasible_key_columns)
-        feasible_hits = get(feasible_hits_by_key, key, 0)
+        key = target_key(row, target.feasible_key_columns)
+        gurobi_pool_feasible_hits = get(gurobi_pool_feasible_hits_by_key, key, 0)
         elapsed_sec = required_float(row, target.time_column)
-        stat_values = hit_rate_stat_values(total_reads, top50_hits, top10_hits, global_hits, feasible_hits, elapsed_sec)
+        stat_values = hit_rate_stat_values(
+            total_reads,
+            top50_hits,
+            top10_hits,
+            global_hits,
+            gurobi_pool_feasible_hits,
+            elapsed_sec,
+        )
 
         insert_after = findfirst(==("global_hits"), base_header)
         isnothing(insert_after) && error("Missing global_hits column in $(target.relpath)")
@@ -203,14 +210,19 @@ function update_summary!(target)
         if isnothing(updated_header)
             updated_header = vcat(
                 base_header[1:insert_after],
-                ["feasible_hits"],
+                ["gurobi_pool_feasible_hits"],
                 STAT_COLUMNS,
                 base_header[(insert_after + 1):end],
             )
         end
         push!(
             updated_rows,
-            vcat(base_row[1:insert_after], [string(feasible_hits)], stat_values, base_row[(insert_after + 1):end]),
+            vcat(
+                base_row[1:insert_after],
+                [string(gurobi_pool_feasible_hits)],
+                stat_values,
+                base_row[(insert_after + 1):end],
+            ),
         )
     end
 
@@ -233,7 +245,7 @@ function main()
         "time_basis_sec",
         "event",
         "hits",
-        "total_reads",
+        "total_trials",
         "hit_rate",
         "hit_rate_wilson95_low",
         "hit_rate_wilson95_high",

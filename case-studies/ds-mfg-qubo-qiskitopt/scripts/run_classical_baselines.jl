@@ -332,7 +332,7 @@ function summarize_distribution(
     top50_hits = 0
     top10_hits = 0
     global_hits = 0
-    feasible_hits = 0
+    gurobi_pool_feasible_hits = 0
     best_flow = ""
     best_repair = nothing
     best_rank = missing
@@ -345,7 +345,7 @@ function summarize_distribution(
         !ismissing(info.rank) && (top50_hits += visits)
         !ismissing(info.rank) && info.rank <= 10 && (top10_hits += visits)
         !ismissing(info.rank) && info.rank == 1 && (global_hits += visits)
-        is_feasible_match(info.match) && (feasible_hits += visits)
+        is_gurobi_pool_feasible_match(info.match) && (gurobi_pool_feasible_hits += visits)
 
         if isnothing(best_repair) || repair.exact_repaired_qubo_energy < best_repair.exact_repaired_qubo_energy
             best_flow = flow_bits
@@ -359,7 +359,14 @@ function summarize_distribution(
     settings = ismissing(max_steps_per_restart) ?
         "independent_uniform_samples" :
         "steepest_descent_restarts;max_steps_per_restart=$(max_steps_per_restart)"
-    hit_stats = hit_rate_stat_values(total_samples, top50_hits, top10_hits, global_hits, feasible_hits, elapsed_sec)
+    hit_stats = hit_rate_stat_values(
+        total_samples,
+        top50_hits,
+        top10_hits,
+        global_hits,
+        gurobi_pool_feasible_hits,
+        elapsed_sec,
+    )
 
     return Any[
         algorithm,
@@ -373,7 +380,7 @@ function summarize_distribution(
         top50_hits,
         top10_hits,
         global_hits,
-        feasible_hits,
+        gurobi_pool_feasible_hits,
         hit_stats...,
         best_rank,
         isnothing(best_repair) ? "" : best_repair.exact_repaired_qubo_energy,
@@ -588,7 +595,7 @@ function main()
         "top50_hits",
         "top10_hits",
         "global_hits",
-        "feasible_hits",
+        "gurobi_pool_feasible_hits",
         hit_rate_stat_headers()...,
         "best_top50_rank",
         "best_repaired_qubo_energy",

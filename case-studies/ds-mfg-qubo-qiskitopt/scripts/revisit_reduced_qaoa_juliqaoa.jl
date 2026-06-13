@@ -190,7 +190,7 @@ function main()
     summary_header = [
         "algorithm", "angle_target", "p", "seed", "optimizer_reads", "final_reads",
         "maximum_iterations", "solve_time_sec", "unique_states", "total_reads",
-        "top50_hits", "top10_hits", "global_hits", "feasible_hits", hit_rate_stat_headers()..., "best_top50_rank",
+        "top50_hits", "top10_hits", "global_hits", "gurobi_pool_feasible_hits", hit_rate_stat_headers()..., "best_top50_rank",
         "best_top50_exact_repaired_qubo_energy", "best_top50_match", "best_top50_flow_bits",
         "juliqaoa_top50_probability", "juliqaoa_top10_probability", "juliqaoa_global_probability",
     ]
@@ -230,7 +230,7 @@ function main()
                 top50_hits = 0
                 top10_hits = 0
                 global_hits = 0
-                feasible_hits = 0
+                gurobi_pool_feasible_hits = 0
                 best_hit = nothing
 
                 for result in 1:result_count
@@ -245,7 +245,7 @@ function main()
                     top50_hits += reads
                     hit.rank <= 10 && (top10_hits += reads)
                     hit.rank == 1 && (global_hits += reads)
-                    is_feasible_match(hit.match) && (feasible_hits += reads)
+                    is_gurobi_pool_feasible_match(hit.match) && (gurobi_pool_feasible_hits += reads)
                     if isnothing(best_hit) || hit.rank < best_hit.rank
                         best_hit = merge(hit, (flow_bits = flow_bits,))
                     end
@@ -264,12 +264,19 @@ function main()
                     )
                 end
 
-                hit_stats = hit_rate_stat_values(total_reads, top50_hits, top10_hits, global_hits, feasible_hits, solve_time)
+                hit_stats = hit_rate_stat_values(
+                    total_reads,
+                    top50_hits,
+                    top10_hits,
+                    global_hits,
+                    gurobi_pool_feasible_hits,
+                    solve_time,
+                )
                 summary_row = if isnothing(best_hit)
                     Any[
                         "QAOA_reduced_surrogate_JuliQAOA_transfer", target, p, seed,
                         optimizer_reads, final_reads, maximum_iterations, solve_time,
-                        result_count, total_reads, top50_hits, top10_hits, global_hits, feasible_hits,
+                        result_count, total_reads, top50_hits, top10_hits, global_hits, gurobi_pool_feasible_hits,
                         hit_stats..., "", "", "", "", angle_record["top50_probability"],
                         angle_record["top10_probability"], angle_record["global_probability"],
                     ]
@@ -277,7 +284,7 @@ function main()
                     Any[
                         "QAOA_reduced_surrogate_JuliQAOA_transfer", target, p, seed,
                         optimizer_reads, final_reads, maximum_iterations, solve_time,
-                        result_count, total_reads, top50_hits, top10_hits, global_hits, feasible_hits,
+                        result_count, total_reads, top50_hits, top10_hits, global_hits, gurobi_pool_feasible_hits,
                         hit_stats..., best_hit.rank, best_hit.exact_repaired_qubo_energy, best_hit.match,
                         best_hit.flow_bits, angle_record["top50_probability"],
                         angle_record["top10_probability"], angle_record["global_probability"],

@@ -7,11 +7,11 @@ const HIT_RATE_EVENTS = (
     ("top50", "top50_hits"),
     ("top10", "top10_hits"),
     ("global", "global_hits"),
-    ("feasible", "feasible_hits"),
+    ("gurobi_pool_feasible", "gurobi_pool_feasible_hits"),
 )
-const FEASIBLE_MATCHES = Set(["global_optimum", "gurobi_pool"])
+const GUROBI_POOL_FEASIBLE_MATCHES = Set(["global_optimum", "gurobi_pool"])
 
-is_feasible_match(match) = string(match) in FEASIBLE_MATCHES
+is_gurobi_pool_feasible_match(match) = string(match) in GUROBI_POOL_FEASIBLE_MATCHES
 
 function validate_hit_count(hits::Integer, total::Integer)
     total >= 0 || error("Total trials must be nonnegative, got $(total)")
@@ -93,11 +93,11 @@ function hit_rate_stat_values(
     top50_hits::Integer,
     top10_hits::Integer,
     global_hits::Integer,
-    feasible_hits::Integer,
+    gurobi_pool_feasible_hits::Integer,
     elapsed_sec::Real,
 )
     values = String[]
-    for hits in (top50_hits, top10_hits, global_hits, feasible_hits)
+    for hits in (top50_hits, top10_hits, global_hits, gurobi_pool_feasible_hits)
         stats = hit_rate_event_stats(hits, total_reads, elapsed_sec)
         append!(
             values,

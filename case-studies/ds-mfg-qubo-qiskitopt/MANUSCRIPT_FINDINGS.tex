@@ -400,7 +400,7 @@ repair. &
 Hit-rate uncertainty and time to solution & Cached QAOA, VQE, and classical
 summary rows &
 Two-sided 95\% Wilson hit-rate intervals and empirical 99\% time to solution
-for top-50, top-10, global-optimum, and feasible Gurobi-pool events. &
+for top-50, top-10, global-optimum, and Gurobi-pool-feasible events. &
 \texttt{ds\_mfg\_hit\_rate\_reports/time\_to\_solution\_report.csv} \\
 \hline
 \end{tabular}
@@ -589,10 +589,11 @@ Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
 
 The cached QAOA, reduced-surrogate VQE, and classical-baseline summary CSVs
 also report empirical hit rates for the top-50, top-10, global-optimum, and
-feasible Gurobi-pool events. The feasible event counts sampled flows whose
-repaired projection matches either \texttt{global\_optimum} or
+Gurobi-pool-feasible events. The Gurobi-pool-feasible event counts sampled
+flows whose repaired projection matches either \texttt{global\_optimum} or
 \texttt{gurobi\_pool}. Each rate is paired with a two-sided 95\% Wilson score
-confidence interval. The same rows report empirical 99\% time to solution,
+confidence interval. The same rows carry \texttt{gurobi\_pool\_feasible\_*}
+columns and report empirical 99\% time to solution,
 \texttt{tts99\_sec}, computed as the recorded local solve or wall time per
 sample multiplied by
 $\lceil \log(1 - 0.99) / \log(1 - \hat{p}) \rceil$, where $\hat{p}$ is the
@@ -605,12 +606,12 @@ use script \texttt{wall\_time\_sec}. The consolidated artifact is
 \begin{table}[t]
 \centering
 \scriptsize
-\caption{Representative global-optimum and feasible-hit empirical 99\% time to
+\caption{Representative global-optimum and Gurobi-pool-feasible-hit empirical 99\% time to
 solution from cached local runs.}
 \label{tab:ds-mfg-global-hit-uncertainty}
 \begin{tabular}{p{0.28\linewidth}p{0.16\linewidth}p{0.15\linewidth}p{0.18\linewidth}p{0.15\linewidth}}
 \hline
-Run & Optimal hits & Optimal \texttt{tts99\_sec} & Feasible hits & Feasible \texttt{tts99\_sec} \\
+Run & Optimal hits & Optimal \texttt{tts99\_sec} & Gurobi-pool feasible hits & Gurobi-pool feasible \texttt{tts99\_sec} \\
 \hline
 Transferred $p=5$ QAOA, high-read & 664 / 262144 & $0.374$ &
 32502 / 262144 & $0.007$ \\

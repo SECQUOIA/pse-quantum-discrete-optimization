@@ -118,7 +118,7 @@ function require_hit_rate_stats(row; total_key = "total_reads", time_key = "solv
         parse(Int, row["top50_hits"]),
         parse(Int, row["top10_hits"]),
         parse(Int, row["global_hits"]),
-        parse(Int, row["feasible_hits"]),
+        parse(Int, row["gurobi_pool_feasible_hits"]),
         parse(Float64, row[time_key]),
     )
     for (column, expected) in zip(hit_rate_stat_headers(), stat_values)
@@ -177,7 +177,7 @@ require_value(qaoa, "algorithm", "QAOA_reduced_surrogate_JuliQAOA_transfer")
 require_int(qaoa, "p", 5)
 require_int(qaoa, "total_reads", 262144)
 require_int(qaoa, "global_hits", 664)
-require_int(qaoa, "feasible_hits", 32502)
+require_int(qaoa, "gurobi_pool_feasible_hits", 32502)
 require_value(qaoa, "best_top50_match", "global_optimum")
 require_value(qaoa, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
 require_hit_rate_stats(qaoa)
@@ -186,8 +186,8 @@ vqe_rows = parse_csv_rows("ds_mfg_vqe_reduced_flow_objective_final/vqe_reduced_t
 length(vqe_rows) == 3 || smoke_error("expected three final VQE follow-up rows")
 sum(parse(Int, row["global_hits"]) for row in vqe_rows) == 28 ||
     smoke_error("unexpected final VQE global-hit total")
-sum(parse(Int, row["feasible_hits"]) for row in vqe_rows) == 601 ||
-    smoke_error("unexpected final VQE feasible-hit total")
+sum(parse(Int, row["gurobi_pool_feasible_hits"]) for row in vqe_rows) == 601 ||
+    smoke_error("unexpected final VQE Gurobi-pool feasible-hit total")
 all(row["best_top50_match"] == "global_optimum" for row in vqe_rows) ||
     smoke_error("not every final VQE row reaches the global optimum")
 all(row["best_top50_flow_bits"] == GLOBAL_FLOW_BITS for row in vqe_rows) ||
@@ -205,7 +205,7 @@ uniform_262 = only(filter(
 require_int(uniform_262, "top50_hits", 24)
 require_int(uniform_262, "top10_hits", 5)
 require_int(uniform_262, "global_hits", 0)
-require_int(uniform_262, "feasible_hits", 21)
+require_int(uniform_262, "gurobi_pool_feasible_hits", 21)
 require_value(uniform_262, "best_top50_rank", "2")
 require_hit_rate_stats(uniform_262; total_key = "total_samples", time_key = "wall_time_sec")
 
@@ -216,7 +216,7 @@ uniform_524 = only(filter(
 require_int(uniform_524, "top50_hits", 49)
 require_int(uniform_524, "top10_hits", 11)
 require_int(uniform_524, "global_hits", 0)
-require_int(uniform_524, "feasible_hits", 33)
+require_int(uniform_524, "gurobi_pool_feasible_hits", 33)
 require_value(uniform_524, "best_top50_rank", "3")
 require_hit_rate_stats(uniform_524; total_key = "total_samples", time_key = "wall_time_sec")
 
@@ -224,12 +224,14 @@ hill = only(filter(row -> row["algorithm"] == "hill_climb_restarts_repaired_flow
 require_int(hill, "top50_hits", 883)
 require_int(hill, "top10_hits", 177)
 require_int(hill, "global_hits", 19)
-require_int(hill, "feasible_hits", 721)
+require_int(hill, "gurobi_pool_feasible_hits", 721)
 require_value(hill, "best_match", "global_optimum")
 require_value(hill, "best_flow_bits", GLOBAL_FLOW_BITS)
 require_hit_rate_stats(hill; total_key = "total_samples", time_key = "wall_time_sec")
 
 tts_rows = parse_csv_rows("ds_mfg_hit_rate_reports/time_to_solution_report.csv")
+all(haskey(row, "total_trials") for row in tts_rows) ||
+    smoke_error("time-to-solution report must use total_trials column")
 qaoa_global_tts = only(filter(
     row -> row["source_summary"] == "ds_mfg_qaoa_juliqaoa_transfer_highread/qaoa_juliqaoa_transfer_summary.csv" &&
         row["event"] == "global",
@@ -241,12 +243,12 @@ require_value(qaoa_global_tts, "tts99_sec", qaoa["global_tts99_sec"])
 
 qaoa_feasible_tts = only(filter(
     row -> row["source_summary"] == "ds_mfg_qaoa_juliqaoa_transfer_highread/qaoa_juliqaoa_transfer_summary.csv" &&
-        row["event"] == "feasible",
+        row["event"] == "gurobi_pool_feasible",
     tts_rows,
 ))
 require_int(qaoa_feasible_tts, "hits", 32502)
-require_value(qaoa_feasible_tts, "hit_rate", qaoa["feasible_hit_rate"])
-require_value(qaoa_feasible_tts, "tts99_sec", qaoa["feasible_tts99_sec"])
+require_value(qaoa_feasible_tts, "hit_rate", qaoa["gurobi_pool_feasible_hit_rate"])
+require_value(qaoa_feasible_tts, "tts99_sec", qaoa["gurobi_pool_feasible_tts99_sec"])
 
 uniform_global_tts = only(filter(
     row -> row["source_summary"] == "ds_mfg_classical_baselines/classical_baseline_summary.csv" &&
