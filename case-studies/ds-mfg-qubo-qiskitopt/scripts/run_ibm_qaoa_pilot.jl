@@ -8,7 +8,7 @@ using Dates
 using Printf
 using PythonCall
 
-include(joinpath(@__DIR__, "hit_rate_stats.jl"))
+isdefined(@__MODULE__, :hit_rate_stat_values) || include(joinpath(@__DIR__, "hit_rate_stats.jl"))
 
 const STUDY_ROOT = normpath(abspath(joinpath(@__DIR__, "..")))
 const REDUCED_DIR = joinpath(STUDY_ROOT, "ds_mfg_reduced_flow_objective")
@@ -446,6 +446,11 @@ function manifest(config::PilotConfig, data, circuit_info, jobs, paths)
     )
 end
 
+function persist_job_manifest!(config::PilotConfig, data, circuit_info, jobs, paths)
+    write_json_file(paths["job_manifest"], manifest(config, data, circuit_info, jobs, paths))
+    return nothing
+end
+
 function dry_run_backend_metadata(config::PilotConfig)
     return Dict{String,Any}(
         "schema_version" => SCHEMA_VERSION,
@@ -700,6 +705,22 @@ function job_status_text(job)
     return "unknown"
 end
 
+function record_job_failure!(job_plan, runtime_job, submitted::Bool, err)
+    if runtime_job !== nothing
+        job_plan["status"] = job_status_text(runtime_job)
+    elseif submitted
+        job_plan["status"] = get(job_plan, "status", "submitted")
+    else
+        job_plan["status"] = "failed_before_submission"
+    end
+    job_plan["error"] = submitted ?
+        "Runtime job result retrieval or scoring failed after submission." :
+        "Runtime job transpile or submission failed before a job ID was assigned."
+    job_plan["error_type"] = string(typeof(err))
+    job_plan["error_recorded_at_utc"] = utc_timestamp()
+    return nothing
+end
+
 function runtime_service(runtime, config::PilotConfig)
     token = strip(get(ENV, "QISKIT_IBM_TOKEN", ""))
     if isempty(token)
@@ -745,7 +766,7 @@ function runtime_service_or_error(runtime, config::PilotConfig, paths)
     )
 end
 
-function run_hardware_jobs!(config::PilotConfig, data, circuit, jobs, paths)
+function run_hardware_jobs!(config::PilotConfig, data, circuit, circuit_info, jobs, paths)
     qiskit = pyimport("qiskit")
     runtime = pyimport("qiskit_ibm_runtime")
     service = runtime_service_or_error(runtime, config, paths)
@@ -769,28 +790,39 @@ function run_hardware_jobs!(config::PilotConfig, data, circuit, jobs, paths)
             ]))
 
             for job_plan in jobs
-                @info "Submitting fixed-parameter QAOA sampler job" repeat=job_plan["repeat"] transpile_seed=job_plan["transpile_seed"] shots=config.final_reads
-                transpiled = qiskit.transpile(
-                    circuit;
-                    backend = backend,
-                    seed_transpiler = job_plan["transpile_seed"],
-                    optimization_level = 3,
-                )
-                sampler = runtime.SamplerV2(; mode = backend)
-                runtime_job = sampler.run([transpiled]; shots = config.final_reads)
-                job_plan["submitted"] = true
-                job_plan["job_id"] = pyconvert(String, runtime_job.job_id())
-                job_plan["status"] = job_status_text(runtime_job)
-                submitted_jobs += 1
+                runtime_job = nothing
+                submitted = false
+                try
+                    @info "Submitting fixed-parameter QAOA sampler job" repeat=job_plan["repeat"] transpile_seed=job_plan["transpile_seed"] shots=config.final_reads
+                    transpiled = qiskit.transpile(
+                        circuit;
+                        backend = backend,
+                        seed_transpiler = job_plan["transpile_seed"],
+                        optimization_level = 3,
+                    )
+                    sampler = runtime.SamplerV2(; mode = backend)
+                    runtime_job = sampler.run([transpiled]; shots = config.final_reads)
+                    submitted = true
+                    job_plan["submitted"] = true
+                    job_plan["job_id"] = pyconvert(String, runtime_job.job_id())
+                    job_plan["status"] = job_status_text(runtime_job)
+                    submitted_jobs += 1
+                    persist_job_manifest!(config, data, circuit_info, jobs, paths)
 
-                result = runtime_job.result()
-                counts = sampler_counts(result)
-                job_plan["status"] = job_status_text(runtime_job)
-                job_plan["unique_raw_bitstrings"] = length(counts)
-                job_plan["total_reads"] = sum(values(counts); init = 0)
-                write_count_rows!(raw_io, scored_io, aggregate, config, data, job_plan, counts)
-                flush(raw_io)
-                flush(scored_io)
+                    result = runtime_job.result()
+                    counts = sampler_counts(result)
+                    job_plan["status"] = job_status_text(runtime_job)
+                    job_plan["unique_raw_bitstrings"] = length(counts)
+                    job_plan["total_reads"] = sum(values(counts); init = 0)
+                    persist_job_manifest!(config, data, circuit_info, jobs, paths)
+                    write_count_rows!(raw_io, scored_io, aggregate, config, data, job_plan, counts)
+                    flush(raw_io)
+                    flush(scored_io)
+                catch err
+                    record_job_failure!(job_plan, runtime_job, submitted || get(job_plan, "submitted", false), err)
+                    persist_job_manifest!(config, data, circuit_info, jobs, paths)
+                    rethrow()
+                end
             end
         end
     end
@@ -811,10 +843,10 @@ function main()
     submitted_jobs = 0
     start_time = time()
 
-    write_json_file(paths["job_manifest"], manifest(config, data, circuit_info, jobs, paths))
+    persist_job_manifest!(config, data, circuit_info, jobs, paths)
 
     if config.run_hardware
-        aggregate, submitted_jobs = run_hardware_jobs!(config, data, circuit, jobs, paths)
+        aggregate, submitted_jobs = run_hardware_jobs!(config, data, circuit, circuit_info, jobs, paths)
     else
         write_json_file(paths["backend_metadata"], dry_run_backend_metadata(config))
         write_empty_count_files(paths)
@@ -830,7 +862,7 @@ function main()
         elapsed_sec = elapsed_sec,
         data = data,
     )
-    write_json_file(paths["job_manifest"], manifest(config, data, circuit_info, jobs, paths))
+    persist_job_manifest!(config, data, circuit_info, jobs, paths)
 
     if config.run_hardware
         println("IBM QAOA pilot hardware run complete.")
@@ -842,4 +874,6 @@ function main()
     println("Summary: ", paths["summary"])
 end
 
-main()
+if abspath(PROGRAM_FILE) == abspath(@__FILE__)
+    main()
+end

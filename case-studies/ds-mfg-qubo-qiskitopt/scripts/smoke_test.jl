@@ -365,4 +365,57 @@ mktempdir() do pilot_output_dir
         smoke_error("IBM pilot dry-run summary row has unexpected configuration values")
 end
 
+println("Checking IBM QAOA pilot manifest durability helpers...")
+include(joinpath(@__DIR__, "run_ibm_qaoa_pilot.jl"))
+mktempdir() do pilot_output_dir
+    config = PilotConfig(
+        DEFAULT_IBM_RUNTIME_CHANNEL,
+        "ibm_brisbane",
+        nothing,
+        64,
+        1,
+        [123],
+        pilot_output_dir,
+        true,
+    )
+    jobs = planned_jobs(config)
+    data = (
+        scalars = (n = 19, scale = 1.0, offset = 0.0),
+        angle_record = Dict(
+            "seed" => "91001",
+            "basinhopping_niter" => "5",
+            "top50_probability" => "0.22967538871326482",
+            "top10_probability" => "0.05261172053991265",
+            "global_probability" => "0.003456748192282216",
+        ),
+        angle_path = joinpath(ANGLE_DIR, "juliqaoa_angle_summary.csv"),
+        angles = fill(0.0, 2 * ANGLE_P),
+        top_flows = Dict{String,NamedTuple}(),
+    )
+    circuit_info = Dict{String,Any}("num_qubits" => 19, "depth" => 0)
+    paths = output_paths(config)
+
+    jobs[1]["submitted"] = true
+    jobs[1]["job_id"] = "synthetic-runtime-job"
+    jobs[1]["status"] = "RUNNING"
+    persist_job_manifest!(config, data, circuit_info, jobs, paths)
+    manifest_text = read(paths["job_manifest"], String)
+    occursin("\"submitted\":true", manifest_text) ||
+        smoke_error("IBM pilot manifest must persist submitted job state")
+    occursin("\"job_id\":\"synthetic-runtime-job\"", manifest_text) ||
+        smoke_error("IBM pilot manifest must persist Runtime job IDs")
+
+    try
+        error("synthetic after-submission failure")
+    catch err
+        record_job_failure!(jobs[1], nothing, true, err)
+    end
+    persist_job_manifest!(config, data, circuit_info, jobs, paths)
+    manifest_text = read(paths["job_manifest"], String)
+    occursin("\"error_type\":\"ErrorException\"", manifest_text) ||
+        smoke_error("IBM pilot manifest must persist after-submission failure type")
+    occursin("Runtime job result retrieval or scoring failed after submission.", manifest_text) ||
+        smoke_error("IBM pilot manifest must persist after-submission failure state")
+end
+
 println("DS-MFG smoke test passed.")
