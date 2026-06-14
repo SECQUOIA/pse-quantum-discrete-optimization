@@ -327,4 +327,40 @@ retained_rows = parse_csv_rows("ds_mfg_classical_baselines/classical_baseline_re
 all(!isempty(get(row, "retained_reason", "")) for row in retained_rows) ||
     smoke_error("every retained classical baseline row must include a retained_reason")
 
+println("Checking IBM QAOA pilot dry-run schema...")
+mktempdir() do pilot_output_dir
+    withenv(
+        "QISKIT_IBM_BACKEND" => "ibm_brisbane",
+        "QISKIT_IBM_INSTANCE" => "",
+        "DSMFG_HARDWARE_FINAL_READS" => "64",
+        "DSMFG_HARDWARE_REPEATS" => "1",
+        "DSMFG_HARDWARE_TRANSPILE_SEEDS" => "123",
+        "DSMFG_HARDWARE_OUTPUT_DIR" => pilot_output_dir,
+        "DSMFG_RUN_IBM_HARDWARE" => "false",
+    ) do
+        run(`$(Base.julia_cmd()) --project=$(ROOT) scripts/run_ibm_qaoa_pilot.jl`)
+    end
+
+    for filename in ("job_manifest.json", "backend_metadata.json", "raw_counts.csv", "scored_counts.csv", "summary.csv")
+        path = joinpath(pilot_output_dir, filename)
+        isfile(path) || smoke_error("IBM pilot dry run did not write $(filename)")
+        filesize(path) > 0 || smoke_error("IBM pilot dry-run file is empty: $(filename)")
+    end
+
+    manifest_text = read(joinpath(pilot_output_dir, "job_manifest.json"), String)
+    occursin("\"mode\":\"dry_run\"", manifest_text) ||
+        smoke_error("IBM pilot manifest must record dry_run mode")
+    occursin("\"submitted\":false", manifest_text) ||
+        smoke_error("IBM pilot dry-run manifest must not mark jobs submitted")
+    !occursin("QISKIT_IBM_TOKEN", manifest_text) ||
+        smoke_error("IBM pilot manifest must not include token environment names")
+    !occursin("qiskit-ibm.json", manifest_text) ||
+        smoke_error("IBM pilot manifest must not include account file paths")
+
+    summary_lines = filter(line -> !isempty(strip(line)), readlines(joinpath(pilot_output_dir, "summary.csv")))
+    length(summary_lines) == 2 || smoke_error("IBM pilot dry-run summary must contain one data row")
+    occursin("QAOA_reduced_surrogate_JuliQAOA_IBM_pilot,dry_run,ibm_brisbane,top10,5,64,1,123,0,", summary_lines[2]) ||
+        smoke_error("IBM pilot dry-run summary row has unexpected configuration values")
+end
+
 println("DS-MFG smoke test passed.")

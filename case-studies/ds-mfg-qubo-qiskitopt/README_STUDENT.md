@@ -208,6 +208,9 @@ every iteration.
 - `scripts/nbconvert_ds_mfg.sh`: full notebook execution helper.
 - `scripts/find_reduced_qaoa_angles_juliqaoa.jl`: optional angle-search helper that expects a local sibling clone of `JuliQAOA.jl`, or a path set by `JULIQAOA_PROJECT`.
 - `scripts/revisit_reduced_qaoa_juliqaoa.jl`: transfers cached JuliQAOA angles into `QiskitOpt.QAOA` and scores the Aer samples.
+- `scripts/run_ibm_qaoa_pilot.jl`: dry-run-safe IBM Runtime pilot for the
+  reduced 19-qubit surrogate using the persisted top-10-targeted p=5 JuliQAOA
+  angles; set `DSMFG_RUN_IBM_HARDWARE=true` to submit real hardware jobs.
 - `scripts/revisit_reduced_vqe.jl`: reduced-surrogate VQE rerun helper; set `DSMFG_REVISIT_OUTPUT_DIR`, `DSMFG_REVISIT_SEEDS`, and `DSMFG_REVISIT_FINAL_READS` to store new sweeps separately.
 - `scripts/run_classical_baselines.jl`: fixed-seed uniform random and
   hill-climb restart baselines scored by exact auxiliary repair.

@@ -12,6 +12,7 @@ Manifest.toml.bak
 case-studies/*/.jupyter/
 case-studies/*/.julia-depot-nbconvert/
 case-studies/*/*_executed.ipynb
+case-studies/ds-mfg-qubo-qiskitopt/ds_mfg_ibm_qaoa_pilot/
 
 # Python and tooling caches
 __pycache__/
