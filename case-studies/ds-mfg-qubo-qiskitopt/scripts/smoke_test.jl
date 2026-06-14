@@ -365,8 +365,48 @@ mktempdir() do pilot_output_dir
         smoke_error("IBM pilot dry-run summary row has unexpected configuration values")
 end
 
-println("Checking IBM QAOA pilot manifest durability helpers...")
 include(joinpath(@__DIR__, "run_ibm_qaoa_pilot.jl"))
+
+function py_probability_dict_to_julia(py_dict)
+    converted = Dict{String,Float64}()
+    for item in py_dict.items()
+        converted[pyconvert(String, item[0])] = pyconvert(Float64, item[1])
+    end
+    return converted
+end
+
+function validate_ibm_pilot_circuit_probabilities()
+    data = load_problem_data()
+    circuit = build_qaoa_circuit(data)
+    circuit_without_measurements = circuit.remove_final_measurements(; inplace = false)
+    statevector = PythonCall.pyimport("qiskit.quantum_info").Statevector.from_instruction(circuit_without_measurements)
+    probabilities = py_probability_dict_to_julia(statevector.probabilities_dict())
+    observed = Dict(
+        "top50_probability" => 0.0,
+        "top10_probability" => 0.0,
+        "global_probability" => 0.0,
+    )
+
+    for (qiskit_bitstring, probability) in probabilities
+        flow_bits = qiskit_key_to_flow_bits(qiskit_bitstring, data.scalars.n)
+        hit = get(data.top_flows, flow_bits, nothing)
+        isnothing(hit) && continue
+        observed["top50_probability"] += probability
+        hit.rank <= 10 && (observed["top10_probability"] += probability)
+        hit.rank == 1 && (observed["global_probability"] += probability)
+    end
+
+    for key in keys(observed)
+        expected = parse(Float64, data.angle_record[key])
+        isapprox(observed[key], expected; atol = 1.0e-3, rtol = 0.0) ||
+            smoke_error("IBM pilot circuit $(key) expected $(expected), got $(observed[key])")
+    end
+end
+
+println("Checking IBM QAOA pilot circuit probabilities...")
+validate_ibm_pilot_circuit_probabilities()
+
+println("Checking IBM QAOA pilot manifest durability helpers...")
 mktempdir() do pilot_output_dir
     config = PilotConfig(
         DEFAULT_IBM_RUNTIME_CHANNEL,

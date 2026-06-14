@@ -1,8 +1,11 @@
 #!/usr/bin/env julia
 
 import Pkg
-Pkg.activate(joinpath(@__DIR__, ".."))
-Pkg.instantiate()
+
+if abspath(PROGRAM_FILE) == abspath(@__FILE__)
+    Pkg.activate(joinpath(@__DIR__, ".."))
+    Pkg.instantiate()
+end
 
 using Dates
 using Printf
