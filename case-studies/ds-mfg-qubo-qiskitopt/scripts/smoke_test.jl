@@ -327,4 +327,135 @@ retained_rows = parse_csv_rows("ds_mfg_classical_baselines/classical_baseline_re
 all(!isempty(get(row, "retained_reason", "")) for row in retained_rows) ||
     smoke_error("every retained classical baseline row must include a retained_reason")
 
+println("Checking IBM QAOA pilot dry-run schema...")
+mktempdir() do pilot_output_dir
+    withenv(
+        "QISKIT_IBM_BACKEND" => "ibm_brisbane",
+        "QISKIT_IBM_INSTANCE" => "",
+        "DSMFG_HARDWARE_FINAL_READS" => "64",
+        "DSMFG_HARDWARE_REPEATS" => "1",
+        "DSMFG_HARDWARE_TRANSPILE_SEEDS" => "123",
+        "DSMFG_HARDWARE_OUTPUT_DIR" => pilot_output_dir,
+        "DSMFG_RUN_IBM_HARDWARE" => "false",
+    ) do
+        run(`$(Base.julia_cmd()) --project=$(ROOT) scripts/run_ibm_qaoa_pilot.jl`)
+    end
+
+    for filename in ("job_manifest.json", "backend_metadata.json", "raw_counts.csv", "scored_counts.csv", "summary.csv")
+        path = joinpath(pilot_output_dir, filename)
+        isfile(path) || smoke_error("IBM pilot dry run did not write $(filename)")
+        filesize(path) > 0 || smoke_error("IBM pilot dry-run file is empty: $(filename)")
+    end
+
+    manifest_text = read(joinpath(pilot_output_dir, "job_manifest.json"), String)
+    occursin("\"mode\":\"dry_run\"", manifest_text) ||
+        smoke_error("IBM pilot manifest must record dry_run mode")
+    occursin("\"channel\":\"ibm_quantum_platform\"", manifest_text) ||
+        smoke_error("IBM pilot manifest must record the default Runtime channel")
+    occursin("\"submitted\":false", manifest_text) ||
+        smoke_error("IBM pilot dry-run manifest must not mark jobs submitted")
+    !occursin("QISKIT_IBM_TOKEN", manifest_text) ||
+        smoke_error("IBM pilot manifest must not include token environment names")
+    !occursin("qiskit-ibm.json", manifest_text) ||
+        smoke_error("IBM pilot manifest must not include account file paths")
+
+    summary_lines = filter(line -> !isempty(strip(line)), readlines(joinpath(pilot_output_dir, "summary.csv")))
+    length(summary_lines) == 2 || smoke_error("IBM pilot dry-run summary must contain one data row")
+    occursin("QAOA_reduced_surrogate_JuliQAOA_IBM_pilot,dry_run,ibm_brisbane,top10,5,64,1,123,0,", summary_lines[2]) ||
+        smoke_error("IBM pilot dry-run summary row has unexpected configuration values")
+end
+
+include(joinpath(@__DIR__, "run_ibm_qaoa_pilot.jl"))
+
+function py_probability_dict_to_julia(py_dict)
+    converted = Dict{String,Float64}()
+    for item in py_dict.items()
+        converted[pyconvert(String, item[0])] = pyconvert(Float64, item[1])
+    end
+    return converted
+end
+
+function validate_ibm_pilot_circuit_probabilities()
+    data = load_problem_data()
+    circuit = build_qaoa_circuit(data)
+    circuit_without_measurements = circuit.remove_final_measurements(; inplace = false)
+    statevector = PythonCall.pyimport("qiskit.quantum_info").Statevector.from_instruction(circuit_without_measurements)
+    probabilities = py_probability_dict_to_julia(statevector.probabilities_dict())
+    observed = Dict(
+        "top50_probability" => 0.0,
+        "top10_probability" => 0.0,
+        "global_probability" => 0.0,
+    )
+
+    for (qiskit_bitstring, probability) in probabilities
+        flow_bits = qiskit_key_to_flow_bits(qiskit_bitstring, data.scalars.n)
+        hit = get(data.top_flows, flow_bits, nothing)
+        isnothing(hit) && continue
+        observed["top50_probability"] += probability
+        hit.rank <= 10 && (observed["top10_probability"] += probability)
+        hit.rank == 1 && (observed["global_probability"] += probability)
+    end
+
+    for key in keys(observed)
+        expected = parse(Float64, data.angle_record[key])
+        isapprox(observed[key], expected; atol = 1.0e-3, rtol = 0.0) ||
+            smoke_error("IBM pilot circuit $(key) expected $(expected), got $(observed[key])")
+    end
+end
+
+println("Checking IBM QAOA pilot circuit probabilities...")
+validate_ibm_pilot_circuit_probabilities()
+
+println("Checking IBM QAOA pilot manifest durability helpers...")
+mktempdir() do pilot_output_dir
+    config = PilotConfig(
+        DEFAULT_IBM_RUNTIME_CHANNEL,
+        "ibm_brisbane",
+        nothing,
+        64,
+        1,
+        [123],
+        pilot_output_dir,
+        true,
+    )
+    jobs = planned_jobs(config)
+    data = (
+        scalars = (n = 19, scale = 1.0, offset = 0.0),
+        angle_record = Dict(
+            "seed" => "91001",
+            "basinhopping_niter" => "5",
+            "top50_probability" => "0.22967538871326482",
+            "top10_probability" => "0.05261172053991265",
+            "global_probability" => "0.003456748192282216",
+        ),
+        angle_path = joinpath(ANGLE_DIR, "juliqaoa_angle_summary.csv"),
+        angles = fill(0.0, 2 * ANGLE_P),
+        top_flows = Dict{String,NamedTuple}(),
+    )
+    circuit_info = Dict{String,Any}("num_qubits" => 19, "depth" => 0)
+    paths = output_paths(config)
+
+    jobs[1]["submitted"] = true
+    jobs[1]["job_id"] = "synthetic-runtime-job"
+    jobs[1]["status"] = "RUNNING"
+    persist_job_manifest!(config, data, circuit_info, jobs, paths)
+    manifest_text = read(paths["job_manifest"], String)
+    occursin("\"submitted\":true", manifest_text) ||
+        smoke_error("IBM pilot manifest must persist submitted job state")
+    occursin("\"job_id\":\"synthetic-runtime-job\"", manifest_text) ||
+        smoke_error("IBM pilot manifest must persist Runtime job IDs")
+
+    try
+        error("synthetic after-submission failure")
+    catch err
+        record_job_failure!(jobs[1], nothing, true, err)
+    end
+    persist_job_manifest!(config, data, circuit_info, jobs, paths)
+    manifest_text = read(paths["job_manifest"], String)
+    occursin("\"error_type\":\"ErrorException\"", manifest_text) ||
+        smoke_error("IBM pilot manifest must persist after-submission failure type")
+    occursin("Runtime job result retrieval or scoring failed after submission.", manifest_text) ||
+        smoke_error("IBM pilot manifest must persist after-submission failure state")
+end
+
 println("DS-MFG smoke test passed.")

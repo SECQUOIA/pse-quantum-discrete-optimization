@@ -100,3 +100,58 @@ environment-only reasons.
 First runs may create local directories such as `.CondaPkg/`, `.jupyter/`, and
 `.julia-depot-nbconvert/` inside the case-study folder. These are machine-local
 environment caches and are intentionally ignored by Git.
+
+## IBM Hardware Pilot
+
+The DS-MFG case study includes a dry-run-safe fixed-parameter IBM QAOA pilot
+runner:
+
+```bash
+cd case-studies/ds-mfg-qubo-qiskitopt
+QISKIT_IBM_BACKEND=ibm_brisbane julia --project=. scripts/run_ibm_qaoa_pilot.jl
+```
+
+Dry-run mode is the default. It validates the reduced 19-qubit surrogate, loads
+the persisted top-10-targeted p=5 JuliQAOA angles, builds the fixed-parameter
+QAOA circuit, and writes `job_manifest.json`, `backend_metadata.json`,
+`raw_counts.csv`, `scored_counts.csv`, and `summary.csv` without contacting IBM
+Runtime or submitting hardware jobs.
+
+The runner is configured only through environment variables:
+
+- `QISKIT_IBM_BACKEND`: required backend name.
+- `QISKIT_IBM_CHANNEL`: optional Runtime channel, default
+  `ibm_quantum_platform`.
+- `QISKIT_IBM_INSTANCE`: IBM Runtime instance selector; optional only when
+  Runtime can auto-resolve the account's instance.
+- `DSMFG_HARDWARE_FINAL_READS`: shots per submitted sampler job, default `4096`.
+- `DSMFG_HARDWARE_REPEATS`: repeat count, default `1`.
+- `DSMFG_HARDWARE_TRANSPILE_SEEDS`: comma-separated seeds or ranges, default
+  `92001`.
+- `DSMFG_HARDWARE_OUTPUT_DIR`: output folder, default
+  `ds_mfg_ibm_qaoa_pilot`.
+- `DSMFG_RUN_IBM_HARDWARE`: must be `true` to submit jobs.
+
+To run on real hardware, configure IBM credentials outside the repository,
+either through IBM Runtime's normal account storage under your home directory
+or through shell environment variables for the current session, for example
+`QISKIT_IBM_TOKEN`. Do not place tokens, account JSON files, or backend secrets
+anywhere in this repository.
+
+After credentials are configured, the hardware gate must be explicit:
+
+```bash
+cd case-studies/ds-mfg-qubo-qiskitopt
+export QISKIT_IBM_TOKEN='your-token'
+QISKIT_IBM_BACKEND=ibm_brisbane \
+QISKIT_IBM_CHANNEL=ibm_quantum_platform \
+DSMFG_HARDWARE_FINAL_READS=4096 \
+DSMFG_HARDWARE_REPEATS=1 \
+DSMFG_HARDWARE_TRANSPILE_SEEDS=92001 \
+DSMFG_RUN_IBM_HARDWARE=true \
+julia --project=. scripts/run_ibm_qaoa_pilot.jl
+```
+
+The output files record backend name, job IDs, count data, repaired-flow
+scoring, and summary hit rates. They intentionally do not write IBM tokens,
+account-file paths, or instance values.

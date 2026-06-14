@@ -70,4 +70,8 @@ than the smoke test.
 
 All quantum-algorithm results currently tracked here are local classical
 emulations. No IBM hardware results are included in the initial DS-MFG bundle,
-and the manuscript narrative keeps that evidence boundary explicit.
+and the manuscript narrative keeps that evidence boundary explicit. The DS-MFG
+case study includes `scripts/run_ibm_qaoa_pilot.jl` as a dry-run-safe IBM
+Runtime pilot for the reduced 19-qubit p=5 QAOA follow-up; see `INSTALL.md` for
+credential handling and the explicit `DSMFG_RUN_IBM_HARDWARE=true` submission
+gate.
