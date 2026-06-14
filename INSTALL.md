@@ -120,7 +120,8 @@ Runtime or submitting hardware jobs.
 The runner is configured only through environment variables:
 
 - `QISKIT_IBM_BACKEND`: required backend name.
-- `QISKIT_IBM_INSTANCE`: optional IBM Runtime instance selector.
+- `QISKIT_IBM_INSTANCE`: IBM Runtime instance selector; optional only when
+  Runtime can auto-resolve the account's instance.
 - `DSMFG_HARDWARE_FINAL_READS`: shots per submitted sampler job, default `4096`.
 - `DSMFG_HARDWARE_REPEATS`: repeat count, default `1`.
 - `DSMFG_HARDWARE_TRANSPILE_SEEDS`: comma-separated seeds or ranges, default

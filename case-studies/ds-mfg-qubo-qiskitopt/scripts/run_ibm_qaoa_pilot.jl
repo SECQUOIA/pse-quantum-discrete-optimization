@@ -17,6 +17,7 @@ const ANGLE_TARGET = "top10"
 const ANGLE_P = 5
 const ALGORITHM = "QAOA_reduced_surrogate_JuliQAOA_IBM_pilot"
 const SCHEMA_VERSION = 1
+const IBM_RUNTIME_CHANNEL = "ibm_quantum_platform"
 
 struct PilotConfig
     backend_name::String
@@ -696,15 +697,15 @@ function runtime_service(runtime, config::PilotConfig)
     token = strip(get(ENV, "QISKIT_IBM_TOKEN", ""))
     if isempty(token)
         if isnothing(config.instance)
-            return runtime.QiskitRuntimeService(; channel = "ibm_quantum")
+            return runtime.QiskitRuntimeService(; channel = IBM_RUNTIME_CHANNEL)
         else
-            return runtime.QiskitRuntimeService(; channel = "ibm_quantum", instance = config.instance)
+            return runtime.QiskitRuntimeService(; channel = IBM_RUNTIME_CHANNEL, instance = config.instance)
         end
     else
         if isnothing(config.instance)
-            return runtime.QiskitRuntimeService(; channel = "ibm_quantum", token = token)
+            return runtime.QiskitRuntimeService(; channel = IBM_RUNTIME_CHANNEL, token = token)
         else
-            return runtime.QiskitRuntimeService(; channel = "ibm_quantum", token = token, instance = config.instance)
+            return runtime.QiskitRuntimeService(; channel = IBM_RUNTIME_CHANNEL, token = token, instance = config.instance)
         end
     end
 end
