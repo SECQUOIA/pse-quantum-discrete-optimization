@@ -692,14 +692,27 @@ function job_status_text(job)
     return "unknown"
 end
 
+function runtime_service(runtime, config::PilotConfig)
+    token = strip(get(ENV, "QISKIT_IBM_TOKEN", ""))
+    if isempty(token)
+        if isnothing(config.instance)
+            return runtime.QiskitRuntimeService(; channel = "ibm_quantum")
+        else
+            return runtime.QiskitRuntimeService(; channel = "ibm_quantum", instance = config.instance)
+        end
+    else
+        if isnothing(config.instance)
+            return runtime.QiskitRuntimeService(; channel = "ibm_quantum", token = token)
+        else
+            return runtime.QiskitRuntimeService(; channel = "ibm_quantum", token = token, instance = config.instance)
+        end
+    end
+end
+
 function run_hardware_jobs!(config::PilotConfig, data, circuit, jobs, paths)
     qiskit = pyimport("qiskit")
     runtime = pyimport("qiskit_ibm_runtime")
-    service = if isnothing(config.instance)
-        runtime.QiskitRuntimeService(; channel = "ibm_quantum")
-    else
-        runtime.QiskitRuntimeService(; channel = "ibm_quantum", instance = config.instance)
-    end
+    service = runtime_service(runtime, config)
     backend = service.backend(config.backend_name)
     write_json_file(paths["backend_metadata"], real_backend_metadata(config, backend))
 

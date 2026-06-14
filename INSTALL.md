@@ -131,13 +131,15 @@ The runner is configured only through environment variables:
 
 To run on real hardware, configure IBM credentials outside the repository,
 either through IBM Runtime's normal account storage under your home directory
-or through shell environment variables for the current session. Do not place
-tokens, account JSON files, or backend secrets anywhere in this repository.
+or through shell environment variables for the current session, for example
+`QISKIT_IBM_TOKEN`. Do not place tokens, account JSON files, or backend secrets
+anywhere in this repository.
 
 After credentials are configured, the hardware gate must be explicit:
 
 ```bash
 cd case-studies/ds-mfg-qubo-qiskitopt
+export QISKIT_IBM_TOKEN='your-token'
 QISKIT_IBM_BACKEND=ibm_brisbane \
 DSMFG_HARDWARE_FINAL_READS=4096 \
 DSMFG_HARDWARE_REPEATS=1 \
