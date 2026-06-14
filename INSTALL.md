@@ -120,6 +120,8 @@ Runtime or submitting hardware jobs.
 The runner is configured only through environment variables:
 
 - `QISKIT_IBM_BACKEND`: required backend name.
+- `QISKIT_IBM_CHANNEL`: optional Runtime channel, default
+  `ibm_quantum_platform`.
 - `QISKIT_IBM_INSTANCE`: IBM Runtime instance selector; optional only when
   Runtime can auto-resolve the account's instance.
 - `DSMFG_HARDWARE_FINAL_READS`: shots per submitted sampler job, default `4096`.
@@ -142,6 +144,7 @@ After credentials are configured, the hardware gate must be explicit:
 cd case-studies/ds-mfg-qubo-qiskitopt
 export QISKIT_IBM_TOKEN='your-token'
 QISKIT_IBM_BACKEND=ibm_brisbane \
+QISKIT_IBM_CHANNEL=ibm_quantum_platform \
 DSMFG_HARDWARE_FINAL_READS=4096 \
 DSMFG_HARDWARE_REPEATS=1 \
 DSMFG_HARDWARE_TRANSPILE_SEEDS=92001 \

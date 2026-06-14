@@ -350,6 +350,8 @@ mktempdir() do pilot_output_dir
     manifest_text = read(joinpath(pilot_output_dir, "job_manifest.json"), String)
     occursin("\"mode\":\"dry_run\"", manifest_text) ||
         smoke_error("IBM pilot manifest must record dry_run mode")
+    occursin("\"channel\":\"ibm_quantum_platform\"", manifest_text) ||
+        smoke_error("IBM pilot manifest must record the default Runtime channel")
     occursin("\"submitted\":false", manifest_text) ||
         smoke_error("IBM pilot dry-run manifest must not mark jobs submitted")
     !occursin("QISKIT_IBM_TOKEN", manifest_text) ||

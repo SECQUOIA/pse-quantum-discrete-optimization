@@ -17,9 +17,10 @@ const ANGLE_TARGET = "top10"
 const ANGLE_P = 5
 const ALGORITHM = "QAOA_reduced_surrogate_JuliQAOA_IBM_pilot"
 const SCHEMA_VERSION = 1
-const IBM_RUNTIME_CHANNEL = "ibm_quantum_platform"
+const DEFAULT_IBM_RUNTIME_CHANNEL = "ibm_quantum_platform"
 
 struct PilotConfig
+    channel::String
     backend_name::String
     instance::Union{Nothing,String}
     final_reads::Int
@@ -71,12 +72,15 @@ end
 
 function read_config()
     backend_name = require_env("QISKIT_IBM_BACKEND")
+    channel = strip(get(ENV, "QISKIT_IBM_CHANNEL", DEFAULT_IBM_RUNTIME_CHANNEL))
+    isempty(channel) && error("QISKIT_IBM_CHANNEL must not be empty")
     instance_text = strip(get(ENV, "QISKIT_IBM_INSTANCE", ""))
     output_name = strip(get(ENV, "DSMFG_HARDWARE_OUTPUT_DIR", "ds_mfg_ibm_qaoa_pilot"))
     isempty(output_name) && error("DSMFG_HARDWARE_OUTPUT_DIR must not be empty")
     output_dir = isabspath(output_name) ? output_name : joinpath(STUDY_ROOT, output_name)
 
     return PilotConfig(
+        channel,
         backend_name,
         isempty(instance_text) ? nothing : instance_text,
         parse_positive_int_env("DSMFG_HARDWARE_FINAL_READS", 4096),
@@ -418,6 +422,7 @@ function manifest(config::PilotConfig, data, circuit_info, jobs, paths)
         "script" => relpath(@__FILE__, STUDY_ROOT),
         "mode" => config.run_hardware ? "hardware" : "dry_run",
         "configuration" => Dict{String,Any}(
+            "channel" => config.channel,
             "backend_name" => config.backend_name,
             "qiskit_ibm_instance_configured" => !isnothing(config.instance),
             "final_reads" => config.final_reads,
@@ -446,6 +451,7 @@ function dry_run_backend_metadata(config::PilotConfig)
         "schema_version" => SCHEMA_VERSION,
         "created_at_utc" => utc_timestamp(),
         "mode" => "dry_run",
+        "channel" => config.channel,
         "backend_name" => config.backend_name,
         "queried" => false,
         "reason" => "Dry run does not contact IBM Quantum Runtime.",
@@ -464,6 +470,7 @@ function real_backend_metadata(config::PilotConfig, backend)
         "schema_version" => SCHEMA_VERSION,
         "created_at_utc" => utc_timestamp(),
         "mode" => "hardware",
+        "channel" => config.channel,
         "backend_name_requested" => config.backend_name,
         "queried" => true,
         "qiskit_ibm_instance_configured" => !isnothing(config.instance),
@@ -697,23 +704,51 @@ function runtime_service(runtime, config::PilotConfig)
     token = strip(get(ENV, "QISKIT_IBM_TOKEN", ""))
     if isempty(token)
         if isnothing(config.instance)
-            return runtime.QiskitRuntimeService(; channel = IBM_RUNTIME_CHANNEL)
+            return runtime.QiskitRuntimeService(; channel = config.channel)
         else
-            return runtime.QiskitRuntimeService(; channel = IBM_RUNTIME_CHANNEL, instance = config.instance)
+            return runtime.QiskitRuntimeService(; channel = config.channel, instance = config.instance)
         end
     else
         if isnothing(config.instance)
-            return runtime.QiskitRuntimeService(; channel = IBM_RUNTIME_CHANNEL, token = token)
+            return runtime.QiskitRuntimeService(; channel = config.channel, token = token)
         else
-            return runtime.QiskitRuntimeService(; channel = IBM_RUNTIME_CHANNEL, token = token, instance = config.instance)
+            return runtime.QiskitRuntimeService(; channel = config.channel, token = token, instance = config.instance)
         end
     end
+end
+
+function runtime_service_or_error(runtime, config::PilotConfig, paths)
+    original_error_type = nothing
+    try
+        return runtime_service(runtime, config)
+    catch err
+        original_error_type = typeof(err)
+    end
+    write_json_file(
+        paths["backend_metadata"],
+        Dict{String,Any}(
+            "schema_version" => SCHEMA_VERSION,
+            "created_at_utc" => utc_timestamp(),
+            "mode" => "hardware",
+            "channel" => config.channel,
+            "backend_name_requested" => config.backend_name,
+            "queried" => false,
+            "qiskit_ibm_instance_configured" => !isnothing(config.instance),
+            "credential_fields_written" => String[],
+            "error" => "IBM Runtime service could not be initialized. Set QISKIT_IBM_INSTANCE to a valid Runtime instance CRN when the account cannot be auto-resolved.",
+        ),
+    )
+    error(
+        "IBM Runtime service could not be initialized. ",
+        "Set QISKIT_IBM_INSTANCE to a valid Runtime instance CRN when the account cannot be auto-resolved. ",
+        "Backend metadata written to $(paths["backend_metadata"]). Original error type: $(original_error_type).",
+    )
 end
 
 function run_hardware_jobs!(config::PilotConfig, data, circuit, jobs, paths)
     qiskit = pyimport("qiskit")
     runtime = pyimport("qiskit_ibm_runtime")
-    service = runtime_service(runtime, config)
+    service = runtime_service_or_error(runtime, config, paths)
     backend = service.backend(config.backend_name)
     write_json_file(paths["backend_metadata"], real_backend_metadata(config, backend))
 
