@@ -2,8 +2,8 @@
 
 import Pkg
 
-const STUDENT_ROOT = abspath(joinpath(@__DIR__, ".."))
-const DEFAULT_JULIQAOA_PROJECT = joinpath(dirname(dirname(dirname(STUDENT_ROOT))), "JuliQAOA.jl")
+const STUDENT_ROOT = normpath(abspath(joinpath(@__DIR__, "..")))
+const DEFAULT_JULIQAOA_PROJECT = abspath(joinpath(@__DIR__, "..", "..", "..", "..", "JuliQAOA.jl"))
 const JULIQAOA_PROJECT = get(ENV, "JULIQAOA_PROJECT", DEFAULT_JULIQAOA_PROJECT)
 
 Pkg.activate(JULIQAOA_PROJECT)

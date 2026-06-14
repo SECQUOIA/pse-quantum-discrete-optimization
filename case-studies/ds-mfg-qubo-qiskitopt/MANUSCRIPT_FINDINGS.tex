@@ -420,11 +420,20 @@ reads in 512 samples, but still did not sample the global optimum.
 
 The strongest QAOA result was obtained by optimizing angles offline on the
 reduced surrogate with \texttt{JuliQAOA.jl} and then transferring those angles
-into \texttt{QiskitOpt.QAOA}. For $p=5$, the offline statevector calculation
+into \texttt{QiskitOpt.QAOA}. For the original energy-targeted $p=5$ search,
+the offline statevector calculation
 predicted a probability of $0.1506823$ on the top 50 repaired flows, $0.0340277$
 on the top 10 repaired flows, and $0.00263256$ on the exact global optimum. The
 high-read Aer follow-up sampled the global optimum 664 times in 262144 reads,
 corresponding to an empirical global-hit rate of $0.002533$.
+
+Additional objective-targeted searches tested top-50, top-10, and direct-global
+JuliQAOA objectives. The top-50 and top-10 $p=5$ searches predicted larger
+global-optimum probabilities than the energy-targeted search, and both improved
+the empirical high-read Aer result. The top-50 target sampled the global optimum
+979 times in 262144 reads, while the top-10 target sampled it 1007 times in
+262144 reads. A bounded direct-global search through $p=3$ did not compete,
+sampling the global optimum 45 times in the same read budget.
 
 \begin{table}[t]
 \centering
@@ -462,21 +471,32 @@ Transferred-angle QAOA, sweep & $p=2,\ldots,5$; 32768 final reads per depth;
 96 at $p=5$ & Every depth sampled the global optimum at least once; artifact
 \texttt{qaoa\_juliqaoa\_transfer\_summary.csv} \\
 \hline
-Transferred-angle QAOA, high-read follow-up & $p=5$; 16 optimizer reads;
+Energy-targeted transferred-angle QAOA, high-read follow-up & $p=5$; 16 optimizer reads;
 262144 final reads; \texttt{MaximumIterations() = 0} & 39661 top-50 reads;
 8964 top-10 reads; 664 global reads & Objective $11.7095$; flow
 \texttt{1001110100111100011}; artifact
 \texttt{qaoa\_juliqaoa\_transfer\_highread/qaoa\_juliqaoa\_transfer\_summary.csv} \\
 \hline
+Objective-targeted transferred-angle QAOA, high-read follow-up & top-50 and
+top-10 targets at $p=5$; direct-global target bounded to $p=3$; 16 optimizer
+reads; 262144 final reads; \texttt{MaximumIterations() = 0} & Top-50 target:
+62964 top-50 reads, 14221 top-10 reads, 979 global reads. Top-10 target: 62597
+top-50 reads, 14326 top-10 reads, 1007 global reads. Direct-global $p=3$: 45
+global reads. & The top-10 target is the strongest cached QAOA result;
+artifact
+\texttt{qaoa\_juliqaoa\_objective\_transfer\_highread/qaoa\_juliqaoa\_transfer\_summary.csv}.
+The direct-global check is stored in
+\texttt{qaoa\_juliqaoa\_global\_transfer\_p3/qaoa\_juliqaoa\_transfer\_summary.csv}. \\
+\hline
 \end{tabular}
 \end{table}
 
-The $p=5$ transferred QAOA parameters are stored in beta-then-gamma order after
-undoing the JuliQAOA energy normalization:
+The best $p=5$ top-10-targeted transferred QAOA parameters are stored in
+beta-then-gamma order after undoing the JuliQAOA energy normalization:
 \begin{verbatim}
-2.33962976942;2.63487051398;2.8837299086;2.94861783352;3.01149134351;
-0.00156283712269;0.00374327754686;0.00643793480657;0.0100189310157;
-0.0141285087419
+2.23879372116;2.59323966677;2.81100015137;2.85831872347;2.93867203427;
+0.00185038323024;0.00470790021078;0.0112988519475;0.0143839727596;
+0.0168246979536
 \end{verbatim}
 These are the fixed parameters used by the QAOA hardware placeholder in the
 notebook.
@@ -576,8 +596,8 @@ Hill-climb restarts, seed 82001 & 262144 evaluations; 2055 restarts &
 883 top-50; 177 top-10; 19 global &
 Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
 \hline
-Transferred-angle QAOA, $p=5$ & 262144 local Aer reads &
-39661 top-50; 8964 top-10; 664 global &
+Top-10-targeted transferred QAOA, $p=5$ & 262144 local Aer reads &
+62597 top-50; 14326 top-10; 1007 global &
 Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
 \hline
 Reduced-surrogate VQE, seed 74018 & 524288 local Aer reads &
@@ -613,8 +633,8 @@ solution from cached local runs.}
 \hline
 Run & Optimal hits & Optimal \texttt{tts99\_sec} & Gurobi-pool feasible hits & Gurobi-pool feasible \texttt{tts99\_sec} \\
 \hline
-Transferred $p=5$ QAOA, high-read & 664 / 262144 & $0.374$ &
-32502 / 262144 & $0.007$ \\
+Top-10-targeted $p=5$ QAOA, high-read & 1007 / 262144 & $0.246$ &
+54820 / 262144 & $0.004$ \\
 \hline
 Reduced-surrogate VQE, seed 74018 & 20 / 524288 & $6.926$ &
 389 / 524288 & $0.356$ \\
@@ -641,7 +661,8 @@ for the QAOA high-read follow-up, it found the global optimum 19 times and
 reached 883 top-50 evaluations. This confirms that simple classical search can
 also exploit $F(y)$ once exact repair is available. However, the transferred
 $p=5$ QAOA distribution was still more concentrated in this cached comparison,
-with 664 global reads and 39661 top-50 reads at the same nominal count. The
+with 1007 global reads and 62597 top-50 reads at the same nominal count for the
+top-10-targeted angle search. The
 comparison does not imply a runtime advantage for QAOA; it shows that sampled
 distribution concentration should be interpreted relative to simple classical
 sampling baselines, not only relative to Gurobi.
@@ -665,8 +686,8 @@ offline statevector QAOA angle search on the reduced surrogate produced a
 distribution with visible mass on the global optimum. VQE also reached the
 global optimum on the reduced surrogate, but at a much lower empirical rate:
 the best final VQE follow-up saw 20 global reads in 524288 samples for seed
-74018, whereas the transferred $p=5$ QAOA follow-up saw 664 global reads in
-262144 samples.
+74018, whereas the top-10-targeted transferred $p=5$ QAOA follow-up saw 1007
+global reads in 262144 samples.
 
 The classical baselines add sampling context to this conclusion. Uniform random
 sampling almost never reaches the global optimum at the budgets used here, so
@@ -705,8 +726,9 @@ they are not evidence of IBM hardware performance.
 \hline
 Method & Local evidence supporting the candidate & Placeholder hardware action \\
 \hline
-QAOA & Reduced 19-flow surrogate; $p=5$; JuliQAOA-learned angles transferred
-to \texttt{QiskitOpt.QAOA}; 664 global reads in 262144 local Aer samples. &
+QAOA & Reduced 19-flow surrogate; top-10-targeted $p=5$ JuliQAOA-learned angles
+transferred to \texttt{QiskitOpt.QAOA}; 1007 global reads in 262144 local Aer
+samples. &
 Submit a fixed-angle $p=5$ QAOA sampling run with
 \texttt{MaximumIterations() = 0} and the beta-then-gamma parameter vector
 listed in Section~\ref{subsec:ds-mfg-qaoa-results}. \\

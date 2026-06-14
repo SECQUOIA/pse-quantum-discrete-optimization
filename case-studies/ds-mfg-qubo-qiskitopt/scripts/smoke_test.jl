@@ -151,6 +151,10 @@ end
 for relpath in (
     "ds_mfg_saved_distributions",
     "ds_mfg_qaoa_juliqaoa_transfer_highread",
+    "ds_mfg_qaoa_juliqaoa_objective_angle_search",
+    "ds_mfg_qaoa_juliqaoa_objective_transfer_highread",
+    "ds_mfg_qaoa_juliqaoa_global_angle_search_p3",
+    "ds_mfg_qaoa_juliqaoa_global_transfer_p3",
     "ds_mfg_vqe_reduced_flow_objective_final",
     "ds_mfg_reduced_flow_objective",
     "ds_mfg_classical_baselines",
@@ -181,6 +185,62 @@ require_int(qaoa, "gurobi_pool_feasible_hits", 32502)
 require_value(qaoa, "best_top50_match", "global_optimum")
 require_value(qaoa, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
 require_hit_rate_stats(qaoa)
+
+objective_angle_rows = parse_csv_rows("ds_mfg_qaoa_juliqaoa_objective_angle_search/juliqaoa_angle_summary.csv")
+length(objective_angle_rows) == 10 || smoke_error("expected ten objective-targeted QAOA angle rows")
+top50_angle = only(filter(row -> row["target"] == "top50" && row["p"] == "5", objective_angle_rows))
+require_int(top50_angle, "basinhopping_niter", 5)
+require_float(top50_angle, "top50_probability", 0.23122699481130704; atol = 1e-12)
+require_float(top50_angle, "top10_probability", 0.0522370454529187; atol = 1e-12)
+require_float(top50_angle, "global_probability", 0.003392140410350963; atol = 1e-12)
+top10_angle = only(filter(row -> row["target"] == "top10" && row["p"] == "5", objective_angle_rows))
+require_int(top10_angle, "basinhopping_niter", 5)
+require_float(top10_angle, "top50_probability", 0.22967538871326482; atol = 1e-12)
+require_float(top10_angle, "top10_probability", 0.05261172053991265; atol = 1e-12)
+require_float(top10_angle, "global_probability", 0.003456748192282216; atol = 1e-12)
+
+global_angle_rows = parse_csv_rows("ds_mfg_qaoa_juliqaoa_global_angle_search_p3/juliqaoa_angle_summary.csv")
+length(global_angle_rows) == 3 || smoke_error("expected three direct-global QAOA angle rows")
+global_angle = only(filter(row -> row["target"] == "global" && row["p"] == "3", global_angle_rows))
+require_int(global_angle, "basinhopping_niter", 1)
+require_float(global_angle, "top50_probability", 0.003936791098224448; atol = 1e-12)
+require_float(global_angle, "top10_probability", 0.0010251847647793182; atol = 1e-12)
+require_float(global_angle, "global_probability", 9.831625827252306e-5; atol = 1e-12)
+
+objective_qaoa_rows = parse_csv_rows(
+    "ds_mfg_qaoa_juliqaoa_objective_transfer_highread/qaoa_juliqaoa_transfer_summary.csv",
+)
+length(objective_qaoa_rows) == 2 || smoke_error("expected two objective-targeted QAOA transfer rows")
+top50_qaoa = only(filter(row -> row["angle_target"] == "top50" && row["p"] == "5", objective_qaoa_rows))
+require_int(top50_qaoa, "total_reads", 262144)
+require_int(top50_qaoa, "top50_hits", 62964)
+require_int(top50_qaoa, "top10_hits", 14221)
+require_int(top50_qaoa, "global_hits", 979)
+require_int(top50_qaoa, "gurobi_pool_feasible_hits", 55284)
+require_value(top50_qaoa, "best_top50_match", "global_optimum")
+require_value(top50_qaoa, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
+require_hit_rate_stats(top50_qaoa)
+top10_qaoa = only(filter(row -> row["angle_target"] == "top10" && row["p"] == "5", objective_qaoa_rows))
+require_int(top10_qaoa, "total_reads", 262144)
+require_int(top10_qaoa, "top50_hits", 62597)
+require_int(top10_qaoa, "top10_hits", 14326)
+require_int(top10_qaoa, "global_hits", 1007)
+require_int(top10_qaoa, "gurobi_pool_feasible_hits", 54820)
+require_value(top10_qaoa, "best_top50_match", "global_optimum")
+require_value(top10_qaoa, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
+require_hit_rate_stats(top10_qaoa)
+
+global_qaoa = only(parse_csv_rows("ds_mfg_qaoa_juliqaoa_global_transfer_p3/qaoa_juliqaoa_transfer_summary.csv"))
+require_value(global_qaoa, "angle_target", "global")
+require_int(global_qaoa, "p", 3)
+require_int(global_qaoa, "total_reads", 262144)
+require_int(global_qaoa, "top50_hits", 1015)
+require_int(global_qaoa, "top10_hits", 312)
+require_int(global_qaoa, "global_hits", 45)
+require_int(global_qaoa, "gurobi_pool_feasible_hits", 924)
+require_value(global_qaoa, "best_top50_match", "global_optimum")
+require_value(global_qaoa, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
+require_hit_rate_stats(global_qaoa)
 
 vqe_rows = parse_csv_rows("ds_mfg_vqe_reduced_flow_objective_final/vqe_reduced_top50_sampling_summary.csv")
 length(vqe_rows) == 3 || smoke_error("expected three final VQE follow-up rows")

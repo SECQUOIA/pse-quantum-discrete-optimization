@@ -96,10 +96,15 @@ The strongest QAOA result came from moving angle search off the Qiskit/Aer optim
 4. transfer the learned p=5 QAOA angles into `QiskitOpt.QAOA`,
 5. set `MaximumIterations() = 0` and use Aer only for final sampling.
 
-This transferred-angle QAOA run sampled the Gurobi global optimum 664 times in
-262144 final reads. It is the strongest cached quantum-emulation result in the
-notebook. Its best repaired objective is `11.7095`, matching the Gurobi optimum,
-and the sampled optimal flow is `1001110100111100011`.
+The original energy-targeted transferred-angle QAOA run sampled the Gurobi
+global optimum 664 times in 262144 final reads. Objective-targeted follow-up
+searches then tested top-50, top-10, and direct-global JuliQAOA objectives. The
+top-50 and top-10 p=5 targets improved the high-read Aer result to 979 and 1007
+global reads, respectively, in 262144 final reads. The bounded direct-global
+p=3 check produced 45 global reads. The top-10-targeted p=5 transfer is now the
+strongest cached quantum-emulation result in the notebook. Its best repaired
+objective is `11.7095`, matching the Gurobi optimum, and the sampled optimal
+flow is `1001110100111100011`.
 
 ## VQE Findings
 
@@ -145,11 +150,12 @@ The cached baselines are:
   repaired-objective evaluations: 883 top-50 hits, 177 top-10 hits, 19 global
   hits, and best repaired objective `11.7095`.
 
-Against these baselines, transferred p=5 QAOA remains much more concentrated
-than uniform random sampling and the simple hill-climb baseline at the same
-262144 count: 39661 top-50 reads, 8964 top-10 reads, and 664 global reads. The
-selected VQE follow-up seed 74018 is also stronger than uniform random sampling
-at 524288 reads, with 391 top-50 reads, 152 top-10 reads, and 20 global reads.
+Against these baselines, top-10-targeted transferred p=5 QAOA remains much more
+concentrated than uniform random sampling and the simple hill-climb baseline at
+the same 262144 count: 62597 top-50 reads, 14326 top-10 reads, and 1007 global
+reads. The selected VQE follow-up seed 74018 is also stronger than uniform
+random sampling at 524288 reads, with 391 top-50 reads, 152 top-10 reads, and
+20 global reads.
 
 ## Hit-rate uncertainty and time to solution
 
@@ -170,7 +176,7 @@ Representative global-optimum and Gurobi-pool-feasible-hit rows are:
 
 | Run | Optimal hits | Optimal `tts99_sec` | Gurobi-pool feasible hits | Gurobi-pool feasible `tts99_sec` |
 | --- | ---: | ---: | ---: | ---: |
-| Transferred p=5 QAOA, high-read | 664 / 262144 | 0.374 | 32502 / 262144 | 0.007 |
+| Top-10-targeted p=5 QAOA, high-read | 1007 / 262144 | 0.246 | 54820 / 262144 | 0.004 |
 | Reduced-surrogate VQE, seed 74018 | 20 / 524288 | 6.926 | 389 / 524288 | 0.356 |
 | Hill-climb restarts, seed 82001 | 19 / 262144 | 0.226 | 721 / 262144 | 0.006 |
 | Uniform random, seed 81001 | 0 / 262144 | Inf | 21 / 262144 | 0.456 |
@@ -209,7 +215,11 @@ the classical solver.
 
 The notebook includes placeholders for hardware execution using the best local findings.
 
-For QAOA, the hardware candidate is well-defined: use the reduced 19-flow surrogate, p=5, and the beta-then-gamma parameter vector learned by `JuliQAOA.jl`. This is a fixed-angle sampling run with `MaximumIterations() = 0`, so the hardware execution focuses on sampling the transferred p=5 circuit.
+For QAOA, the hardware candidate is well-defined: use the reduced 19-flow
+surrogate, p=5, and the beta-then-gamma top-10-targeted parameter vector
+learned by `JuliQAOA.jl`. This is a fixed-angle sampling run with
+`MaximumIterations() = 0`, so the hardware execution focuses on sampling the
+transferred p=5 circuit.
 
 For VQE, the current cache identifies the best configuration rather than a persisted optimized parameter vector. The best final follow-up seed was 74018, using EfficientSU2, 128 optimizer reads, 25 COBYLA iterations, and high final sampling. The hardware placeholder therefore reruns VQE from the best initial seed unless the scripts are extended to persist the optimized `result.x` ansatz vector.
 
@@ -220,7 +230,14 @@ measurements.
 
 The main methodological finding is that model interpretation matters as much as sampler behavior. Raw QUBO energies alone can be misleading because auxiliary-variable assignments may be inconsistent even when the projected flow is meaningful. Exact auxiliary repair makes the comparison to the original IP objective coherent.
 
-The main algorithmic finding is that reduced-surrogate QAOA with offline statevector angle search is the strongest approach tested here. VQE benefits from final-sampling separation and multiple initializations, but it remains less concentrated on the global optimum. The best VQE results are useful as evidence that the reduced surrogate contains the optimum in its sampled distribution, whereas the QAOA transfer result provides the clearest candidate for hardware sampling.
+The main algorithmic finding is that reduced-surrogate QAOA with offline
+statevector angle search is the strongest approach tested here, and the
+objective-targeted top-10 p=5 search improves the earlier energy-targeted
+endpoint. VQE benefits from final-sampling separation and multiple
+initializations, but it remains less concentrated on the global optimum. The
+best VQE results are useful as evidence that the reduced surrogate contains the
+optimum in its sampled distribution, whereas the QAOA transfer result provides
+the clearest candidate for hardware sampling.
 
 The classical baselines add sampling context. Uniform random repaired-flow
 sampling almost never reaches the global optimum at these budgets, so both the

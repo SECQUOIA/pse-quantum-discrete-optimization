@@ -31,8 +31,9 @@ Best cached results:
 
 - Gurobi global optimum: objective `11.7095`, flow
   `1001110100111100011`.
-- QAOA: transferred p=5 JuliQAOA angles on the reduced 19-flow surrogate sampled
-  the global optimum 664 times in 262144 local Aer reads.
+- QAOA: top-10-targeted transferred p=5 JuliQAOA angles on the reduced 19-flow
+  surrogate sampled the global optimum 1007 times in 262144 local Aer reads,
+  improving on the earlier 664-hit energy-targeted endpoint.
 - VQE: the final reduced-surrogate follow-up sampled the global optimum 28
   times across three 524288-read local Aer runs; seed 74018 produced 20 of
   those reads.
