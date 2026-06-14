@@ -84,9 +84,10 @@ Gurobi global optimum:
 Best sampled QAOA results in this analysis bundle:
 
 - full QAOA with larger final sampling: repaired pool objective `14.5505`,
-- reduced-surrogate QAOA with JuliQAOA-learned p=5 angles: 664 sampled
-  global-optimum reads out of 262144. This is the strongest cached
-  quantum-emulation result in the bundle and remains the accepted QAOA endpoint.
+- reduced-surrogate QAOA with top-10-targeted JuliQAOA-learned p=5 angles:
+  1007 sampled global-optimum reads out of 262144. This improves on the earlier
+  664-hit energy-targeted endpoint and is the strongest cached quantum-emulation
+  result in the bundle.
 
 Best sampled VQE results in this analysis bundle:
 
@@ -109,11 +110,11 @@ Classical sampling baselines in this analysis bundle:
   repaired-objective evaluations: 883 top-50 hits, 177 top-10 hits, 19
   global-optimum hits.
 
-The strongest cached sampler is reduced-surrogate QAOA with angles learned
-offline using the local JuliQAOA statevector simulator and transferred back into
-`QiskitOpt.QAOA` for Aer sampling. The later VQE follow-up also reaches the
-optimum, but at much lower frequency. The cached CSVs are important for
-comparing distributions without rerunning the quantum emulation.
+The strongest cached sampler is reduced-surrogate QAOA with top-10-targeted
+angles learned offline using the local JuliQAOA statevector simulator and
+transferred back into `QiskitOpt.QAOA` for Aer sampling. The later VQE follow-up
+also reaches the optimum, but at much lower frequency. The cached CSVs are
+important for comparing distributions without rerunning the quantum emulation.
 
 ## What Was Run
 
@@ -123,9 +124,9 @@ Qiskit Aer. The high-cost simulations used Aer's matrix-product-state backend
 with the package-level Aer options exposed by `QiskitOpt.jl`.
 
 The strongest QAOA run used a two-stage workflow: JuliQAOA searched for p=5
-angles on the reduced 19-flow quadratic surrogate, then those angles were
-transferred into `QiskitOpt.QAOA` for fixed-parameter Aer sampling with
-`MaximumIterations() = 0`.
+angles on the reduced 19-flow quadratic surrogate using a top-10 objective, then
+those angles were transferred into `QiskitOpt.QAOA` for fixed-parameter Aer
+sampling with `MaximumIterations() = 0`.
 
 The VQE runs used `EfficientSU2`, multiple random starts, separated optimizer
 reads from final sampling reads, and the same exact auxiliary-repair scoring.
