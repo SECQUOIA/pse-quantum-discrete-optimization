@@ -73,8 +73,14 @@ Most quantum-algorithm evidence tracked here is local classical emulation. The
 bundle also includes a small IBM hardware pilot for the reduced 19-qubit
 top-10-targeted p=5 QAOA circuit on `ibm_fez`: 9 jobs, 4096 shots each, 36864
 total reads, 6 top-50 repaired-flow hits, 1 top-10 hit, and no global-optimum
-hit. The manuscript narrative keeps that evidence boundary explicit and does
-not treat the pilot as a speedup or hardware-superiority result. The DS-MFG
-case study includes `scripts/run_ibm_qaoa_pilot.jl` as a dry-run-safe IBM
-Runtime runner; see `INSTALL.md` for credential handling and the explicit
-`DSMFG_RUN_IBM_HARDWARE=true` submission gate.
+hit. Cached simulator-to-hardware comparison tables are stored under
+`ds_mfg_simulator_hardware_comparison/`.
+
+The manuscript narrative keeps that evidence boundary explicit and does not
+treat the pilot as a speedup or hardware-superiority result. The DS-MFG case
+study includes `scripts/run_ibm_qaoa_pilot.jl` as a dry-run-safe IBM Runtime
+runner; see `INSTALL.md` for credential handling and the explicit
+`DSMFG_RUN_IBM_HARDWARE=true` submission gate. It also includes
+`scripts/run_noisy_qaoa_fake_backend.jl` for an overnight model-based
+FakeFez/Aer simulation; results from that script must be labeled as
+model-based simulation, not as calibrated hardware predictions.

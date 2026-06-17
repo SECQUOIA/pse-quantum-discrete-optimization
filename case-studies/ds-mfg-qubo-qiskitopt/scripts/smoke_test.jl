@@ -151,6 +151,8 @@ for relpath in (
     "ds_mfg_qubo_qiskitopt.ipynb",
     "Fw_ DS mfg case qubo information.zip",
     "ds_mfg_qaoa_vqe_distribution.svg",
+    "scripts/run_noisy_qaoa_fake_backend.jl",
+    "scripts/update_simulator_hardware_comparison.jl",
 )
     require_file(relpath)
 end
@@ -165,6 +167,7 @@ for relpath in (
     "ds_mfg_vqe_reduced_flow_objective_final",
     "ds_mfg_reduced_flow_objective",
     "ds_mfg_ibm_qaoa_pilot_fez_4096x3",
+    "ds_mfg_simulator_hardware_comparison",
     "ds_mfg_classical_baselines",
     "ds_mfg_hit_rate_reports",
     "scripts",
@@ -413,6 +416,45 @@ for text in (hardware_manifest, hardware_backend)
         smoke_error("hardware artifacts must not include Runtime instance CRNs")
 end
 
+println("Checking simulator-to-hardware comparison artifacts...")
+comparison_rows = parse_csv_rows("ds_mfg_simulator_hardware_comparison/simulator_hardware_comparison_summary.csv")
+length(comparison_rows) == 3 || smoke_error("expected three simulator/hardware comparison rows")
+ideal_comparison = only(filter(row -> row["evidence_tier"] == "ideal_simulator", comparison_rows))
+require_value(ideal_comparison, "row_status", "cached_result")
+require_value(ideal_comparison, "source_artifact", "ds_mfg_qaoa_juliqaoa_objective_transfer_highread/qaoa_juliqaoa_transfer_summary.csv")
+require_int(ideal_comparison, "total_reads", 262144)
+require_int(ideal_comparison, "top50_hits", 62597)
+require_int(ideal_comparison, "top10_hits", 14326)
+require_int(ideal_comparison, "global_hits", 1007)
+require_value(ideal_comparison, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
+
+noisy_comparison = only(filter(row -> row["evidence_tier"] == "model_based_noisy_simulator", comparison_rows))
+require_value(noisy_comparison, "row_status", "script_available_not_run")
+require_value(noisy_comparison, "source_artifact", "scripts/run_noisy_qaoa_fake_backend.jl")
+require_value(noisy_comparison, "total_reads", "")
+occursin("model-based simulation", noisy_comparison["notes"]) ||
+    smoke_error("noisy comparison row must label future output as model-based simulation")
+
+hardware_comparison = only(filter(row -> row["evidence_tier"] == "hardware", comparison_rows))
+require_value(hardware_comparison, "row_status", "cached_result")
+require_value(hardware_comparison, "source_artifact", "ds_mfg_ibm_qaoa_pilot_fez_4096x3/summary.csv")
+require_int(hardware_comparison, "total_reads", 36864)
+require_int(hardware_comparison, "top50_hits", 6)
+require_int(hardware_comparison, "top10_hits", 1)
+require_int(hardware_comparison, "global_hits", 0)
+require_value(hardware_comparison, "best_top50_flow_bits", "1001110100111010011")
+
+degradation_rows = parse_csv_rows("ds_mfg_simulator_hardware_comparison/simulator_hardware_degradation_summary.csv")
+length(degradation_rows) == 4 || smoke_error("expected four simulator/hardware degradation rows")
+top50_degradation = only(filter(row -> row["event"] == "top50", degradation_rows))
+require_value(top50_degradation, "ideal_aer_hit_rate", "0.238788604736")
+require_value(top50_degradation, "noisy_model_hit_rate", "")
+require_value(top50_degradation, "hardware_hit_rate", "0.000162760416667")
+require_value(top50_degradation, "hardware_to_ideal_hit_rate_ratio", "0.000681608809794")
+global_degradation = only(filter(row -> row["event"] == "global", degradation_rows))
+require_value(global_degradation, "ideal_expected_hits_at_hardware_reads", "141.609375")
+require_value(global_degradation, "hardware_hits_minus_ideal_expected", "-141.609375")
+
 println("Checking IBM QAOA pilot dry-run schema...")
 mktempdir() do pilot_output_dir
     withenv(
@@ -449,6 +491,37 @@ mktempdir() do pilot_output_dir
     length(summary_lines) == 2 || smoke_error("IBM pilot dry-run summary must contain one data row")
     occursin("QAOA_reduced_surrogate_JuliQAOA_IBM_pilot,dry_run,ibm_brisbane,top10,5,64,1,123,0,", summary_lines[2]) ||
         smoke_error("IBM pilot dry-run summary row has unexpected configuration values")
+end
+
+println("Checking FakeFez noisy QAOA dry-run schema...")
+mktempdir() do noisy_output_dir
+    withenv(
+        "DSMFG_NOISY_OUTPUT_DIR" => noisy_output_dir,
+        "DSMFG_RUN_NOISY_SIMULATION" => "false",
+    ) do
+        run(`$(Base.julia_cmd()) --project=$(ROOT) scripts/run_noisy_qaoa_fake_backend.jl`)
+    end
+
+    for filename in ("job_manifest.json", "backend_metadata.json", "raw_counts.csv", "scored_counts.csv", "summary.csv")
+        path = joinpath(noisy_output_dir, filename)
+        isfile(path) || smoke_error("FakeFez noisy dry run did not write $(filename)")
+        filesize(path) > 0 || smoke_error("FakeFez noisy dry-run file is empty: $(filename)")
+    end
+
+    manifest_text = read(joinpath(noisy_output_dir, "job_manifest.json"), String)
+    occursin("\"mode\":\"dry_run\"", manifest_text) ||
+        smoke_error("FakeFez noisy manifest must record dry_run mode")
+    occursin("\"fake_backend_class\":\"FakeFez\"", manifest_text) ||
+        smoke_error("FakeFez noisy manifest must record FakeFez backend class")
+    occursin("\"run_simulation\":false", manifest_text) ||
+        smoke_error("FakeFez noisy dry-run manifest must not mark simulation enabled")
+    occursin("model-based fake-backend simulation", manifest_text) ||
+        smoke_error("FakeFez noisy manifest must include model-based interpretation warning")
+
+    summary_lines = filter(line -> !isempty(strip(line)), readlines(joinpath(noisy_output_dir, "summary.csv")))
+    length(summary_lines) == 2 || smoke_error("FakeFez noisy dry-run summary must contain one data row")
+    occursin("QAOA_reduced_surrogate_JuliQAOA_FakeFez_noisy_simulation,dry_run,FakeFez,top10,5,4096,3,92001;92002;92003,93001,3,0,", summary_lines[2]) ||
+        smoke_error("FakeFez noisy dry-run summary row has unexpected configuration values")
 end
 
 include(joinpath(@__DIR__, "run_ibm_qaoa_pilot.jl"))
