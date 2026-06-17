@@ -7,7 +7,8 @@
 \label{sec:ds-mfg-qubo}
 
 This case study evaluates local classical emulations of QAOA and VQE on the
-DS-MFG discrete manufacturing QUBO instance using \texttt{QiskitOpt.jl}. The
+DS-MFG discrete manufacturing QUBO instance using \texttt{QiskitOpt.jl}, plus a
+small fixed-parameter IBM hardware pilot for the strongest QAOA handoff. The
 input data are the exported \texttt{scalars.csv}, \texttt{L\_vector.csv}, and
 \texttt{Q\_matrix.csv} files from the DS-MFG archive, with the Gurobi solution
 pool used as ground truth for the original integer-programming variables. The
@@ -50,9 +51,9 @@ the 36-variable QUBO and the 19-flow quadratic surrogate. & Shows whether
 simulated QAOA/VQE sampling distributions place observable mass on useful
 repaired flow assignments. \\
 \hline
-IBM hardware feasibility & Disabled notebook placeholders and fixed-parameter
-candidate workflows selected from local evidence. & Identifies hardware-ready
-experiments to run later; no IBM hardware performance or superiority result is
+IBM hardware feasibility & Fixed-parameter p=5 QAOA sampling pilot on
+\texttt{ibm\_fez}, selected from local evidence. & Tests the hardware handoff
+and count-scoring path descriptively; no IBM hardware superiority result is
 claimed here. \\
 \hline
 \end{tabular}
@@ -246,8 +247,9 @@ against $\widetilde{F}(y)$.
 \subsection{Computational Setup}
 \label{subsec:ds-mfg-computational-setup}
 
-All QAOA and VQE experiments reported here are local classical simulations, not
-IBM hardware executions. The notebook was executed through
+Except for the fixed-parameter QAOA hardware pilot in
+Section~\ref{subsec:ds-mfg-hardware-pilot}, the QAOA and VQE experiments
+reported here are local classical simulations. The notebook was executed through
 \texttt{scripts/nbconvert\_ds\_mfg.sh}, which activates the Julia project
 \texttt{DSMFGQiskitOptStudent}. The project pins \texttt{QiskitOpt.jl v0.4.2},
 \texttt{QUBODrivers v0.6}, \texttt{QUBOTools v0.13}, \texttt{PythonCall v0.9},
@@ -261,10 +263,11 @@ and a thread cap of \texttt{min(Sys.CPU\_THREADS, 8)}. Optimizer reads and final
 sampling reads were separated with \texttt{QUBODrivers.FinalNumberOfReads()}
 when supported by the package.
 
-Because these runs are simulator experiments, timing and hit-rate observations
-are not hardware-performance measurements. The reported results should be read
-as evidence about workflow feasibility and sampled-distribution quality under
-local Aer emulation, not as evidence of quantum speedup or hardware superiority.
+Because most runs are simulator experiments, timing and hit-rate observations
+are not hardware-performance measurements. The reported local results should be
+read as evidence about workflow feasibility and sampled-distribution quality
+under local Aer emulation, not as evidence of quantum speedup or hardware
+superiority. The hardware pilot is reported separately and descriptively.
 
 The strongest QAOA workflow used an additional offline angle-search step. That
 step was run from the local sibling clone of LANL's \texttt{JuliQAOA.jl}. The
@@ -318,9 +321,9 @@ This burden is central to the interpretation. The local QAOA and VQE results
 show that meaningful samples can be obtained, but they were not obtained by a
 drop-in replacement for the classical solver. They required problem-specific
 reduction, manual parameter-search choices, backend-specific simulator settings,
-and postprocessing logic tied to the original IP variables. The hardware cells
-therefore represent feasibility candidates selected from local evidence, not a
-completed hardware comparison.
+and postprocessing logic tied to the original IP variables. The QAOA hardware
+pilot adds the practical handoff to IBM Runtime, but it remains a feasibility
+check rather than a hardware-performance comparison.
 
 \begin{table}[t]
 \centering
@@ -374,6 +377,13 @@ optimizer reads, \texttt{MaximumIterations() = 0}; 32768 final reads for
 $p=2,\ldots,5$ and 262144 final reads for the best $p=5$ follow-up. &
 \texttt{ds\_mfg\_qaoa\_juliqaoa\_transfer/};
 \texttt{ds\_mfg\_qaoa\_juliqaoa\_transfer\_highread/} \\
+\hline
+IBM QAOA hardware pilot & 19-variable quadratic surrogate &
+Fixed top-10-targeted $p=5$ QAOA circuit submitted through IBM Runtime to
+\texttt{ibm\_fez}; 3 repeats, transpile seeds 92001--92003, 4096 shots per
+repeat/seed pair, 9 jobs total. &
+\texttt{ds\_mfg\_ibm\_qaoa\_pilot\_fez\_4096x3/summary.csv};
+\texttt{ds\_mfg\_ibm\_qaoa\_pilot\_fez\_4096x3/job\_manifest.json} \\
 \hline
 VQE full-QUBO sweep & Full 36-variable QUBO &
 Local \texttt{QiskitOpt.VQE}/Aer emulation with \texttt{EfficientSU2}; five
@@ -498,8 +508,8 @@ beta-then-gamma order after undoing the JuliQAOA energy normalization:
 0.00185038323024;0.00470790021078;0.0112988519475;0.0143839727596;
 0.0168246979536
 \end{verbatim}
-These are the fixed parameters used by the QAOA hardware placeholder in the
-notebook.
+These are the fixed parameters used by the QAOA hardware pilot in
+Section~\ref{subsec:ds-mfg-hardware-pilot}.
 
 \subsection{VQE Results}
 \label{subsec:ds-mfg-vqe-results}
@@ -706,53 +716,65 @@ and repair, but the workflow burden is substantial. The evidence supports an
 audit claim about feasibility, interpretation, and engineering effort; it does
 not support replacing Gurobi for this process-design instance.
 
-\subsection{Hardware Run Plan}
-\label{subsec:ds-mfg-hardware-plan}
+\subsection{Hardware Pilot Results}
+\label{subsec:ds-mfg-hardware-pilot}
 
-The notebook includes placeholder cells for hardware execution, but no hardware
-results are included in this bundle. The QAOA hardware candidate is ready as a
-fixed-parameter sampling experiment. The VQE hardware candidate is less mature
-because the cache identifies the best random seed and sampled distribution, but
-does not yet persist the optimized \texttt{EfficientSU2} parameter vector.
-These placeholders are included to make the next experimental step explicit;
-they are not evidence of IBM hardware performance.
+The strongest local QAOA configuration was submitted as a fixed-parameter IBM
+hardware pilot. The pilot used the reduced 19-flow quadratic surrogate,
+top-10-targeted $p=5$ JuliQAOA-learned angles, and
+\texttt{MaximumIterations() = 0}. The fixed circuit was submitted to
+\texttt{ibm\_fez} through IBM Runtime. The run used three repeats and
+transpile seeds 92001, 92002, and 92003; each repeat/seed pair used 4096 shots,
+for 9 submitted jobs and 36864 total hardware reads. All submitted jobs
+completed with status \texttt{DONE}. The backend metadata reports
+\texttt{ibm\_fez} as a 156-qubit non-simulator backend.
 
 \begin{table}[t]
 \centering
 \scriptsize
-\caption{Hardware placeholders recorded in the notebook.}
-\label{tab:ds-mfg-hardware-placeholders}
-\begin{tabular}{p{0.20\linewidth}p{0.30\linewidth}p{0.38\linewidth}}
+\caption{IBM hardware pilot for the fixed top-10-targeted $p=5$ QAOA circuit.
+Counts are scored by the same exact auxiliary-repair pipeline used for local
+Aer outputs.}
+\label{tab:ds-mfg-hardware-pilot}
+\begin{tabular}{p{0.24\linewidth}p{0.22\linewidth}p{0.22\linewidth}p{0.22\linewidth}}
 \hline
-Method & Local evidence supporting the candidate & Placeholder hardware action \\
+Backend and budget & Hit counts & Best repaired result & Artifact \\
 \hline
-QAOA & Reduced 19-flow surrogate; top-10-targeted $p=5$ JuliQAOA-learned angles
-transferred to \texttt{QiskitOpt.QAOA}; 1007 global reads in 262144 local Aer
-samples. &
-Submit a fixed-angle $p=5$ QAOA sampling run with
-\texttt{MaximumIterations() = 0} and the beta-then-gamma parameter vector
-listed in Section~\ref{subsec:ds-mfg-qaoa-results}. \\
-\hline
-VQE & Reduced 19-flow surrogate; \texttt{EfficientSU2}; best final follow-up
-seed 74018; 20 global reads in 524288 local Aer samples. & Rerun VQE from
-seed 74018 unless the scripts are extended to persist and reload the optimized
-ansatz parameter vector. For a hardware experiment, persisting that vector
-should be done before submission so optimization and hardware sampling can be
-separated. \\
+\texttt{ibm\_fez}; 9 jobs; 4096 shots per job; 36864 total reads; transpile
+seeds 92001--92003 & 6 top-50 hits; 1 top-10 hit; 0 global hits; 4
+Gurobi-pool-feasible hits & Rank 2; objective $11.8105$; flow
+\texttt{1001110100111010011}; match \texttt{gurobi\_pool} &
+\texttt{ds\_mfg\_ibm\_qaoa\_pilot\_fez\_4096x3/summary.csv} \\
 \hline
 \end{tabular}
 \end{table}
 
+The hardware pilot confirms that the fixed-circuit handoff and repaired-count
+scoring path can be executed on IBM hardware. The observed hardware
+distribution was much less concentrated than the corresponding local Aer
+distribution: the local top-10-targeted $p=5$ Aer run sampled the global
+optimum 1007 times in 262144 reads, whereas the hardware pilot observed no
+global-optimum reads in 36864 shots and only one top-10 repaired-flow read.
+This comparison is descriptive and should not be interpreted as a speedup or
+hardware-superiority claim.
+
+The VQE hardware candidate remains a follow-up item. The cache identifies seed
+74018 as the best final VQE follow-up, but it does not yet persist the optimized
+\texttt{EfficientSU2} parameter vector needed for a clean fixed-parameter
+hardware sampling experiment.
+
 \subsection{Limitations}
 \label{subsec:ds-mfg-limitations}
 
-The local results are classical Aer simulations and should not be interpreted as
-hardware performance. The reduced objective is exact after auxiliary repair,
-but the QAOA and VQE experiments use a quadratic surrogate fit to that exact
-objective. Although the surrogate has high global $R^2$, its minimizer is not
-the true repaired global optimum. Future work should test either an interface
-that optimizes the exact reduced objective directly or a surrogate fit weighted
-toward the low-energy region of the repaired objective. The VQE workflow should
-also persist optimized ansatz parameters so that future hardware studies can
-run fixed-parameter sampling rather than rerunning the classical optimization
-loop on hardware.
+Most reported quantum-algorithm results are classical Aer simulations and
+should not be interpreted as hardware performance. The included IBM hardware
+pilot is small and descriptive; it tests fixed-circuit execution and scoring,
+not speedup or IBM hardware superiority. The reduced objective is exact after
+auxiliary repair, but the QAOA and VQE experiments use a quadratic surrogate
+fit to that exact objective. Although the surrogate has high global $R^2$, its
+minimizer is not the true repaired global optimum. Future work should test
+either an interface that optimizes the exact reduced objective directly or a
+surrogate fit weighted toward the low-energy region of the repaired objective.
+The VQE workflow should also persist optimized ansatz parameters so that future
+hardware studies can run fixed-parameter sampling rather than rerunning the
+classical optimization loop on hardware.
