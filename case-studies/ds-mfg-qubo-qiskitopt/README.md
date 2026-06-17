@@ -1,15 +1,16 @@
 # DS-MFG QUBO Case Study Bundle
 
 This bundle contains a reproducible DS-MFG QUBO case study using local classical
-emulations of QAOA and VQE through `QiskitOpt.jl` and Qiskit Aer. It includes
-the executed notebook, cached distributions, generated figures, and a
-manuscript-ready findings draft.
+emulations of QAOA and VQE through `QiskitOpt.jl` and Qiskit Aer, plus a small
+IBM hardware pilot for the fixed-parameter QAOA handoff. It includes the
+executed notebook, cached distributions, generated figures, hardware pilot
+artifacts, and a manuscript-ready findings draft.
 
 The case study is framed as a practical quantum-optimization audit. Gurobi
 provides the original 19-flow-variable ground truth, local Aer emulation
-provides the current QAOA/VQE evidence, and IBM hardware execution remains a
-planned feasibility step. The bundle does not claim quantum speedup or IBM
-hardware-performance superiority.
+provides the main QAOA/VQE evidence, and IBM hardware execution is reported as
+a descriptive feasibility pilot. The bundle does not claim quantum speedup or
+IBM hardware-performance superiority.
 
 Start with:
 
@@ -17,7 +18,7 @@ Start with:
   results, and rerun commands.
 - `ds_mfg_qubo_qiskitopt.ipynb`: executed notebook with the full workflow.
 - `MANUSCRIPT_FINDINGS.tex`: LaTeX manuscript section with problem formulation,
-  reduction, experiment provenance, result tables, and hardware placeholders.
+  reduction, experiment provenance, result tables, and the IBM hardware pilot.
 - `MANUSCRIPT_FINDINGS.md`: compact narrative summary.
 
 The main modeling point is that the QUBO has 36 binary variables, but Gurobi's
@@ -46,7 +47,11 @@ Best cached results:
   intervals, feasible Gurobi-pool hit rates, and empirical 99%
   time-to-solution columns. A consolidated report is in
   `ds_mfg_hit_rate_reports/time_to_solution_report.csv`.
+- IBM hardware pilot: the fixed top-10-targeted p=5 QAOA circuit was submitted
+  to `ibm_fez` for 9 jobs of 4096 shots each. Across 36864 hardware reads, the
+  run found 6 top-50 repaired-flow hits, 1 top-10 hit, 0 global-optimum hits,
+  and a best repaired objective of `11.8105` at rank 2. Cached artifacts are in
+  `ds_mfg_ibm_qaoa_pilot_fez_4096x3/`.
 
-No IBM hardware results are included. The notebook contains disabled hardware
-placeholder cells for the best QAOA and VQE local configurations. Those cells
-identify follow-up experiments rather than completed hardware evidence.
+The IBM hardware pilot is reported descriptively. It is not evidence of quantum
+speedup or IBM hardware-performance superiority.

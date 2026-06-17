@@ -117,9 +117,12 @@ QAOA circuit, and writes `job_manifest.json`, `backend_metadata.json`,
 `raw_counts.csv`, `scored_counts.csv`, and `summary.csv` without contacting IBM
 Runtime or submitting hardware jobs.
 
-The runner is configured only through environment variables:
+The runner is configured only through environment variables. The backend must
+be one that the configured IBM Runtime instance can access; the tracked
+hardware pilot used `ibm_fez`.
 
-- `QISKIT_IBM_BACKEND`: required backend name.
+- `QISKIT_IBM_BACKEND`: required backend name, for example `ibm_fez` or another
+  QPU visible to the configured instance.
 - `QISKIT_IBM_CHANNEL`: optional Runtime channel, default
   `ibm_quantum_platform`.
 - `QISKIT_IBM_INSTANCE`: IBM Runtime instance selector; optional only when
@@ -143,7 +146,7 @@ After credentials are configured, the hardware gate must be explicit:
 ```bash
 cd case-studies/ds-mfg-qubo-qiskitopt
 export QISKIT_IBM_TOKEN='your-token'
-QISKIT_IBM_BACKEND=ibm_brisbane \
+QISKIT_IBM_BACKEND=ibm_fez \
 QISKIT_IBM_CHANNEL=ibm_quantum_platform \
 DSMFG_HARDWARE_FINAL_READS=4096 \
 DSMFG_HARDWARE_REPEATS=1 \

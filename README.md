@@ -7,9 +7,10 @@ The initial case study is a demand-side manufacturing (DS-MFG) QUBO workflow
 using local Qiskit Aer emulations of QAOA and VQE through `QiskitOpt.jl`.
 It is framed as a practical workflow audit: Gurobi provides the 19-flow-variable
 ground truth, local Aer emulation provides the current QAOA/VQE evidence,
-simple classical sampling baselines provide non-quantum context, and IBM
-hardware execution remains a planned feasibility step. The current bundle does
-not claim quantum speedup or IBM hardware-performance superiority.
+simple classical sampling baselines provide non-quantum context, and a small
+IBM hardware pilot provides a feasibility check for the fixed-parameter QAOA
+handoff. The current bundle does not claim quantum speedup or IBM
+hardware-performance superiority.
 The repository layout is intentionally case-study based so that related PSE
 instances can be added without changing the existing DS-MFG artifact paths.
 
@@ -68,10 +69,12 @@ scripts/nbconvert_ds_mfg.sh
 The full notebook run uses local Qiskit Aer emulation and can take much longer
 than the smoke test.
 
-All quantum-algorithm results currently tracked here are local classical
-emulations. No IBM hardware results are included in the initial DS-MFG bundle,
-and the manuscript narrative keeps that evidence boundary explicit. The DS-MFG
+Most quantum-algorithm evidence tracked here is local classical emulation. The
+bundle also includes a small IBM hardware pilot for the reduced 19-qubit
+top-10-targeted p=5 QAOA circuit on `ibm_fez`: 9 jobs, 4096 shots each, 36864
+total reads, 6 top-50 repaired-flow hits, 1 top-10 hit, and no global-optimum
+hit. The manuscript narrative keeps that evidence boundary explicit and does
+not treat the pilot as a speedup or hardware-superiority result. The DS-MFG
 case study includes `scripts/run_ibm_qaoa_pilot.jl` as a dry-run-safe IBM
-Runtime pilot for the reduced 19-qubit p=5 QAOA follow-up; see `INSTALL.md` for
-credential handling and the explicit `DSMFG_RUN_IBM_HARDWARE=true` submission
-gate.
+Runtime runner; see `INSTALL.md` for credential handling and the explicit
+`DSMFG_RUN_IBM_HARDWARE=true` submission gate.

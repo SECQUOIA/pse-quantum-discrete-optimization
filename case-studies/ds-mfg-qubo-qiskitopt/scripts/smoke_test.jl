@@ -52,6 +52,13 @@ function parse_csv_rows(relpath)
     return rows
 end
 
+function count_csv_data_rows(relpath)
+    path = require_file(relpath)
+    lines = filter(line -> !isempty(strip(line)), readlines(path))
+    length(lines) >= 1 || smoke_error("expected a header row in $relpath")
+    return length(lines) - 1
+end
+
 function parse_key_value_csv(relpath)
     rows = parse_csv_rows(relpath)
     all(haskey(row, "key") && haskey(row, "value") for row in rows) ||
@@ -157,6 +164,7 @@ for relpath in (
     "ds_mfg_qaoa_juliqaoa_global_transfer_p3",
     "ds_mfg_vqe_reduced_flow_objective_final",
     "ds_mfg_reduced_flow_objective",
+    "ds_mfg_ibm_qaoa_pilot_fez_4096x3",
     "ds_mfg_classical_baselines",
     "ds_mfg_hit_rate_reports",
     "scripts",
@@ -326,6 +334,84 @@ validate_classical_distribution(
 retained_rows = parse_csv_rows("ds_mfg_classical_baselines/classical_baseline_retained_flows.csv")
 all(!isempty(get(row, "retained_reason", "")) for row in retained_rows) ||
     smoke_error("every retained classical baseline row must include a retained_reason")
+
+println("Checking IBM QAOA hardware pilot artifacts...")
+for filename in ("job_manifest.json", "backend_metadata.json", "raw_counts.csv", "scored_counts.csv", "summary.csv")
+    require_file(joinpath("ds_mfg_ibm_qaoa_pilot_fez_4096x3", filename))
+end
+
+hardware_summary = only(parse_csv_rows("ds_mfg_ibm_qaoa_pilot_fez_4096x3/summary.csv"))
+require_value(hardware_summary, "algorithm", "QAOA_reduced_surrogate_JuliQAOA_IBM_pilot")
+require_value(hardware_summary, "mode", "hardware")
+require_value(hardware_summary, "backend", "ibm_fez")
+require_value(hardware_summary, "angle_target", "top10")
+require_int(hardware_summary, "p", 5)
+require_int(hardware_summary, "final_reads", 4096)
+require_int(hardware_summary, "repeats", 3)
+require_value(hardware_summary, "transpile_seeds", "92001;92002;92003")
+require_int(hardware_summary, "submitted_jobs", 9)
+require_int(hardware_summary, "unique_flows", 34573)
+require_int(hardware_summary, "total_reads", 36864)
+require_int(hardware_summary, "top50_hits", 6)
+require_int(hardware_summary, "top10_hits", 1)
+require_int(hardware_summary, "global_hits", 0)
+require_int(hardware_summary, "gurobi_pool_feasible_hits", 4)
+require_value(hardware_summary, "best_top50_rank", "2")
+require_float(hardware_summary, "best_top50_exact_repaired_qubo_energy", 11.8105)
+require_value(hardware_summary, "best_top50_match", "gurobi_pool")
+require_value(hardware_summary, "best_top50_flow_bits", "1001110100111010011")
+for (column, expected) in (
+    "top50_hit_rate" => "0.000162760416667",
+    "top50_hit_rate_wilson95_low" => "7.45966258791e-05",
+    "top50_hit_rate_wilson95_high" => "0.000355085671588",
+    "top50_tts99_sec" => "56.4001563512",
+    "top10_hit_rate" => "2.71267361111e-05",
+    "top10_hit_rate_wilson95_low" => "4.78855106823e-06",
+    "top10_hit_rate_wilson95_high" => "0.000153654650094",
+    "top10_tts99_sec" => "338.422866628",
+    "global_hit_rate" => "0",
+    "global_hit_rate_wilson95_low" => "0",
+    "global_hit_rate_wilson95_high" => "0.000104195381902",
+    "global_tts99_sec" => "Inf",
+    "gurobi_pool_feasible_hit_rate" => "0.000108506944444",
+    "gurobi_pool_feasible_hit_rate_wilson95_low" => "4.21970151315e-05",
+    "gurobi_pool_feasible_hit_rate_wilson95_high" => "0.000278989643814",
+    "gurobi_pool_feasible_tts99_sec" => "84.6022280288",
+)
+    require_value(hardware_summary, column, expected)
+end
+
+count_csv_data_rows("ds_mfg_ibm_qaoa_pilot_fez_4096x3/raw_counts.csv") == 36539 ||
+    smoke_error("unexpected hardware raw-count row count")
+count_csv_data_rows("ds_mfg_ibm_qaoa_pilot_fez_4096x3/scored_counts.csv") == 36539 ||
+    smoke_error("unexpected hardware scored-count row count")
+
+hardware_manifest = read(require_file("ds_mfg_ibm_qaoa_pilot_fez_4096x3/job_manifest.json"), String)
+occursin("\"mode\":\"hardware\"", hardware_manifest) ||
+    smoke_error("hardware manifest must record hardware mode")
+occursin("\"backend_name\":\"ibm_fez\"", hardware_manifest) ||
+    smoke_error("hardware manifest must record ibm_fez backend")
+occursin("\"submitted\":true", hardware_manifest) ||
+    smoke_error("hardware manifest must record submitted jobs")
+occursin("\"status\":\"DONE\"", hardware_manifest) ||
+    smoke_error("hardware manifest must record completed jobs")
+
+hardware_backend = read(require_file("ds_mfg_ibm_qaoa_pilot_fez_4096x3/backend_metadata.json"), String)
+occursin("\"backend_name_resolved\":\"ibm_fez\"", hardware_backend) ||
+    smoke_error("hardware backend metadata must record resolved backend")
+occursin("\"num_qubits\":156", hardware_backend) ||
+    smoke_error("hardware backend metadata must record ibm_fez qubit count")
+occursin("\"simulator\":false", hardware_backend) ||
+    smoke_error("hardware backend metadata must record non-simulator backend")
+
+for text in (hardware_manifest, hardware_backend)
+    !occursin("QISKIT_IBM_TOKEN", text) ||
+        smoke_error("hardware artifacts must not include token environment names")
+    !occursin("qiskit-ibm.json", text) ||
+        smoke_error("hardware artifacts must not include account file paths")
+    !occursin("crn:v1:", lowercase(text)) ||
+        smoke_error("hardware artifacts must not include Runtime instance CRNs")
+end
 
 println("Checking IBM QAOA pilot dry-run schema...")
 mktempdir() do pilot_output_dir
