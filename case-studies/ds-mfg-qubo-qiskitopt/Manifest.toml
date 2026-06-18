@@ -2,7 +2,7 @@
 
 julia_version = "1.10.11"
 manifest_format = "2.0"
-project_hash = "8887d947a3238ce544333d34b7bdd7347af44b18"
+project_hash = "0f8adfc27f79392cd32f747dcab4afa65dc88439"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -517,9 +517,9 @@ version = "0.6.0"
 
 [[deps.QUBODrivers]]
 deps = ["MathOptInterface", "QUBOTools", "Random", "TOML"]
-git-tree-sha1 = "70048866aab4de74435933eb4df053e2505e7e04"
+git-tree-sha1 = "b290277ff91140943ad5dac000e750dca1008839"
 uuid = "a3f166f7-2cd3-47b6-9e1e-6fbfe0449eb0"
-version = "0.6.0"
+version = "0.6.1"
 weakdeps = ["PythonCall", "Test"]
 
     [deps.QUBODrivers.extensions]
@@ -528,9 +528,9 @@ weakdeps = ["PythonCall", "Test"]
 
 [[deps.QUBOTools]]
 deps = ["Dates", "GeometryBasics", "Graphs", "HDF5", "JSON", "JSONSchema", "LinearAlgebra", "NetworkLayout", "Printf", "PseudoBooleanOptimization", "Random", "RecipesBase", "SparseArrays", "Statistics", "TOML"]
-git-tree-sha1 = "6bcd0289cd2cb2cce2ee26c026905bfeb37f6fef"
+git-tree-sha1 = "70876aacf91b8a224ecf86eb460c087507c7f084"
 uuid = "60eb5b62-0a39-4ddc-84c5-97d2adff9319"
-version = "0.13.0"
+version = "0.13.1"
 weakdeps = ["MathOptInterface"]
 
     [deps.QUBOTools.extensions]
@@ -538,9 +538,11 @@ weakdeps = ["MathOptInterface"]
 
 [[deps.QiskitOpt]]
 deps = ["PythonCall", "QUBO"]
-git-tree-sha1 = "2d9720135a3b1fc739e8fce0dce36b47ee0fc700"
+git-tree-sha1 = "185f45b47e83e79e8b4084239b2d725c678b4a25"
+repo-rev = "v0.5.0"
+repo-url = "https://github.com/JuliaQUBO/QiskitOpt.jl.git"
 uuid = "81b20daf-e62b-4502-a0d1-aa084de80e33"
-version = "0.4.2"
+version = "0.5.0"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]

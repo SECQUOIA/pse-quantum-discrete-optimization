@@ -115,6 +115,7 @@ end
 function configure_vqe!(model; seed, optimizer_reads, final_reads, maximum_iterations)
     threads = max(1, min(Sys.CPU_THREADS, 8))
     MOI.set(model, VQE.NumberOfReads(), optimizer_reads)
+    MOI.set(model, QUBODrivers.RandomSeed(), seed)
     MOI.set(model, QUBODrivers.FinalNumberOfReads(), final_reads)
     MOI.set(model, VQE.MaximumIterations(), maximum_iterations)
     MOI.set(model, VQE.InitialParameters(), VQE.random_initial_parameters(n_variables = 19, seed = seed))
@@ -126,8 +127,6 @@ function configure_vqe!(model; seed, optimizer_reads, final_reads, maximum_itera
     MOI.set(model, VQE.AerMPSTruncationThreshold(), 1.0e-10)
     MOI.set(model, VQE.AerMPSMaxBondDimension(), 64)
     MOI.set(model, VQE.AerMPSSampleMeasureAlgorithm(), "mps_heuristic")
-    MOI.set(model, VQE.AerSeedSimulator(), seed)
-    MOI.set(model, VQE.TranspilerSeed(), seed)
     return model
 end
 

@@ -129,10 +129,12 @@ important for comparing distributions without rerunning the quantum emulation.
 ## What Was Run
 
 Most quantum-algorithm results in this bundle are local classical emulations.
-QAOA and VQE were run through `QiskitOpt v0.4.2` with local Qiskit Aer. The
-high-cost simulations used Aer's matrix-product-state backend with the
-package-level Aer options exposed by `QiskitOpt.jl`. The included hardware
-pilot is a separate fixed-parameter sampling check on IBM hardware.
+The current runnable project uses `QiskitOpt v0.5.0` with local Qiskit Aer. The
+high-cost simulations use Aer's matrix-product-state backend with the
+package-level Aer options exposed by `QiskitOpt.jl`; the historical cached
+distributions remain tracked so the comparisons can be inspected without
+rerunning expensive emulations. The included hardware pilot is a separate
+fixed-parameter sampling check on IBM hardware.
 
 The strongest QAOA run used a two-stage workflow: JuliQAOA searched for p=5
 angles on the reduced 19-flow quadratic surrogate using a top-10 objective, then
@@ -214,14 +216,20 @@ avoids the extension-loading error that says to run `Pkg.instantiate()`.
 
 ## Package Setup
 
-This folder uses the registered `QiskitOpt v0.4.2` package from Julia's General
-registry. The notebook project is a normal Julia environment, not a local copy
-of the package source.
+This folder locks the `QiskitOpt v0.5.0` release tag in `Manifest.toml`. At the
+time of this update, that tag is released on GitHub but not yet listed in
+Julia's General registry metadata, so the manifest records the release source
+URL instead of relying on a local package checkout.
 
 The final sampling control used in the notebook is
 `QUBODrivers.FinalNumberOfReads()`. It applies to both QAOA and VQE and lets the
 final sampler use more reads without increasing the optimizer/estimator reads at
 every iteration.
+
+The local QAOA/VQE revisit scripts use `QUBODrivers.RandomSeed()` as the
+standard sampler seed. With `QiskitOpt v0.5.0`, QiskitOpt derives local Aer
+simulator and transpiler seeds from that value when explicit QiskitOpt seed
+attributes are not set.
 
 ## Important Files
 
