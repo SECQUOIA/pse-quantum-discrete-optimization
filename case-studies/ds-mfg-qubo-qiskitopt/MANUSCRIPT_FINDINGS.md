@@ -93,6 +93,13 @@ The direct original-QUBO audit cache rescored this same run against exact repair
 and the top-flow table: it contains 5 top-50 repaired-flow reads, 1 top-10 read,
 0 global reads, and 0 encoded Gurobi-pool reads.
 
+A higher-read direct full-QUBO p=2 run starting from the same parameter source
+and allowing 25 optimizer iterations found the repaired global optimum 4 times
+in 32768 final reads. The optimized beta-then-gamma vector is cached in
+`ds_mfg_direct_full_qubo_qaoa_highread/direct_full_qubo_qaoa_optimized_parameters.json`.
+These are repaired-flow global hits; the sampled auxiliary bits were not encoded
+global completions.
+
 The strongest QAOA result came from moving angle search off the Qiskit/Aer optimizer path. The workflow was:
 
 1. eliminate auxiliary variables exactly to build the reduced 19-flow objective,
@@ -146,11 +153,13 @@ noisy density-matrix simulation would require `2^72` complex entries, while Aer
 automatic or MPS-style noisy simulation is entanglement-dependent. No direct
 36-qubit noisy samples are cached because a useful-shot direct noisy run was
 not established as practical for this circuit. The audit now persists the same
-p=2 beta-then-gamma QAOA parameter vector in
-`ds_mfg_direct_full_qubo_audit/direct_full_qubo_qaoa_hardware_parameters.json`;
-`scripts/run_direct_full_qubo_hardware_pilot.jl` consumes that artifact to
-build a dry-run-safe direct full-QUBO IBM Runtime handoff, with real submission
-kept behind `DSMFG_RUN_DIRECT_FULL_QUBO_HARDWARE=true`.
+p=2 warm-start beta-then-gamma QAOA parameter vector in
+`ds_mfg_direct_full_qubo_audit/direct_full_qubo_qaoa_hardware_parameters.json`.
+The optimized global-hit vector is cached in
+`ds_mfg_direct_full_qubo_qaoa_highread/direct_full_qubo_qaoa_optimized_parameters.json`;
+`scripts/run_direct_full_qubo_hardware_pilot.jl` prefers that artifact when
+present and builds a dry-run-safe direct full-QUBO IBM Runtime handoff, with real
+submission kept behind `DSMFG_RUN_DIRECT_FULL_QUBO_HARDWARE=true`.
 
 ## Classical Sampling Baselines
 

@@ -18,6 +18,10 @@ const DIRECT_HARDWARE_SCHEMA_VERSION = 1
 const DIRECT_HARDWARE_DEFAULT_OUTPUT_DIR = "ds_mfg_direct_full_qubo_hardware_pilot"
 const DIRECT_HARDWARE_DEFAULT_CHANNEL = "ibm_quantum_platform"
 const DIRECT_FLOW_VARIABLES = 19
+const DIRECT_OPTIMIZED_QAOA_PARAMETER_ARTIFACT = joinpath(
+    "ds_mfg_direct_full_qubo_qaoa_highread",
+    "direct_full_qubo_qaoa_optimized_parameters.json",
+)
 
 struct DirectHardwareConfig
     channel::String
@@ -77,6 +81,8 @@ function direct_parse_int_list(value::AbstractString)
 end
 
 function direct_default_parameter_path()
+    optimized_path = joinpath(STUDY_ROOT, DIRECT_OPTIMIZED_QAOA_PARAMETER_ARTIFACT)
+    isfile(optimized_path) && return optimized_path
     return joinpath(STUDY_ROOT, DEFAULT_OUTPUT_DIR, DIRECT_QAOA_PARAMETER_ARTIFACT)
 end
 

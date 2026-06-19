@@ -572,6 +572,12 @@ The direct original-QUBO audit cache rescored this full-QUBO final-sampling row
 against exact repair and the top-flow table: it contains five top-50
 repaired-flow reads, one top-10 read, zero global reads, and zero encoded
 Gurobi-pool reads.
+A higher-read direct full-QUBO $p=2$ run starting from the same parameter source
+and allowing 25 optimizer iterations found the repaired global optimum four
+times in 32768 final reads. The optimized beta-then-gamma vector is cached in
+\texttt{ds\_mfg\_direct\_full\_qubo\_qaoa\_highread/direct\_full\_qubo\_qaoa\_optimized\_parameters.json}.
+These are repaired-flow global hits; the sampled auxiliary bits were not encoded
+global completions.
 
 The strongest QAOA result was obtained by optimizing angles offline on the
 reduced surrogate with \texttt{JuliQAOA.jl} and then transferring those angles
@@ -615,6 +621,12 @@ final reads; 25 iterations & 3 projected pool reads; 0 encoded pool reads; 0
 global reads & Objective $14.5505$; flow
 \texttt{1001110110011100011}; artifact
 \texttt{final\_sampling\_summary.csv} \\
+\hline
+Optimized direct full-QUBO QAOA high-read run & $p=2$; 32 optimizer reads; 32768
+final reads; 25 iterations & 99 projected pool reads; 0 encoded pool reads; 4
+global reads & Objective $11.7095$; flow
+\texttt{1001110100111100011}; artifact
+\texttt{direct\_full\_qubo\_qaoa\_highread\_summary.csv} \\
 \hline
 Reduced-surrogate QAOA before offline angle transfer & $p=2$; 128 optimizer
 reads; 512 final reads; 25 iterations & 0 pool reads and 0 global reads &
@@ -674,12 +686,14 @@ depth 1344 with 1157 \texttt{cz} gates. Exact dense noisy density-matrix
 simulation would require $2^{72}$ complex entries, while Aer automatic or
 MPS-style noisy simulation is entanglement-dependent. No direct 36-qubit noisy
 samples are cached because a useful-shot direct noisy run was not established as
-practical for this circuit. The audit also persists the same $p=2$
+practical for this circuit. The audit persists the same $p=2$ warm-start
 beta-then-gamma QAOA parameter vector in
 \texttt{ds\_mfg\_direct\_full\_qubo\_audit/direct\_full\_qubo\_qaoa\_hardware\_parameters.json}.
-\texttt{scripts/run\_direct\_full\_qubo\_hardware\_pilot.jl} consumes that
-artifact to build a dry-run-safe direct full-QUBO IBM Runtime handoff; actual
-submission remains gated by
+The optimized global-hit vector is cached in
+\texttt{ds\_mfg\_direct\_full\_qubo\_qaoa\_highread/direct\_full\_qubo\_qaoa\_optimized\_parameters.json}.
+\texttt{scripts/run\_direct\_full\_qubo\_hardware\_pilot.jl} prefers that
+artifact when present and builds a dry-run-safe direct full-QUBO IBM Runtime
+handoff; actual submission remains gated by
 \texttt{DSMFG\_RUN\_DIRECT\_FULL\_QUBO\_HARDWARE=true}.
 
 The reduced-surrogate VQE runs performed better. A five-seed sweep with 8192

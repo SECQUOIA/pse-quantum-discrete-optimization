@@ -71,8 +71,9 @@ IBM pilot dry run by default: it builds and scores the fixed-parameter QAOA
 handoff artifacts without submitting hardware jobs. Real IBM hardware
 submission requires credentials configured outside this repository and the
 explicit `DSMFG_RUN_IBM_HARDWARE=true` gate. The fourth dry-runs the direct
-36-variable full-QUBO QAOA hardware handoff from the persisted p=2 parameter
-artifact; real submission is separately gated by
+36-variable full-QUBO QAOA hardware handoff. It defaults to the optimized p=2
+artifact that produced 4 repaired global-optimum hits in 32768 local Aer reads
+when that artifact is present; real submission is separately gated by
 `DSMFG_RUN_DIRECT_FULL_QUBO_HARDWARE=true`.
 
 Then read:
@@ -107,6 +108,6 @@ runner; see `INSTALL.md` for credential handling and the explicit
 FakeFez/Aer simulation; results from that script must be labeled as
 model-based simulation, not as calibrated hardware predictions. The direct
 full-QUBO p=2 QAOA hardware handoff is available as
-`scripts/run_direct_full_qubo_hardware_pilot.jl`; it consumes
-`ds_mfg_direct_full_qubo_audit/direct_full_qubo_qaoa_hardware_parameters.json`
-and also dry-runs unless its direct hardware gate is enabled.
+`scripts/run_direct_full_qubo_hardware_pilot.jl`; it prefers
+`ds_mfg_direct_full_qubo_qaoa_highread/direct_full_qubo_qaoa_optimized_parameters.json`
+when present and also dry-runs unless its direct hardware gate is enabled.

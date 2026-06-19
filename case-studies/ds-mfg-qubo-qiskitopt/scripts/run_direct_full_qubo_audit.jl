@@ -384,6 +384,20 @@ function source_specs()
         ))
     end
 
+    for row in read_csv_rows(joinpath(STUDY_ROOT, "ds_mfg_direct_full_qubo_qaoa_highread", "direct_full_qubo_qaoa_highread_summary.csv"))
+        push!(specs, Dict{String,Any}(
+            "algorithm" => row["algorithm"],
+            "source_artifact" => row["distribution_csv"],
+            "seed" => row["seed"],
+            "p" => row["p"],
+            "optimizer_reads" => row["optimizer_reads"],
+            "final_reads" => row["final_reads"],
+            "maximum_iterations" => row["maximum_iterations"],
+            "solve_time_sec" => row["solve_time_sec"],
+            "settings" => "parameter_source=$(row["parameter_source"]);optimized_parameter_artifact=$(row["optimized_parameter_artifact"]);parameter_order=$(row["parameter_order"])",
+        ))
+    end
+
     for row in read_csv_rows(joinpath(STUDY_ROOT, "ds_mfg_vqe_final_sampling_sweep_v2", "vqe_final_sampling_summary.csv"))
         push!(specs, Dict{String,Any}(
             "algorithm" => "VQE_full_qubo_final_sampling",

@@ -10,13 +10,20 @@ DS-MFG QUBO from `Fw_ DS mfg case qubo information.zip`.
 - `direct_full_qubo_resource_summary.csv` records the direct full-QUBO p=2 QAOA
   circuit resource summary and gated FakeFez transpile metadata.
 - `direct_full_qubo_qaoa_hardware_parameters.json` persists the direct p=2 QAOA
-  depth, beta-then-gamma angle vector, source distribution, and hardware
-  handoff policy used by `scripts/run_direct_full_qubo_hardware_pilot.jl`.
+  depth, warm-start beta-then-gamma angle vector, source distribution, and
+  hardware handoff policy.
 - `direct_full_qubo_resource_metadata.json` records the same resource audit in
   structured form. The resource cache omits wall-clock generation timestamps and
   records transpile runtime as `not_recorded_for_reproducible_artifacts` so
   rerunning the gated transpile can regenerate byte-stable artifacts when
   Qiskit output is unchanged.
+
+The optimized direct p=2 QAOA vector that produced 4 repaired global-optimum
+hits in 32768 Aer reads is cached separately in
+`../ds_mfg_direct_full_qubo_qaoa_highread/direct_full_qubo_qaoa_optimized_parameters.json`.
+`scripts/run_direct_full_qubo_hardware_pilot.jl` prefers that optimized artifact
+when present, while this directory keeps the original warm-start parameter
+record.
 
 The noisy-simulation feasibility note is about exact dense noise simulation,
 not only the noiseless `2^36` statevector. A dense 36-qubit density matrix has
