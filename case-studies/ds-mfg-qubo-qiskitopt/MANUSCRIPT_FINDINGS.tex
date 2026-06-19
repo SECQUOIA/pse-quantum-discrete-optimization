@@ -89,7 +89,8 @@ engineering work required to submit and interpret quantum-optimization runs.
 
 Let $F$ be the set of candidate flows and $N$ the set of nodes in the process
 superstructure. The binary variable $f_i$ indicates whether flow or unit-option
-$i$ is selected. The discrete design subproblem can be summarized as
+$i$ is selected. The discrete design subproblem can be summarized
+schematically as
 \begin{equation}
 \begin{aligned}
 \min_{f} \quad & \sum_{i \in F} c_i f_i
@@ -107,13 +108,16 @@ $i$ is selected. The discrete design subproblem can be summarized as
 \end{aligned}
 \label{eq:ds-mfg-ip-formulation}
 \end{equation}
-Logic constraints include compatibility rules such as requiring a holding tank
-when a continuous unit is followed by a batch operation. In the Gurobi export
-used here the model is named \texttt{capex}; it has 19 binary flow variables,
-20 constraints, 58 nonzeros, and a minimization objective. The Gurobi solve was
-run with solution-pool search enabled and returned 36 pool solutions. We use
-this pool as classical ground truth over the original 19-variable decision
-space.
+Equation~\eqref{eq:ds-mfg-ip-formulation} records the constraint classes used
+to orient the reader, not a complete literal listing of the \texttt{capex}
+instance. For example, the logic-constraint class can represent compatibility
+rules such as requiring a holding tank when a continuous unit is followed by a
+batch operation. The authoritative instance data for this audit are the Gurobi
+export and QUBO archive. In that export the model is named \texttt{capex}; it
+has 19 binary flow variables, 20 constraints, 58 nonzeros, and a minimization
+objective. The Gurobi solve was run with solution-pool search enabled and
+returned 36 pool solutions. We use this pool as classical ground truth over the
+original 19-variable decision space.
 
 The computational task in this case study is not merely to recover one bitstring
 with low raw QUBO energy. Rather, for each quantum-emulation method $A$, the
