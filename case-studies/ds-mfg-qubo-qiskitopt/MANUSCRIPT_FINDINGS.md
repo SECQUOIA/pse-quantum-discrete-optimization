@@ -141,8 +141,11 @@ Thus, VQE can reach the global optimum on the reduced surrogate, but its global-
 For direct noisy-simulator feasibility, the audit builds the direct full-QUBO
 p=2 QAOA circuit from the archived `scalars.csv`, `L_vector.csv`, and
 `Q_matrix.csv`. The logical circuit has 36 qubits and 202 `rzz` gates. The
-gated FakeFez transpile produces depth 1344 and 1157 `cz` gates; no direct
-36-qubit noisy samples are cached.
+gated FakeFez transpile produces depth 1344 and 1157 `cz` gates. Exact dense
+noisy density-matrix simulation would require `2^72` complex entries, while Aer
+automatic or MPS-style noisy simulation is entanglement-dependent. No direct
+36-qubit noisy samples are cached because a useful-shot direct noisy run was
+not established as practical for this circuit.
 
 ## Classical Sampling Baselines
 

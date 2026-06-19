@@ -670,8 +670,11 @@ encoded Gurobi-pool reads.
 The same audit records direct noisy-simulator resource evidence for the
 original QUBO. The direct full-QUBO $p=2$ QAOA circuit has 36 logical qubits and
 202 logical \texttt{rzz} gates. A gated \texttt{FakeFez} transpile produced
-depth 1344 with 1157 \texttt{cz} gates. No direct 36-qubit noisy samples are
-cached.
+depth 1344 with 1157 \texttt{cz} gates. Exact dense noisy density-matrix
+simulation would require $2^{72}$ complex entries, while Aer automatic or
+MPS-style noisy simulation is entanglement-dependent. No direct 36-qubit noisy
+samples are cached because a useful-shot direct noisy run was not established as
+practical for this circuit.
 
 The reduced-surrogate VQE runs performed better. A five-seed sweep with 8192
 final reads found a near-optimal pool flow with repaired objective $11.8105$,

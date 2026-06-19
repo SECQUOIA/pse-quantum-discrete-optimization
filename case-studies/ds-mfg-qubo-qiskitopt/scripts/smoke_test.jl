@@ -308,18 +308,28 @@ require_int(resource_row, "logical_rzz_count", 202)
 require_int(resource_row, "logical_two_qubit_ops", 202)
 require_value(resource_row, "statevector_amplitudes", "68719476736")
 require_value(resource_row, "statevector_complex128_bytes", "1099511627776")
+require_value(resource_row, "density_matrix_elements", "4722366482869645213696")
+require_value(resource_row, "density_matrix_complex128_bytes", "75557863725914323419136")
+require_value(resource_row, "noisy_method_considered", "qiskit_aer.AerSimulator.from_backend(FakeFez)")
 require_value(resource_row, "transpile_requested", "true")
 require_value(resource_row, "transpile_status", "DONE")
 require_int(resource_row, "transpiled_depth", 1344)
 require_int(resource_row, "transpiled_cz_count", 1157)
+require_value(resource_row, "transpile_elapsed_sec", "not_recorded_for_reproducible_artifacts")
 require_value(resource_row, "simulation_status", "not_run")
 resource_metadata = read(require_file("ds_mfg_direct_full_qubo_audit/direct_full_qubo_resource_metadata.json"), String)
 occursin("\"n_qubits\":36", resource_metadata) ||
     smoke_error("direct full-QUBO resource metadata must record 36 qubits")
 occursin("\"cz_count\":1157", resource_metadata) ||
     smoke_error("direct full-QUBO resource metadata must record FakeFez CZ count")
-occursin("No direct 36-qubit noisy samples are cached", resource_metadata) ||
-    smoke_error("direct full-QUBO metadata must state the noisy-sample boundary")
+occursin("\"dense_density_matrix_elements\":\"4722366482869645213696\"", resource_metadata) ||
+    smoke_error("direct full-QUBO metadata must record density-matrix size")
+occursin("not_recorded_for_reproducible_artifacts", resource_metadata) ||
+    smoke_error("direct full-QUBO metadata must avoid volatile transpile runtime")
+!occursin("created_at_utc", resource_metadata) ||
+    smoke_error("direct full-QUBO metadata must avoid volatile timestamps")
+occursin("Aer automatic or MPS simulation is entanglement-dependent", resource_metadata) ||
+    smoke_error("direct full-QUBO metadata must state noisy-simulator feasibility")
 
 vqe_rows = parse_csv_rows("ds_mfg_vqe_reduced_flow_objective_final/vqe_reduced_top50_sampling_summary.csv")
 length(vqe_rows) == 3 || smoke_error("expected three final VQE follow-up rows")
@@ -662,6 +672,8 @@ mktempdir() do direct_output_dir
     require_value(dry_resource_row, "transpile_status", "not_requested")
     require_int(dry_resource_row, "logical_qubits", 36)
     require_int(dry_resource_row, "logical_rzz_count", 202)
+    require_value(dry_resource_row, "density_matrix_elements", "4722366482869645213696")
+    require_value(dry_resource_row, "transpile_elapsed_sec", "")
     require_value(dry_resource_row, "simulation_status", "not_run")
 end
 

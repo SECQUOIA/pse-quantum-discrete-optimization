@@ -10,7 +10,16 @@ DS-MFG QUBO from `Fw_ DS mfg case qubo information.zip`.
 - `direct_full_qubo_resource_summary.csv` records the direct full-QUBO p=2 QAOA
   circuit resource summary and gated FakeFez transpile metadata.
 - `direct_full_qubo_resource_metadata.json` records the same resource audit in
-  structured form.
+  structured form. The resource cache omits wall-clock generation timestamps and
+  records transpile runtime as `not_recorded_for_reproducible_artifacts` so
+  rerunning the gated transpile can regenerate byte-stable artifacts when
+  Qiskit output is unchanged.
+
+The noisy-simulation feasibility note is about exact dense noise simulation,
+not only the noiseless `2^36` statevector. A dense 36-qubit density matrix has
+`2^72` complex entries. Aer automatic or MPS-style noisy simulation may avoid
+that storage for some circuits, but its cost is entanglement-dependent; this
+cache does not establish a useful-shot direct noisy run as practical.
 
 Regenerate the cache from the case-study directory with:
 

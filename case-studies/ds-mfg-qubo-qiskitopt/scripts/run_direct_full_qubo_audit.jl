@@ -7,7 +7,6 @@ if abspath(PROGRAM_FILE) == abspath(@__FILE__)
     Pkg.instantiate()
 end
 
-using Dates
 using Printf
 using PythonCall
 
@@ -97,8 +96,6 @@ function write_json_file(path::AbstractString, value)
         println(io)
     end
 end
-
-utc_timestamp() = string(Dates.now(Dates.UTC), "Z")
 
 function parse_bool_env(name::AbstractString)
     raw = lowercase(strip(get(ENV, name, "false")))
@@ -593,9 +590,9 @@ function circuit_resource_metadata(qubo::QuboData; transpile::Bool, fake_backend
     cx_count = get(operation_counts, "cx", 0)
     logical_two_qubit_ops = rzz_count + cx_count
     amplitudes = BigInt(2)^qubo.n
+    density_matrix_elements = BigInt(2)^(2 * qubo.n)
     metadata = Dict{String,Any}(
         "schema_version" => 1,
-        "created_at_utc" => utc_timestamp(),
         "script" => relpath(@__FILE__, STUDY_ROOT),
         "problem" => Dict{String,Any}(
             "name" => "DS-MFG direct original 36-variable QUBO",
@@ -626,11 +623,19 @@ function circuit_resource_metadata(qubo::QuboData; transpile::Bool, fake_backend
             "complex64_bytes" => string(amplitudes * 8),
             "complex128_bytes" => string(amplitudes * 16),
         ),
+        "classical_noisy_simulation_assessment" => Dict{String,Any}(
+            "method_considered" => "qiskit_aer.AerSimulator.from_backend(FakeFez)",
+            "dense_density_matrix_elements" => string(density_matrix_elements),
+            "dense_density_matrix_complex64_bytes" => string(density_matrix_elements * 8),
+            "dense_density_matrix_complex128_bytes" => string(density_matrix_elements * 16),
+            "automatic_or_mps_note" => "Aer automatic or MPS-style noisy simulation may avoid dense density-matrix storage for some circuits but the cost is entanglement-dependent and was not run at a useful shot budget for this 36-qubit circuit.",
+            "feasibility" => "Exact dense noisy simulation is not feasible on ordinary local hardware; approximate or tensor-network simulation would need a separate bounded feasibility study.",
+        ),
         "fake_backend_class" => fake_backend_class,
         "transpile_requested" => transpile,
         "transpile" => Dict{String,Any}("status" => transpile ? "requested" : "not_requested"),
         "simulation_status" => "not_run",
-        "blocker" => "No direct 36-qubit noisy samples are cached. The audit records circuit width; depth; two-qubit count; gated FakeFez transpile metadata; and dense-state memory estimates without submitting hardware jobs.",
+        "blocker" => "No direct 36-qubit noisy samples are cached. Dense noisy density-matrix simulation would require 2^72 complex entries. Aer automatic or MPS simulation is entanglement-dependent and was not run at a useful shot budget.",
     )
 
     if transpile
@@ -639,16 +644,14 @@ function circuit_resource_metadata(qubo::QuboData; transpile::Bool, fake_backend
         pyhasattr(fake_provider, fake_backend_class) ||
             error("qiskit_ibm_runtime.fake_provider has no $(fake_backend_class)")
         backend = pygetattr(fake_provider, fake_backend_class)()
-        start_time = time()
         transpiled = qiskit.transpile(circuit; backend = backend, seed_transpiler = 92001, optimization_level = 3)
-        elapsed_sec = time() - start_time
         transpiled_counts = py_dict_to_julia_int(transpiled.count_ops())
         metadata["transpile"] = Dict{String,Any}(
             "status" => "DONE",
             "fake_backend_class" => fake_backend_class,
             "seed_transpiler" => 92001,
             "optimization_level" => 3,
-            "elapsed_sec" => @sprintf("%.6f", elapsed_sec),
+            "elapsed_sec" => "not_recorded_for_reproducible_artifacts",
             "depth" => pyconvert(Int, transpiled.depth()),
             "operation_counts" => transpiled_counts,
             "cz_count" => get(transpiled_counts, "cz", 0),
@@ -666,6 +669,8 @@ function resource_summary_header()
         "logical_qubits", "logical_clbits", "logical_depth", "logical_rzz_count",
         "logical_cx_count", "logical_measure_count", "logical_two_qubit_ops",
         "statevector_amplitudes", "statevector_complex64_bytes", "statevector_complex128_bytes",
+        "density_matrix_elements", "density_matrix_complex64_bytes", "density_matrix_complex128_bytes",
+        "noisy_method_considered", "classical_noisy_feasibility",
         "transpile_requested", "transpile_status", "transpiled_depth", "transpiled_cz_count",
         "transpiled_cx_count", "transpiled_ecr_count", "transpile_elapsed_sec",
         "simulation_status", "blocker",
@@ -676,6 +681,7 @@ function write_resource_summary(path::AbstractString, metadata)
     logical = metadata["logical_circuit"]
     operations = logical["operation_counts"]
     memory = metadata["statevector_memory_estimate"]
+    noisy = metadata["classical_noisy_simulation_assessment"]
     transpile = metadata["transpile"]
     open(path, "w") do io
         println(io, csv_row(resource_summary_header()))
@@ -696,6 +702,11 @@ function write_resource_summary(path::AbstractString, metadata)
             memory["amplitudes"],
             memory["complex64_bytes"],
             memory["complex128_bytes"],
+            noisy["dense_density_matrix_elements"],
+            noisy["dense_density_matrix_complex64_bytes"],
+            noisy["dense_density_matrix_complex128_bytes"],
+            noisy["method_considered"],
+            noisy["feasibility"],
             metadata["transpile_requested"],
             get(transpile, "status", ""),
             get(transpile, "depth", ""),

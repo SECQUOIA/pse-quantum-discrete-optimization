@@ -82,7 +82,11 @@ DSMFG_DIRECT_FULL_QUBO_TRANSPILE=true julia --project=. scripts/run_direct_full_
 
 The cached resource row records 36 logical qubits, 202 logical `rzz` gates, a
 FakeFez-transpiled depth of 1344 with 1157 `cz` gates, and no direct noisy
-sample cache.
+sample cache. A dense noiseless statevector would require `2^36` amplitudes
+(`1099511627776` complex128 bytes), while exact dense noisy density-matrix
+simulation would require `2^72` complex entries. Aer automatic or MPS-style
+noisy simulation may avoid dense density-matrix storage for some circuits, but
+the cost is entanglement-dependent and was not run here at a useful shot budget.
 
 To rerun the model-based noisy simulation as an overnight job, run:
 

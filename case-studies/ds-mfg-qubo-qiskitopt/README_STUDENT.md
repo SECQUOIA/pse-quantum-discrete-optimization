@@ -113,7 +113,12 @@ Direct original-QUBO audit in this analysis bundle:
   hit, 0 global hits, and best repaired objective `14.6515` in 8192 reads,
 - the direct full-QUBO p=2 resource audit records 36 qubits, 202 logical `rzz`
   gates, FakeFez-transpiled depth 1344, 1157 `cz` gates, and no cached direct
-  noisy samples.
+  noisy samples,
+- exact dense noisy density-matrix simulation of the 36-qubit circuit would
+  require `2^72` complex entries. Aer automatic or MPS-style noisy simulation is
+  entanglement-dependent, so a useful-shot direct noisy run would need a
+  separate bounded feasibility study rather than being assumed from the `2^36`
+  statevector estimate alone.
 
 Classical sampling baselines in this analysis bundle:
 
