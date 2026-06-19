@@ -1,9 +1,10 @@
 # DS-MFG QUBO Case Study: Findings Narrative
 
 For manuscript incorporation, use `MANUSCRIPT_FINDINGS.tex`. That file is a
-LaTeX-ready section with experiment provenance, cached artifact paths, result
-tables, and the IBM hardware pilot. This Markdown file is kept as a compact
-companion summary.
+LaTeX-ready manuscript body organized as Introduction, Method, Results,
+Discussion, and Conclusion, with experiment provenance, cached artifact paths,
+result tables, and the IBM hardware pilot. This Markdown file is kept as a
+compact companion summary.
 
 ## Purpose
 

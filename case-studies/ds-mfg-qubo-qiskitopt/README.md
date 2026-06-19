@@ -17,8 +17,9 @@ Start with:
 - `README_STUDENT.md`: detailed guide to the notebook, environment, cached
   results, and rerun commands.
 - `ds_mfg_qubo_qiskitopt.ipynb`: executed notebook with the full workflow.
-- `MANUSCRIPT_FINDINGS.tex`: LaTeX manuscript section with problem formulation,
-  reduction, experiment provenance, result tables, and the IBM hardware pilot.
+- `MANUSCRIPT_FINDINGS.tex`: LaTeX manuscript body with introduction, method,
+  results, discussion, conclusion, experiment provenance, result tables, and
+  the IBM hardware pilot.
 - `MANUSCRIPT_FINDINGS.md`: compact narrative summary.
 
 The main modeling point is that the QUBO has 36 binary variables, but Gurobi's
