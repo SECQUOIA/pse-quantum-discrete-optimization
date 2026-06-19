@@ -257,7 +257,7 @@ Section~\ref{subsec:ds-mfg-hardware-pilot}, the QAOA and VQE experiments
 reported here are local classical simulations. The notebook was executed through
 \texttt{scripts/nbconvert\_ds\_mfg.sh}, which activates the Julia project
 \texttt{DSMFGQiskitOptStudent}. The current runnable project pins
-\texttt{QiskitOpt.jl v0.5.0}, \texttt{QUBODrivers v0.6.1},
+\texttt{QiskitOpt.jl v0.6.0}, \texttt{QUBODrivers v0.6.1},
 \texttt{QUBOTools v0.13}, \texttt{PythonCall v0.9}, and a Julia compatibility
 target of \texttt{1.10}. The QAOA and VQE solves use
 Qiskit Aer through \texttt{QiskitOpt.jl}. The expensive local simulations use
@@ -268,7 +268,7 @@ maximum MPS bond dimension 64, \texttt{mps\_heuristic} measurement sampling,
 and a thread cap of \texttt{min(Sys.CPU\_THREADS, 8)}. Optimizer reads and final
 sampling reads were separated with \texttt{QUBODrivers.FinalNumberOfReads()}
 when supported by the package. The runnable revisit scripts also set
-\texttt{QUBODrivers.RandomSeed()} so \texttt{QiskitOpt.jl v0.5.0} derives local
+\texttt{QUBODrivers.RandomSeed()} so \texttt{QiskitOpt.jl v0.6.0} derives local
 Aer simulator and transpiler seeds through the standard sampler seed interface.
 
 Because most runs are simulator experiments, timing and hit-rate observations

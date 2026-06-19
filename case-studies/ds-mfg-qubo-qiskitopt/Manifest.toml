@@ -2,7 +2,7 @@
 
 julia_version = "1.10.11"
 manifest_format = "2.0"
-project_hash = "0f8adfc27f79392cd32f747dcab4afa65dc88439"
+project_hash = "0fd8d235a6b1c53ce8431543e037e1736665e3e6"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -538,11 +538,9 @@ weakdeps = ["MathOptInterface"]
 
 [[deps.QiskitOpt]]
 deps = ["PythonCall", "QUBO"]
-git-tree-sha1 = "185f45b47e83e79e8b4084239b2d725c678b4a25"
-repo-rev = "v0.5.0"
-repo-url = "https://github.com/JuliaQUBO/QiskitOpt.jl.git"
+git-tree-sha1 = "ae4d38da1b792c79e8062851e1cf6c39ce1b8691"
 uuid = "81b20daf-e62b-4502-a0d1-aa084de80e33"
-version = "0.5.0"
+version = "0.6.0"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
