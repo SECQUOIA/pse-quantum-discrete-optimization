@@ -421,6 +421,48 @@ for text in (hardware_manifest, hardware_backend)
 end
 
 println("Checking simulator-to-hardware comparison artifacts...")
+noisy_artifact_dir = "ds_mfg_fake_fez_qaoa_noisy_4096x3"
+for filename in ("job_manifest.json", "backend_metadata.json", "raw_counts.csv", "scored_counts.csv", "summary.csv")
+    require_file(joinpath(noisy_artifact_dir, filename))
+end
+
+noisy_summary = only(parse_csv_rows(joinpath(noisy_artifact_dir, "summary.csv")))
+require_value(noisy_summary, "algorithm", "QAOA_reduced_surrogate_JuliQAOA_FakeFez_noisy_simulation")
+require_value(noisy_summary, "mode", "model_based_noisy_simulation")
+require_value(noisy_summary, "fake_backend", "FakeFez")
+require_value(noisy_summary, "angle_target", "top10")
+require_int(noisy_summary, "p", 5)
+require_int(noisy_summary, "final_reads", 4096)
+require_int(noisy_summary, "repeats", 3)
+require_value(noisy_summary, "transpile_seeds", "92001;92002;92003")
+require_int(noisy_summary, "completed_jobs", 9)
+require_int(noisy_summary, "unique_flows", 11172)
+require_int(noisy_summary, "total_reads", 36864)
+require_int(noisy_summary, "top50_hits", 516)
+require_int(noisy_summary, "top10_hits", 108)
+require_int(noisy_summary, "global_hits", 12)
+require_int(noisy_summary, "gurobi_pool_feasible_hits", 447)
+require_value(noisy_summary, "global_hit_rate", "0.000325520833333")
+require_value(noisy_summary, "best_top50_match", "global_optimum")
+require_value(noisy_summary, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
+require_int(noisy_summary, "transpiled_depth_min", 1442)
+require_int(noisy_summary, "transpiled_depth_max", 1557)
+require_int(noisy_summary, "transpiled_cz_min", 1136)
+require_int(noisy_summary, "transpiled_cz_max", 1156)
+count_csv_data_rows(joinpath(noisy_artifact_dir, "raw_counts.csv")) == 35636 ||
+    smoke_error("unexpected FakeFez noisy raw-count row count")
+count_csv_data_rows(joinpath(noisy_artifact_dir, "scored_counts.csv")) == 35636 ||
+    smoke_error("unexpected FakeFez noisy scored-count row count")
+noisy_manifest = read(require_file(joinpath(noisy_artifact_dir, "job_manifest.json")), String)
+occursin("\"mode\":\"model_based_noisy_simulation\"", noisy_manifest) ||
+    smoke_error("FakeFez noisy manifest must record model-based simulation mode")
+occursin("\"run_simulation\":true", noisy_manifest) ||
+    smoke_error("FakeFez noisy manifest must record simulation enabled")
+occursin("\"status\":\"DONE\"", noisy_manifest) ||
+    smoke_error("FakeFez noisy manifest must record completed jobs")
+!occursin("\"status\":\"FAILED\"", noisy_manifest) ||
+    smoke_error("FakeFez noisy manifest must not record failed jobs")
+
 comparison_rows = parse_csv_rows("ds_mfg_simulator_hardware_comparison/simulator_hardware_comparison_summary.csv")
 length(comparison_rows) == 3 || smoke_error("expected three simulator/hardware comparison rows")
 ideal_comparison = only(filter(row -> row["evidence_tier"] == "ideal_simulator", comparison_rows))
@@ -433,11 +475,15 @@ require_int(ideal_comparison, "global_hits", 1007)
 require_value(ideal_comparison, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
 
 noisy_comparison = only(filter(row -> row["evidence_tier"] == "model_based_noisy_simulator", comparison_rows))
-require_value(noisy_comparison, "row_status", "script_available_not_run")
-require_value(noisy_comparison, "source_artifact", "scripts/run_noisy_qaoa_fake_backend.jl")
-require_value(noisy_comparison, "total_reads", "")
-occursin("model-based simulation", noisy_comparison["notes"]) ||
-    smoke_error("noisy comparison row must label future output as model-based simulation")
+require_value(noisy_comparison, "row_status", "cached_result")
+require_value(noisy_comparison, "source_artifact", "ds_mfg_fake_fez_qaoa_noisy_4096x3/summary.csv")
+require_int(noisy_comparison, "total_reads", 36864)
+require_int(noisy_comparison, "top50_hits", 516)
+require_int(noisy_comparison, "top10_hits", 108)
+require_int(noisy_comparison, "global_hits", 12)
+require_value(noisy_comparison, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
+occursin("Model-based fake-backend simulation", noisy_comparison["notes"]) ||
+    smoke_error("noisy comparison row must label cached output as model-based simulation")
 
 hardware_comparison = only(filter(row -> row["evidence_tier"] == "hardware", comparison_rows))
 require_value(hardware_comparison, "row_status", "cached_result")
@@ -452,10 +498,12 @@ degradation_rows = parse_csv_rows("ds_mfg_simulator_hardware_comparison/simulato
 length(degradation_rows) == 4 || smoke_error("expected four simulator/hardware degradation rows")
 top50_degradation = only(filter(row -> row["event"] == "top50", degradation_rows))
 require_value(top50_degradation, "ideal_aer_hit_rate", "0.238788604736")
-require_value(top50_degradation, "noisy_model_hit_rate", "")
+require_value(top50_degradation, "noisy_model_hit_rate", "0.0139973958333")
+require_value(top50_degradation, "noisy_to_ideal_hit_rate_ratio", "0.0586183576423")
 require_value(top50_degradation, "hardware_hit_rate", "0.000162760416667")
 require_value(top50_degradation, "hardware_to_ideal_hit_rate_ratio", "0.000681608809794")
 global_degradation = only(filter(row -> row["event"] == "global", degradation_rows))
+require_value(global_degradation, "noisy_model_hit_rate", "0.000325520833333")
 require_value(global_degradation, "ideal_expected_hits_at_hardware_reads", "141.609375")
 require_value(global_degradation, "hardware_hits_minus_ideal_expected", "-141.609375")
 
