@@ -157,6 +157,7 @@ for relpath in (
     "ds_mfg_qaoa_vqe_distribution.svg",
     "scripts/run_noisy_qaoa_fake_backend.jl",
     "scripts/run_direct_full_qubo_audit.jl",
+    "scripts/run_direct_full_qubo_hardware_pilot.jl",
     "scripts/update_simulator_hardware_comparison.jl",
 )
     require_file(relpath)
@@ -260,9 +261,28 @@ require_value(global_qaoa, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
 require_hit_rate_stats(global_qaoa)
 
 println("Checking direct original-QUBO audit artifacts...")
-for filename in ("README.md", "direct_full_qubo_summary.csv", "direct_full_qubo_resource_summary.csv", "direct_full_qubo_resource_metadata.json")
+for filename in (
+    "README.md",
+    "direct_full_qubo_summary.csv",
+    "direct_full_qubo_qaoa_hardware_parameters.json",
+    "direct_full_qubo_resource_summary.csv",
+    "direct_full_qubo_resource_metadata.json",
+)
     require_file(joinpath("ds_mfg_direct_full_qubo_audit", filename))
 end
+
+parameter_text = read(
+    require_file("ds_mfg_direct_full_qubo_audit/direct_full_qubo_qaoa_hardware_parameters.json"),
+    String,
+)
+occursin("\"artifact_role\":\"direct_full_qubo_qaoa_hardware_parameter_handoff\"", parameter_text) ||
+    smoke_error("direct full-QUBO parameter artifact must declare its hardware handoff role")
+occursin("\"p\":2", parameter_text) ||
+    smoke_error("direct full-QUBO parameter artifact must record p=2")
+occursin("\"qiskit_angles_beta_then_gamma\":[0.55500000000000005,0.29299999999999998,-0.48799999999999999,-0.89800000000000002]", parameter_text) ||
+    smoke_error("direct full-QUBO parameter artifact must record the fixed QAOA angles")
+occursin("fixed-parameter sampling only", parameter_text) ||
+    smoke_error("direct full-QUBO parameter artifact must record hardware sampling policy")
 
 direct_rows = parse_csv_rows("ds_mfg_direct_full_qubo_audit/direct_full_qubo_summary.csv")
 length(direct_rows) == 19 || smoke_error("expected 19 direct full-QUBO audit rows")
@@ -659,7 +679,12 @@ mktempdir() do direct_output_dir
         run(`$(Base.julia_cmd()) --project=$(ROOT) scripts/run_direct_full_qubo_audit.jl`)
     end
 
-    for filename in ("direct_full_qubo_summary.csv", "direct_full_qubo_resource_summary.csv", "direct_full_qubo_resource_metadata.json")
+    for filename in (
+        "direct_full_qubo_summary.csv",
+        "direct_full_qubo_qaoa_hardware_parameters.json",
+        "direct_full_qubo_resource_summary.csv",
+        "direct_full_qubo_resource_metadata.json",
+    )
         path = joinpath(direct_output_dir, filename)
         isfile(path) || smoke_error("direct full-QUBO dry run did not write $(filename)")
         filesize(path) > 0 || smoke_error("direct full-QUBO dry-run file is empty: $(filename)")
@@ -675,6 +700,55 @@ mktempdir() do direct_output_dir
     require_value(dry_resource_row, "density_matrix_elements", "4722366482869645213696")
     require_value(dry_resource_row, "transpile_elapsed_sec", "")
     require_value(dry_resource_row, "simulation_status", "not_run")
+end
+
+println("Checking direct full-QUBO QAOA hardware dry-run schema...")
+mktempdir() do direct_hardware_output_dir
+    withenv(
+        "QISKIT_IBM_BACKEND" => "ibm_brisbane",
+        "QISKIT_IBM_INSTANCE" => "",
+        "DSMFG_DIRECT_HARDWARE_FINAL_READS" => "64",
+        "DSMFG_DIRECT_HARDWARE_REPEATS" => "1",
+        "DSMFG_DIRECT_HARDWARE_TRANSPILE_SEEDS" => "123",
+        "DSMFG_DIRECT_HARDWARE_OUTPUT_DIR" => direct_hardware_output_dir,
+        "DSMFG_DIRECT_QAOA_PARAMETER_PATH" => joinpath(
+            ROOT,
+            "ds_mfg_direct_full_qubo_audit",
+            "direct_full_qubo_qaoa_hardware_parameters.json",
+        ),
+        "DSMFG_RUN_DIRECT_FULL_QUBO_HARDWARE" => "false",
+    ) do
+        run(`$(Base.julia_cmd()) --project=$(ROOT) scripts/run_direct_full_qubo_hardware_pilot.jl`)
+    end
+
+    for filename in ("job_manifest.json", "backend_metadata.json", "raw_counts.csv", "scored_counts.csv", "summary.csv")
+        path = joinpath(direct_hardware_output_dir, filename)
+        isfile(path) || smoke_error("direct full-QUBO hardware dry run did not write $(filename)")
+        filesize(path) > 0 || smoke_error("direct full-QUBO hardware dry-run file is empty: $(filename)")
+    end
+
+    manifest_text = read(joinpath(direct_hardware_output_dir, "job_manifest.json"), String)
+    occursin("\"mode\":\"dry_run\"", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record dry_run mode")
+    occursin("\"run_hardware\":false", manifest_text) ||
+        smoke_error("direct full-QUBO hardware dry-run manifest must not mark hardware enabled")
+    occursin("\"n_qubits\":36", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record the 36-qubit problem")
+    occursin("\"p\":2", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record p=2")
+    occursin("\"submitted\":false", manifest_text) ||
+        smoke_error("direct full-QUBO hardware dry-run manifest must not mark jobs submitted")
+    !occursin("QISKIT_IBM_TOKEN", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must not include token environment names")
+    !occursin("qiskit-ibm.json", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must not include account file paths")
+
+    summary_lines = filter(line -> !isempty(strip(line)), readlines(joinpath(direct_hardware_output_dir, "summary.csv")))
+    length(summary_lines) == 2 || smoke_error("direct full-QUBO hardware dry-run summary must contain one data row")
+    occursin(
+        "QAOA_direct_full_qubo_IBM_handoff,dry_run,ibm_brisbane,ds_mfg_direct_full_qubo_audit/direct_full_qubo_qaoa_hardware_parameters.json,2,64,1,123,0,",
+        summary_lines[2],
+    ) || smoke_error("direct full-QUBO hardware dry-run summary row has unexpected configuration values")
 end
 
 include(joinpath(@__DIR__, "run_ibm_qaoa_pilot.jl"))

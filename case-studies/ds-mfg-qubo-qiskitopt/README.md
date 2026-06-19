@@ -44,7 +44,8 @@ Best cached results:
   direct full-QUBO QAOA row found 5 top-50 repaired-flow reads, 1 top-10 read,
   and no global reads in 512 final samples; the best direct full-QUBO VQE seed
   found 2 top-50 reads, 1 top-10 read, and no global reads in 8192 final
-  samples.
+  samples. The same audit persists the direct p=2 QAOA parameter artifact used
+  by the dry-run-safe full-QUBO hardware handoff script.
 - Classical baselines: uniform random repaired-flow sampling found no global
   optimum hits at 262144 or 524288 samples, while the 262144-evaluation
   hill-climb restart baseline found 19 global hits. Cached outputs are in
@@ -79,6 +80,18 @@ p=2 circuit:
 ```bash
 DSMFG_DIRECT_FULL_QUBO_TRANSPILE=true julia --project=. scripts/run_direct_full_qubo_audit.jl
 ```
+
+To build the direct full-QUBO p=2 QAOA hardware handoff artifacts without
+submitting jobs:
+
+```bash
+QISKIT_IBM_BACKEND=ibm_fez julia --project=. scripts/run_direct_full_qubo_hardware_pilot.jl
+```
+
+The hardware pilot consumes
+`ds_mfg_direct_full_qubo_audit/direct_full_qubo_qaoa_hardware_parameters.json`
+and dry-runs by default. Real IBM submission requires configured Runtime
+credentials and the explicit `DSMFG_RUN_DIRECT_FULL_QUBO_HARDWARE=true` gate.
 
 The cached resource row records 36 logical qubits, 202 logical `rzz` gates, a
 FakeFez-transpiled depth of 1344 with 1157 `cz` gates, and no direct noisy

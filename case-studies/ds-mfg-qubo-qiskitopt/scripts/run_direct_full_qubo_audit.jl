@@ -17,6 +17,12 @@ const DEFAULT_OUTPUT_DIR = "ds_mfg_direct_full_qubo_audit"
 const DIRECT_QAOA_ANGLE_SOURCE = "full-QUBO p=2 final-sampling separation"
 const DIRECT_QAOA_ANGLES = [0.555, 0.293, -0.488, -0.898]
 const DIRECT_QAOA_P = 2
+const DIRECT_QAOA_SOURCE_SUMMARY = joinpath("ds_mfg_final_sampling_sweep_v2", "final_sampling_summary.csv")
+const DIRECT_QAOA_SOURCE_DISTRIBUTION = joinpath(
+    "ds_mfg_final_sampling_sweep_v2",
+    "qaoa_p2_optimizer_reads128_final_reads512_iter25_distribution.csv",
+)
+const DIRECT_QAOA_PARAMETER_ARTIFACT = "direct_full_qubo_qaoa_hardware_parameters.json"
 const DIRECT_FULL_QUBO_ALGORITHM = "QAOA_direct_full_qubo_resource_audit"
 
 include(joinpath(@__DIR__, "hit_rate_stats.jl"))
@@ -539,12 +545,21 @@ function ising_terms_from_qubo(qubo::QuboData)
     return h, zz_pairs
 end
 
-function build_direct_full_qubo_qaoa_circuit(qubo::QuboData)
+function validate_direct_qaoa_parameters(p::Integer, angles::AbstractVector{<:Real})
+    p > 0 || error("QAOA depth p must be positive, got $(p)")
+    length(angles) == 2p || error("Expected $(2p) QAOA angles for p=$(p), got $(length(angles))")
+    return Float64.(collect(angles))
+end
+
+function build_direct_full_qubo_qaoa_circuit(
+    qubo::QuboData,
+    p::Integer,
+    angles::AbstractVector{<:Real},
+)
     qiskit = pyimport("qiskit")
-    p = DIRECT_QAOA_P
-    length(DIRECT_QAOA_ANGLES) == 2p || error("Expected $(2p) QAOA angles")
-    betas = DIRECT_QAOA_ANGLES[1:p]
-    gammas = DIRECT_QAOA_ANGLES[(p + 1):end]
+    parameter_values = validate_direct_qaoa_parameters(p, angles)
+    betas = parameter_values[1:p]
+    gammas = parameter_values[(p + 1):end]
     h, zz_pairs = ising_terms_from_qubo(qubo)
 
     circuit = qiskit.QuantumCircuit(qubo.n, qubo.n)
@@ -575,6 +590,34 @@ function build_direct_full_qubo_qaoa_circuit(qubo::QuboData)
     return circuit, zz_pairs
 end
 
+function build_direct_full_qubo_qaoa_circuit(qubo::QuboData)
+    return build_direct_full_qubo_qaoa_circuit(qubo, DIRECT_QAOA_P, DIRECT_QAOA_ANGLES)
+end
+
+function direct_qaoa_parameter_artifact(qubo::QuboData)
+    return Dict{String,Any}(
+        "schema_version" => 1,
+        "artifact_role" => "direct_full_qubo_qaoa_hardware_parameter_handoff",
+        "algorithm" => "QAOA_direct_full_qubo_fixed_parameter_handoff",
+        "problem_name" => "DS-MFG direct original 36-variable QUBO",
+        "data_source" => ZIP_NAME,
+        "n_qubits" => qubo.n,
+        "n_flow_variables" => 19,
+        "n_auxiliary_variables" => qubo.n - 19,
+        "scale" => qubo.scale,
+        "offset" => qubo.offset,
+        "angle_source" => DIRECT_QAOA_ANGLE_SOURCE,
+        "source_summary_artifact" => DIRECT_QAOA_SOURCE_SUMMARY,
+        "source_distribution_artifact" => DIRECT_QAOA_SOURCE_DISTRIBUTION,
+        "p" => DIRECT_QAOA_P,
+        "parameter_order" => "beta_then_gamma",
+        "qiskit_angles_beta_then_gamma" => DIRECT_QAOA_ANGLES,
+        "hardware_handoff_policy" => "fixed-parameter sampling only; do not run an optimizer loop on hardware",
+        "measurement_bit_order" => "Qiskit count keys must be reversed before scoring as x1..x36.",
+        "producer_script" => relpath(@__FILE__, STUDY_ROOT),
+    )
+end
+
 function py_dict_to_julia_int(py_dict)
     converted = Dict{String,Int}()
     for item in py_dict.items()
@@ -584,7 +627,12 @@ function py_dict_to_julia_int(py_dict)
 end
 
 function circuit_resource_metadata(qubo::QuboData; transpile::Bool, fake_backend_class::String)
-    circuit, zz_pairs = build_direct_full_qubo_qaoa_circuit(qubo)
+    parameter_artifact = direct_qaoa_parameter_artifact(qubo)
+    circuit, zz_pairs = build_direct_full_qubo_qaoa_circuit(
+        qubo,
+        parameter_artifact["p"],
+        parameter_artifact["qiskit_angles_beta_then_gamma"],
+    )
     operation_counts = py_dict_to_julia_int(circuit.count_ops())
     rzz_count = get(operation_counts, "rzz", 0)
     cx_count = get(operation_counts, "cx", 0)
@@ -604,10 +652,11 @@ function circuit_resource_metadata(qubo::QuboData; transpile::Bool, fake_backend
             "offset" => qubo.offset,
         ),
         "angle_source" => Dict{String,Any}(
-            "description" => DIRECT_QAOA_ANGLE_SOURCE,
-            "p" => DIRECT_QAOA_P,
-            "parameter_order" => "beta_then_gamma",
-            "qiskit_angles_beta_then_gamma" => DIRECT_QAOA_ANGLES,
+            "description" => parameter_artifact["angle_source"],
+            "p" => parameter_artifact["p"],
+            "parameter_order" => parameter_artifact["parameter_order"],
+            "qiskit_angles_beta_then_gamma" => parameter_artifact["qiskit_angles_beta_then_gamma"],
+            "parameter_artifact" => DIRECT_QAOA_PARAMETER_ARTIFACT,
         ),
         "logical_circuit" => Dict{String,Any}(
             "num_qubits" => pyconvert(Int, circuit.num_qubits),
@@ -741,6 +790,9 @@ function main()
         end
     end
 
+    parameter_path = joinpath(output_dir, DIRECT_QAOA_PARAMETER_ARTIFACT)
+    write_json_file(parameter_path, direct_qaoa_parameter_artifact(qubo))
+
     metadata = circuit_resource_metadata(qubo; transpile = transpile, fake_backend_class = fake_backend_class)
     metadata_path = joinpath(output_dir, "direct_full_qubo_resource_metadata.json")
     resource_summary_path = joinpath(output_dir, "direct_full_qubo_resource_summary.csv")
@@ -748,6 +800,7 @@ function main()
     write_resource_summary(resource_summary_path, metadata)
 
     println("Direct full-QUBO summary written to: ", summary_path)
+    println("Direct full-QUBO QAOA hardware parameters written to: ", parameter_path)
     println("Direct full-QUBO resource summary written to: ", resource_summary_path)
     println("Direct full-QUBO resource metadata written to: ", metadata_path)
 end

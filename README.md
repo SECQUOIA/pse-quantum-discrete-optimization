@@ -62,6 +62,7 @@ are:
 scripts/bootstrap_ds_mfg.sh
 julia --project=. scripts/run_classical_baselines.jl
 QISKIT_IBM_BACKEND=ibm_fez julia --project=. scripts/run_ibm_qaoa_pilot.jl
+QISKIT_IBM_BACKEND=ibm_fez julia --project=. scripts/run_direct_full_qubo_hardware_pilot.jl
 ```
 
 The first command is the fresh-clone smoke test. The second regenerates the
@@ -69,7 +70,10 @@ fixed-seed uniform-random and hill-climb classical baselines. The third is an
 IBM pilot dry run by default: it builds and scores the fixed-parameter QAOA
 handoff artifacts without submitting hardware jobs. Real IBM hardware
 submission requires credentials configured outside this repository and the
-explicit `DSMFG_RUN_IBM_HARDWARE=true` gate.
+explicit `DSMFG_RUN_IBM_HARDWARE=true` gate. The fourth dry-runs the direct
+36-variable full-QUBO QAOA hardware handoff from the persisted p=2 parameter
+artifact; real submission is separately gated by
+`DSMFG_RUN_DIRECT_FULL_QUBO_HARDWARE=true`.
 
 Then read:
 
@@ -101,4 +105,8 @@ runner; see `INSTALL.md` for credential handling and the explicit
 `DSMFG_RUN_IBM_HARDWARE=true` submission gate. It also includes
 `scripts/run_noisy_qaoa_fake_backend.jl` for an overnight model-based
 FakeFez/Aer simulation; results from that script must be labeled as
-model-based simulation, not as calibrated hardware predictions.
+model-based simulation, not as calibrated hardware predictions. The direct
+full-QUBO p=2 QAOA hardware handoff is available as
+`scripts/run_direct_full_qubo_hardware_pilot.jl`; it consumes
+`ds_mfg_direct_full_qubo_audit/direct_full_qubo_qaoa_hardware_parameters.json`
+and also dry-runs unless its direct hardware gate is enabled.

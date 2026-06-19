@@ -145,7 +145,12 @@ gated FakeFez transpile produces depth 1344 and 1157 `cz` gates. Exact dense
 noisy density-matrix simulation would require `2^72` complex entries, while Aer
 automatic or MPS-style noisy simulation is entanglement-dependent. No direct
 36-qubit noisy samples are cached because a useful-shot direct noisy run was
-not established as practical for this circuit.
+not established as practical for this circuit. The audit now persists the same
+p=2 beta-then-gamma QAOA parameter vector in
+`ds_mfg_direct_full_qubo_audit/direct_full_qubo_qaoa_hardware_parameters.json`;
+`scripts/run_direct_full_qubo_hardware_pilot.jl` consumes that artifact to
+build a dry-run-safe direct full-QUBO IBM Runtime handoff, with real submission
+kept behind `DSMFG_RUN_DIRECT_FULL_QUBO_HARDWARE=true`.
 
 ## Classical Sampling Baselines
 
