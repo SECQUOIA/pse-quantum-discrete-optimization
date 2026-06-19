@@ -148,6 +148,7 @@ function configure_qaoa!(model; p, seed, optimizer_reads, final_reads, maximum_i
     threads = max(1, min(Sys.CPU_THREADS, 8))
     MOI.set(model, QAOA.NumberOfLayers(), p)
     MOI.set(model, QAOA.NumberOfReads(), optimizer_reads)
+    MOI.set(model, QUBODrivers.RandomSeed(), seed)
     MOI.set(model, QUBODrivers.FinalNumberOfReads(), final_reads)
     MOI.set(model, QAOA.MaximumIterations(), maximum_iterations)
     MOI.set(model, QAOA.InitialParameters(), initial_parameters)
@@ -159,8 +160,6 @@ function configure_qaoa!(model; p, seed, optimizer_reads, final_reads, maximum_i
     MOI.set(model, QAOA.AerMPSTruncationThreshold(), 1.0e-10)
     MOI.set(model, QAOA.AerMPSMaxBondDimension(), 64)
     MOI.set(model, QAOA.AerMPSSampleMeasureAlgorithm(), "mps_heuristic")
-    MOI.set(model, QAOA.AerSeedSimulator(), seed)
-    MOI.set(model, QAOA.TranspilerSeed(), seed)
     return model
 end
 

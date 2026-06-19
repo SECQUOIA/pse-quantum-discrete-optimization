@@ -51,6 +51,11 @@ the 36-variable QUBO and the 19-flow quadratic surrogate. & Shows whether
 simulated QAOA/VQE sampling distributions place observable mass on useful
 repaired flow assignments. \\
 \hline
+Model-based noisy emulation & Overnight \texttt{FakeFez}/Aer runner for the
+same fixed top-10-targeted $p=5$ QAOA circuit. & Provides a noise-aware
+simulation path when cached; any result is model-based and not a calibrated
+hardware predictor. \\
+\hline
 IBM hardware feasibility & Fixed-parameter p=5 QAOA sampling pilot on
 \texttt{ibm\_fez}, selected from local evidence. & Tests the hardware handoff
 and count-scoring path descriptively; no IBM hardware superiority result is
@@ -251,9 +256,10 @@ Except for the fixed-parameter QAOA hardware pilot in
 Section~\ref{subsec:ds-mfg-hardware-pilot}, the QAOA and VQE experiments
 reported here are local classical simulations. The notebook was executed through
 \texttt{scripts/nbconvert\_ds\_mfg.sh}, which activates the Julia project
-\texttt{DSMFGQiskitOptStudent}. The project pins \texttt{QiskitOpt.jl v0.4.2},
-\texttt{QUBODrivers v0.6}, \texttt{QUBOTools v0.13}, \texttt{PythonCall v0.9},
-and a Julia compatibility target of \texttt{1.10}. The QAOA and VQE solves use
+\texttt{DSMFGQiskitOptStudent}. The current runnable project pins
+\texttt{QiskitOpt.jl v0.6.0}, \texttt{QUBODrivers v0.6.1},
+\texttt{QUBOTools v0.13}, \texttt{PythonCall v0.9}, and a Julia compatibility
+target of \texttt{1.10}. The QAOA and VQE solves use
 Qiskit Aer through \texttt{QiskitOpt.jl}. The expensive local simulations use
 Aer's matrix-product-state method with single precision; the cached full-QUBO
 notebook rows record the fast MPS settings used there, while the reduced QAOA
@@ -261,7 +267,9 @@ and VQE revisit scripts explicitly set truncation threshold $10^{-10}$,
 maximum MPS bond dimension 64, \texttt{mps\_heuristic} measurement sampling,
 and a thread cap of \texttt{min(Sys.CPU\_THREADS, 8)}. Optimizer reads and final
 sampling reads were separated with \texttt{QUBODrivers.FinalNumberOfReads()}
-when supported by the package.
+when supported by the package. The runnable revisit scripts also set
+\texttt{QUBODrivers.RandomSeed()} so \texttt{QiskitOpt.jl v0.6.0} derives local
+Aer simulator and transpiler seeds through the standard sampler seed interface.
 
 Because most runs are simulator experiments, timing and hit-rate observations
 are not hardware-performance measurements. The reported local results should be
@@ -377,6 +385,14 @@ optimizer reads, \texttt{MaximumIterations() = 0}; 32768 final reads for
 $p=2,\ldots,5$ and 262144 final reads for the best $p=5$ follow-up. &
 \texttt{ds\_mfg\_qaoa\_juliqaoa\_transfer/};
 \texttt{ds\_mfg\_qaoa\_juliqaoa\_transfer\_highread/} \\
+\hline
+Model-based noisy QAOA runner & 19-variable quadratic surrogate &
+Local \texttt{qiskit\_ibm\_runtime.fake\_provider.FakeFez} with
+\texttt{qiskit\_aer.AerSimulator.from\_backend}; cached run uses 4096 shots,
+3 repeats, and transpile seeds 92001--92003. &
+\texttt{scripts/run\_noisy\_qaoa\_fake\_backend.jl};
+\texttt{ds\_mfg\_fake\_fez\_qaoa\_noisy\_4096x3/summary.csv};
+\texttt{ds\_mfg\_simulator\_hardware\_comparison/} \\
 \hline
 IBM QAOA hardware pilot & 19-variable quadratic surrogate &
 Fixed top-10-targeted $p=5$ QAOA circuit submitted through IBM Runtime to
@@ -749,14 +765,63 @@ Gurobi-pool-feasible hits & Rank 2; objective $11.8105$; flow
 \end{tabular}
 \end{table}
 
+\begin{table}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\caption{Ideal simulator, model-based noisy simulation, and hardware comparison
+for the fixed top-10-targeted $p=5$ QAOA circuit. Rates in parentheses are
+empirical hit rates; TTS values are empirical 99\% time to solution.}
+\label{tab:ds-mfg-simulator-hardware-comparison}
+\begin{tabular}{p{0.17\linewidth}p{0.10\linewidth}p{0.12\linewidth}p{0.12\linewidth}p{0.12\linewidth}p{0.09\linewidth}p{0.12\linewidth}p{0.09\linewidth}}
+\hline
+Evidence & Budget & Top-50 hits & Top-10 hits & Global hits & Global TTS99 &
+Gurobi-pool feasible hits & Feasible TTS99 \\
+\hline
+Ideal Aer transferred-angle QAOA & 262144 reads &
+62597 ($0.238789$) & 14326 ($0.0546494$) & 1007 ($0.0038414$) &
+$0.246$ s & 54820 ($0.209122$) & $0.00411$ s \\
+\hline
+\texttt{FakeFez}/Aer model-based noisy simulation & 36864 reads &
+516 ($0.0139974$) & 108 ($0.00292969$) & 12 ($0.000325521$) &
+3818 s & 447 ($0.0121257$) & 102 s \\
+\hline
+IBM \texttt{ibm\_fez} hardware pilot & 36864 reads &
+6 ($0.000162760$) & 1 ($2.71267\times 10^{-5}$) & 0 ($0$) &
+$\infty$ & 4 ($0.000108507$) & $84.6$ s \\
+\hline
+\end{tabular}
+\end{table}
+
 The hardware pilot confirms that the fixed-circuit handoff and repaired-count
-scoring path can be executed on IBM hardware. The observed hardware
-distribution was much less concentrated than the corresponding local Aer
-distribution: the local top-10-targeted $p=5$ Aer run sampled the global
-optimum 1007 times in 262144 reads, whereas the hardware pilot observed no
-global-optimum reads in 36864 shots and only one top-10 repaired-flow read.
-This comparison is descriptive and should not be interpreted as a speedup or
-hardware-superiority claim.
+scoring path can be executed on IBM hardware. The three rows use the same
+logical fixed-parameter QAOA setup and angles, but they do not use the same
+compiled physical circuit: the ideal Aer row is an ideal local reference, the
+\texttt{FakeFez}/Aer row is a model-based fake-backend simulation, and the
+\texttt{ibm\_fez} row is real hardware execution. The model-based noisy row
+sampled the global optimum 12 times in 36864 reads, retaining about 8.5\% of
+the ideal global-optimum hit rate. The hardware row observed no global-optimum
+reads and only one top-10 repaired-flow read in the same 36864-read budget.
+Relative to the ideal Aer rates, the hardware pilot retained approximately
+0.068\% of the top-50 hit rate and 0.050\% of the top-10 hit rate. The cached
+tables are
+\texttt{ds\_mfg\_simulator\_hardware\_comparison/simulator\_hardware\_comparison\_summary.csv}
+and
+\texttt{ds\_mfg\_simulator\_hardware\_comparison/simulator\_hardware\_degradation\_summary.csv}.
+
+The noisy simulation is model-based and should not be treated as a calibrated
+prediction of hardware behavior. Its transpiled \texttt{FakeFez} circuits had
+depths 1442--1557 and 1136--1156 \texttt{cz} gates, and the cached 9-job run
+took 9949.7 seconds locally. The hardware elapsed time is not directly
+comparable to the local noisy-simulation elapsed time, so the hit rates are the
+cleaner cross-backend comparison; TTS values are included as run-local
+descriptive quantities.
+
+The simulator-to-hardware degradation is plausibly affected by the deep
+transpiled circuit, two-qubit gate accumulation, measurement and readout
+effects, and backend noise during the hardware execution. This comparison is
+descriptive and should not be interpreted as a speedup or hardware-superiority
+claim.
 
 The VQE hardware candidate remains a follow-up item. The cache identifies seed
 74018 as the best final VQE follow-up, but it does not yet persist the optimized

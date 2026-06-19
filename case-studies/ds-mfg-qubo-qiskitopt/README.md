@@ -52,6 +52,23 @@ Best cached results:
   run found 6 top-50 repaired-flow hits, 1 top-10 hit, 0 global-optimum hits,
   and a best repaired objective of `11.8105` at rank 2. Cached artifacts are in
   `ds_mfg_ibm_qaoa_pilot_fez_4096x3/`.
+- Simulator-to-hardware comparison: cached tables in
+  `ds_mfg_simulator_hardware_comparison/` compare the ideal Aer top-10-targeted
+  p=5 transfer, the model-based FakeFez/Aer noisy simulation from
+  `ds_mfg_fake_fez_qaoa_noisy_4096x3/summary.csv`, and the `ibm_fez` pilot.
 
 The IBM hardware pilot is reported descriptively. It is not evidence of quantum
 speedup or IBM hardware-performance superiority.
+
+To rerun the model-based noisy simulation as an overnight job, run:
+
+```bash
+DSMFG_RUN_NOISY_SIMULATION=true julia --project=. scripts/run_noisy_qaoa_fake_backend.jl
+julia --project=. scripts/update_simulator_hardware_comparison.jl
+```
+
+The default noisy run uses `qiskit_ibm_runtime.fake_provider.FakeFez`,
+`qiskit_aer.AerSimulator.from_backend`, 4096 shots, three repeats, and
+transpile seeds `92001:92003`, matching the hardware pilot's nominal shot
+budget. Treat its output as model-based simulation, not as a calibrated
+prediction of the hardware run.
