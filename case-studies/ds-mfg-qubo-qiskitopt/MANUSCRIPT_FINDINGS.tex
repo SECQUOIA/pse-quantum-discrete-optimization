@@ -336,6 +336,67 @@ check rather than a hardware-performance comparison.
 \begin{table}[t]
 \centering
 \scriptsize
+\caption{Workflow-effort rubric for reproducing and interpreting the DS-MFG
+quantum-optimization audit.}
+\label{tab:ds-mfg-workflow-effort}
+\begin{tabular}{p{0.18\linewidth}p{0.20\linewidth}p{0.25\linewidth}p{0.27\linewidth}}
+\hline
+Workflow step & Effort class & Reproducibility status & Interpretation \\
+\hline
+QUBO reformulation & Manual interpretation of supplied artifact & Required
+input archive and CSV files are tracked. & The 36-bit QUBO is not the same
+object as the 19-flow Gurobi model, so the flow/auxiliary split must be
+documented before sampling results are meaningful. \\
+\hline
+Penalty and scaling interpretation & Manual review plus scripted loading &
+\texttt{scalars.csv}, \texttt{L\_vector.csv}, and \texttt{Q\_matrix.csv} are
+loaded by the notebook and helper scripts. & Objective values are comparable
+only after applying the recorded scale and offset and distinguishing raw QUBO
+energy from repaired flow objective. \\
+\hline
+Auxiliary repair & Scripted once the split is identified & Repair components
+and exact repaired flow scores are cached under
+\texttt{ds\_mfg\_reduced\_flow\_objective/}. & Exact repair is required for a
+coherent comparison to the original Gurobi flow objective. \\
+\hline
+Reduced surrogate construction & Scripted and problem-specific & The notebook
+enumerates all $2^{19}$ repaired flow values and writes reduced surrogate CSVs.
+& This enables QAOA/VQE interfaces that require quadratic QUBOs, but the
+surrogate remains an approximation scored against exact repair. \\
+\hline
+Angle search & Optional scripted/manual tuning &
+\texttt{scripts/find\_reduced\_qaoa\_angles\_juliqaoa.jl} expects
+\texttt{JuliQAOA.jl} via a sibling clone or \texttt{JULIQAOA\_PROJECT}. & The
+strongest QAOA result required offline statevector angle search and parameter
+transfer rather than a default optimizer run. \\
+\hline
+Backend selection & Manual choice with scripted settings & Aer MPS,
+\texttt{FakeFez}/Aer, and IBM Runtime paths are separate scripts or
+configuration gates. & Backend choice changes the evidentiary tier: local
+emulation, model-based noisy simulation, or hardware feasibility. \\
+\hline
+Transpilation & Scripted and backend-specific & Simulator and hardware scripts
+set or record transpile seeds. & Hardware-comparable circuits require explicit
+transpilation provenance. \\
+\hline
+IBM credential handling & Manual, hardware-specific, optional &
+\texttt{scripts/run\_ibm\_qaoa\_pilot.jl} dry-runs by default and submits only
+when \texttt{DSMFG\_RUN\_IBM\_HARDWARE=true}. & IBM tokens and account files
+must remain outside the repository; dry-run artifacts should not expose
+secrets. \\
+\hline
+Postprocessing and exact repair & Scripted and required for reported metrics &
+Scoring scripts and cached summaries report top-50, top-10, global,
+feasible-pool, Wilson interval, and time-to-solution fields. & The reported
+result is the repaired-flow distribution, not merely raw sampled QUBO
+bitstrings. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\scriptsize
 \caption{Experiment campaigns and execution backends. Artifact paths are
 relative to the reproducibility bundle.}
 \label{tab:ds-mfg-campaigns}
