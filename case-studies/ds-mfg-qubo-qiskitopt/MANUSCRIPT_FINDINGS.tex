@@ -568,6 +568,10 @@ the global optimum. Perturbing those $p=2$ fixed angles did not improve the
 result. Separating optimizer reads from final sampling on the full QUBO improved
 the best repaired pool objective to $14.5505$ and produced three projected pool
 reads in 512 samples, but still did not sample the global optimum.
+The direct original-QUBO audit cache rescored this full-QUBO final-sampling row
+against exact repair and the top-flow table: it contains five top-50
+repaired-flow reads, one top-10 read, zero global reads, and zero encoded
+Gurobi-pool reads.
 
 The strongest QAOA result was obtained by optimizing angles offline on the
 reduced surrogate with \texttt{JuliQAOA.jl} and then transferring those angles
@@ -659,6 +663,15 @@ The initial VQE experiments were less concentrated than the best QAOA workflow.
 On the full 36-variable QUBO, a five-seed \texttt{EfficientSU2} sweep with
 8192 final reads per seed produced one projected pool read and no encoded or
 global read. The best repaired full-QUBO VQE objective was $14.6515$.
+The direct original-QUBO audit cache reports that the best full-QUBO VQE seed
+had two top-50 repaired-flow reads, one top-10 read, zero global reads, and zero
+encoded Gurobi-pool reads.
+
+The same audit records direct noisy-simulator resource evidence for the
+original QUBO. The direct full-QUBO $p=2$ QAOA circuit has 36 logical qubits and
+202 logical \texttt{rzz} gates. A gated \texttt{FakeFez} transpile produced
+depth 1344 with 1157 \texttt{cz} gates. No direct 36-qubit noisy samples are
+cached.
 
 The reduced-surrogate VQE runs performed better. A five-seed sweep with 8192
 final reads found a near-optimal pool flow with repaired objective $11.8105$,

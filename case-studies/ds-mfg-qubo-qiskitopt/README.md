@@ -39,6 +39,12 @@ Best cached results:
 - VQE: the final reduced-surrogate follow-up sampled the global optimum 28
   times across three 524288-read local Aer runs; seed 74018 produced 20 of
   those reads.
+- Direct original-QUBO audit: cached direct 36-variable QUBO QAOA/VQE
+  distributions are consolidated in `ds_mfg_direct_full_qubo_audit/`. The best
+  direct full-QUBO QAOA row found 5 top-50 repaired-flow reads, 1 top-10 read,
+  and no global reads in 512 final samples; the best direct full-QUBO VQE seed
+  found 2 top-50 reads, 1 top-10 read, and no global reads in 8192 final
+  samples.
 - Classical baselines: uniform random repaired-flow sampling found no global
   optimum hits at 262144 or 524288 samples, while the 262144-evaluation
   hill-climb restart baseline found 19 global hits. Cached outputs are in
@@ -60,6 +66,23 @@ Best cached results:
 
 The IBM hardware pilot is reported descriptively. It is not evidence of quantum
 speedup or IBM hardware-performance superiority.
+
+To refresh the direct original-QUBO audit cache without running noisy samples:
+
+```bash
+julia --project=. scripts/run_direct_full_qubo_audit.jl
+```
+
+To also record gated FakeFez transpilation metadata for the direct full-QUBO
+p=2 circuit:
+
+```bash
+DSMFG_DIRECT_FULL_QUBO_TRANSPILE=true julia --project=. scripts/run_direct_full_qubo_audit.jl
+```
+
+The cached resource row records 36 logical qubits, 202 logical `rzz` gates, a
+FakeFez-transpiled depth of 1344 with 1157 `cz` gates, and no direct noisy
+sample cache.
 
 To rerun the model-based noisy simulation as an overnight job, run:
 

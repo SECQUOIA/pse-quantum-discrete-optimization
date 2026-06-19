@@ -89,6 +89,9 @@ correctly. Exact auxiliary repair scored that projected flow at `18.0745`.
 Separating optimizer reads from final sampling improved the full 36-variable
 QAOA run. A p=2 run using 128 optimizer reads and 512 final reads produced three
 projected pool reads and improved the best repaired pool objective to `14.5505`.
+The direct original-QUBO audit cache rescored this same run against exact repair
+and the top-flow table: it contains 5 top-50 repaired-flow reads, 1 top-10 read,
+0 global reads, and 0 encoded Gurobi-pool reads.
 
 The strongest QAOA result came from moving angle search off the Qiskit/Aer optimizer path. The workflow was:
 
@@ -121,6 +124,9 @@ On the full 36-variable QUBO, a 5-seed VQE sweep with 8192 final reads found a
 projected Gurobi-pool flow with repaired objective `14.6515`. On the reduced
 19-flow surrogate, a 5-seed sweep improved the best repaired objective to
 `11.8105`, close to the global optimum.
+The direct original-QUBO audit cache shows that the best full-QUBO VQE seed had
+2 top-50 repaired-flow reads, 1 top-10 read, 0 global reads, and 0 encoded
+Gurobi-pool reads.
 
 After package-level Aer MPS backend attributes were available, the
 reduced-surrogate VQE study was repeated with more seeds and higher final
@@ -131,6 +137,12 @@ final sampling to 524288 reads on seeds 74018, 74007, and 74001; it sampled the
 global optimum 28 times total, with seed 74018 producing 20 of those reads.
 
 Thus, VQE can reach the global optimum on the reduced surrogate, but its global-hit rate is much lower than the transferred-angle QAOA run.
+
+For direct noisy-simulator feasibility, the audit builds the direct full-QUBO
+p=2 QAOA circuit from the archived `scalars.csv`, `L_vector.csv`, and
+`Q_matrix.csv`. The logical circuit has 36 qubits and 202 `rzz` gates. The
+gated FakeFez transpile produces depth 1344 and 1157 `cz` gates; no direct
+36-qubit noisy samples are cached.
 
 ## Classical Sampling Baselines
 

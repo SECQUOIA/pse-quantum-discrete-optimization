@@ -156,6 +156,7 @@ for relpath in (
     "Fw_ DS mfg case qubo information.zip",
     "ds_mfg_qaoa_vqe_distribution.svg",
     "scripts/run_noisy_qaoa_fake_backend.jl",
+    "scripts/run_direct_full_qubo_audit.jl",
     "scripts/update_simulator_hardware_comparison.jl",
 )
     require_file(relpath)
@@ -172,6 +173,7 @@ for relpath in (
     "ds_mfg_reduced_flow_objective",
     "ds_mfg_ibm_qaoa_pilot_fez_4096x3",
     "ds_mfg_simulator_hardware_comparison",
+    "ds_mfg_direct_full_qubo_audit",
     "ds_mfg_classical_baselines",
     "ds_mfg_hit_rate_reports",
     "scripts",
@@ -256,6 +258,68 @@ require_int(global_qaoa, "gurobi_pool_feasible_hits", 924)
 require_value(global_qaoa, "best_top50_match", "global_optimum")
 require_value(global_qaoa, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
 require_hit_rate_stats(global_qaoa)
+
+println("Checking direct original-QUBO audit artifacts...")
+for filename in ("README.md", "direct_full_qubo_summary.csv", "direct_full_qubo_resource_summary.csv", "direct_full_qubo_resource_metadata.json")
+    require_file(joinpath("ds_mfg_direct_full_qubo_audit", filename))
+end
+
+direct_rows = parse_csv_rows("ds_mfg_direct_full_qubo_audit/direct_full_qubo_summary.csv")
+length(direct_rows) == 19 || smoke_error("expected 19 direct full-QUBO audit rows")
+direct_qaoa = only(filter(
+    row -> row["source_artifact"] == "ds_mfg_final_sampling_sweep_v2/qaoa_p2_optimizer_reads128_final_reads512_iter25_distribution.csv",
+    direct_rows,
+))
+require_value(direct_qaoa, "problem", "direct_original_36_variable_qubo")
+require_value(direct_qaoa, "mode", "cached_local_aer_emulation")
+require_int(direct_qaoa, "total_reads", 512)
+require_int(direct_qaoa, "projected_pool_hits", 3)
+require_int(direct_qaoa, "encoded_pool_hits", 0)
+require_int(direct_qaoa, "top50_hits", 5)
+require_int(direct_qaoa, "top10_hits", 1)
+require_int(direct_qaoa, "global_hits", 0)
+require_int(direct_qaoa, "gurobi_pool_feasible_hits", 3)
+require_value(direct_qaoa, "best_repaired_match", "gurobi_pool")
+require_value(direct_qaoa, "best_repaired_flow_bits", "1001110110011100011")
+require_float(direct_qaoa, "best_repaired_qubo_energy", 14.5505)
+require_hit_rate_stats(direct_qaoa)
+
+direct_vqe = only(filter(
+    row -> row["source_artifact"] == "ds_mfg_vqe_final_sampling_sweep_v2/vqe_full_random_seed73005_optimizer_reads128_final_reads8192_iter25_distribution.csv",
+    direct_rows,
+))
+require_int(direct_vqe, "total_reads", 8192)
+require_int(direct_vqe, "projected_pool_hits", 1)
+require_int(direct_vqe, "encoded_pool_hits", 0)
+require_int(direct_vqe, "top50_hits", 2)
+require_int(direct_vqe, "top10_hits", 1)
+require_int(direct_vqe, "global_hits", 0)
+require_value(direct_vqe, "best_repaired_match", "gurobi_pool")
+require_value(direct_vqe, "best_repaired_flow_bits", "1001110110011010011")
+require_float(direct_vqe, "best_repaired_qubo_energy", 14.6515)
+require_hit_rate_stats(direct_vqe)
+
+resource_row = only(parse_csv_rows("ds_mfg_direct_full_qubo_audit/direct_full_qubo_resource_summary.csv"))
+require_value(resource_row, "problem", "direct_original_36_variable_qubo")
+require_value(resource_row, "mode", "resource_audit")
+require_value(resource_row, "fake_backend", "FakeFez")
+require_int(resource_row, "logical_qubits", 36)
+require_int(resource_row, "logical_rzz_count", 202)
+require_int(resource_row, "logical_two_qubit_ops", 202)
+require_value(resource_row, "statevector_amplitudes", "68719476736")
+require_value(resource_row, "statevector_complex128_bytes", "1099511627776")
+require_value(resource_row, "transpile_requested", "true")
+require_value(resource_row, "transpile_status", "DONE")
+require_int(resource_row, "transpiled_depth", 1344)
+require_int(resource_row, "transpiled_cz_count", 1157)
+require_value(resource_row, "simulation_status", "not_run")
+resource_metadata = read(require_file("ds_mfg_direct_full_qubo_audit/direct_full_qubo_resource_metadata.json"), String)
+occursin("\"n_qubits\":36", resource_metadata) ||
+    smoke_error("direct full-QUBO resource metadata must record 36 qubits")
+occursin("\"cz_count\":1157", resource_metadata) ||
+    smoke_error("direct full-QUBO resource metadata must record FakeFez CZ count")
+occursin("No direct 36-qubit noisy samples are cached", resource_metadata) ||
+    smoke_error("direct full-QUBO metadata must state the noisy-sample boundary")
 
 vqe_rows = parse_csv_rows("ds_mfg_vqe_reduced_flow_objective_final/vqe_reduced_top50_sampling_summary.csv")
 length(vqe_rows) == 3 || smoke_error("expected three final VQE follow-up rows")
@@ -574,6 +638,31 @@ mktempdir() do noisy_output_dir
     length(summary_lines) == 2 || smoke_error("FakeFez noisy dry-run summary must contain one data row")
     occursin("QAOA_reduced_surrogate_JuliQAOA_FakeFez_noisy_simulation,dry_run,FakeFez,top10,5,4096,3,92001;92002;92003,93001,3,0,", summary_lines[2]) ||
         smoke_error("FakeFez noisy dry-run summary row has unexpected configuration values")
+end
+
+println("Checking direct full-QUBO audit dry-run schema...")
+mktempdir() do direct_output_dir
+    withenv(
+        "DSMFG_DIRECT_FULL_QUBO_OUTPUT_DIR" => direct_output_dir,
+        "DSMFG_DIRECT_FULL_QUBO_TRANSPILE" => "false",
+    ) do
+        run(`$(Base.julia_cmd()) --project=$(ROOT) scripts/run_direct_full_qubo_audit.jl`)
+    end
+
+    for filename in ("direct_full_qubo_summary.csv", "direct_full_qubo_resource_summary.csv", "direct_full_qubo_resource_metadata.json")
+        path = joinpath(direct_output_dir, filename)
+        isfile(path) || smoke_error("direct full-QUBO dry run did not write $(filename)")
+        filesize(path) > 0 || smoke_error("direct full-QUBO dry-run file is empty: $(filename)")
+    end
+
+    dry_summary_rows = parse_csv_rows(joinpath(direct_output_dir, "direct_full_qubo_summary.csv"))
+    length(dry_summary_rows) == 19 || smoke_error("direct full-QUBO dry run must write 19 summary rows")
+    dry_resource_row = only(parse_csv_rows(joinpath(direct_output_dir, "direct_full_qubo_resource_summary.csv")))
+    require_value(dry_resource_row, "transpile_requested", "false")
+    require_value(dry_resource_row, "transpile_status", "not_requested")
+    require_int(dry_resource_row, "logical_qubits", 36)
+    require_int(dry_resource_row, "logical_rzz_count", 202)
+    require_value(dry_resource_row, "simulation_status", "not_run")
 end
 
 include(joinpath(@__DIR__, "run_ibm_qaoa_pilot.jl"))

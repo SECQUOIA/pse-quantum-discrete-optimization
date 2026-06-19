@@ -101,6 +101,20 @@ Best sampled VQE results in this analysis bundle:
 - final reduced-surrogate VQE follow-up with 524288 final reads over the same 3
   selected seeds: 28 sampled global-optimum reads, with seed 74018 producing 20.
 
+Direct original-QUBO audit in this analysis bundle:
+
+- `scripts/run_direct_full_qubo_audit.jl` reloads the original archived
+  36-variable QUBO and scores cached direct full-QUBO QAOA/VQE distributions
+  with exact auxiliary repair,
+- the best direct full-QUBO QAOA final-sampling row has 5 top-50 repaired-flow
+  hits, 1 top-10 hit, 0 global hits, and best repaired objective `14.5505` in
+  512 reads,
+- the best direct full-QUBO VQE seed has 2 top-50 repaired-flow hits, 1 top-10
+  hit, 0 global hits, and best repaired objective `14.6515` in 8192 reads,
+- the direct full-QUBO p=2 resource audit records 36 qubits, 202 logical `rzz`
+  gates, FakeFez-transpiled depth 1344, 1157 `cz` gates, and no cached direct
+  noisy samples.
+
 Classical sampling baselines in this analysis bundle:
 
 - uniform random repaired-flow sampling with 262144 samples: 24 top-50 hits, 5
