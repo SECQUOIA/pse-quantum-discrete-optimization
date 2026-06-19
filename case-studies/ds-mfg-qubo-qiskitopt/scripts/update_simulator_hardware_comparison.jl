@@ -202,7 +202,7 @@ function degradation_rows(ideal, noisy, hardware)
                 format_number(hardware_minus_expected),
                 noisy_stats === nothing ?
                     "No cached model-based noisy result is present yet; run scripts/run_noisy_qaoa_fake_backend.jl overnight to populate the noisy columns." :
-                    "Rates use each row's own read budget; expected hardware-budget hits apply the ideal Aer rate to 36864 reads.",
+                    "Rates use each row's own read budget; expected hardware-budget hits apply the ideal Aer rate to $(hardware_total) reads.",
             ],
         )
     end
