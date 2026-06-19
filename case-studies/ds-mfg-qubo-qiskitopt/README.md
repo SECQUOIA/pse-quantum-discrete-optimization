@@ -54,13 +54,13 @@ Best cached results:
   `ds_mfg_ibm_qaoa_pilot_fez_4096x3/`.
 - Simulator-to-hardware comparison: cached tables in
   `ds_mfg_simulator_hardware_comparison/` compare the ideal Aer top-10-targeted
-  p=5 transfer with the `ibm_fez` pilot and reserve columns for a model-based
-  FakeFez/Aer noisy simulation.
+  p=5 transfer, the model-based FakeFez/Aer noisy simulation from
+  `ds_mfg_fake_fez_qaoa_noisy_4096x3/summary.csv`, and the `ibm_fez` pilot.
 
 The IBM hardware pilot is reported descriptively. It is not evidence of quantum
 speedup or IBM hardware-performance superiority.
 
-To launch the model-based noisy simulation as an overnight job, run:
+To rerun the model-based noisy simulation as an overnight job, run:
 
 ```bash
 DSMFG_RUN_NOISY_SIMULATION=true julia --project=. scripts/run_noisy_qaoa_fake_backend.jl
