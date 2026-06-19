@@ -97,7 +97,9 @@ bundle also includes a small IBM hardware pilot for the reduced 19-qubit
 top-10-targeted p=5 QAOA circuit on `ibm_fez`: 9 jobs, 4096 shots each, 36864
 total reads, 6 top-50 repaired-flow hits, 1 top-10 hit, and no global-optimum
 hit. Cached simulator-to-hardware comparison tables are stored under
-`ds_mfg_simulator_hardware_comparison/`.
+`ds_mfg_simulator_hardware_comparison/`. A direct 36-qubit full-QUBO p=2
+hardware pilot using the optimized high-read parameters is also cached: 1
+`ibm_fez` job, 4096 shots, and no top-50/top-10/global repaired-flow hits.
 
 The manuscript narrative keeps that evidence boundary explicit and does not
 treat the pilot as a speedup or hardware-superiority result. The DS-MFG case

@@ -61,6 +61,11 @@ Best cached results:
   run found 6 top-50 repaired-flow hits, 1 top-10 hit, 0 global-optimum hits,
   and a best repaired objective of `11.8105` at rank 2. Cached artifacts are in
   `ds_mfg_ibm_qaoa_pilot_fez_4096x3/`.
+- Direct full-QUBO hardware pilot: the optimized direct 36-variable full-QUBO
+  p=2 QAOA circuit was submitted to `ibm_fez` for 1 job of 4096 shots. It found
+  0 top-50, 0 top-10, and 0 global repaired-flow hits; its best repaired
+  objective was `91.7295`. Cached artifacts are in
+  `ds_mfg_direct_full_qubo_hardware_pilot/`.
 - Simulator-to-hardware comparison: cached tables in
   `ds_mfg_simulator_hardware_comparison/` compare the ideal Aer top-10-targeted
   p=5 transfer, the model-based FakeFez/Aer noisy simulation from
@@ -99,7 +104,8 @@ and the explicit `DSMFG_RUN_DIRECT_FULL_QUBO_HARDWARE=true` gate.
 
 The cached resource row records 36 logical qubits, 202 logical `rzz` gates, a
 FakeFez-transpiled depth of 1344 with 1157 `cz` gates, and no direct noisy
-sample cache. A dense noiseless statevector would require `2^36` amplitudes
+sample cache. The direct full-QUBO hardware pilot is a real hardware sample,
+not a noisy simulator cache. A dense noiseless statevector would require `2^36` amplitudes
 (`1099511627776` complex128 bytes), while exact dense noisy density-matrix
 simulation would require `2^72` complex entries. Aer automatic or MPS-style
 noisy simulation may avoid dense density-matrix storage for some circuits, but

@@ -280,6 +280,11 @@ The cached simulator-to-hardware comparison is stored in
 | FakeFez/Aer model-based noisy simulation | 36864 reads | 516 (0.0139974) | 108 (0.00292969) | 12 (0.000325521) |
 | IBM `ibm_fez` hardware pilot | 36864 reads | 6 (0.000162760) | 1 (0.0000271267) | 0 (0) |
 
+A direct full-QUBO p=2 `ibm_fez` hardware pilot using the optimized high-read
+parameters was also run as 1 job with 4096 shots. It found 0 top-50, 0 top-10,
+and 0 global repaired-flow hits; the best repaired objective was `91.7295`.
+The artifacts are in `ds_mfg_direct_full_qubo_hardware_pilot/`.
+
 Relative to the ideal Aer rates, the model-based noisy simulation retained about
 5.9% of the top-50 hit rate, 5.4% of the top-10 hit rate, and 8.5% of the
 global-optimum hit rate. The hardware pilot retained about 0.068% of the top-50

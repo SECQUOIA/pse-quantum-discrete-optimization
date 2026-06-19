@@ -931,6 +931,14 @@ tables are
 and
 \texttt{ds\_mfg\_simulator\_hardware\_comparison/simulator\_hardware\_degradation\_summary.csv}.
 
+A direct full-QUBO $p=2$ \texttt{ibm\_fez} hardware pilot using the optimized
+high-read parameter artifact was also run as one 4096-shot job. It found zero
+top-50, zero top-10, and zero global repaired-flow hits; the best repaired
+objective was $91.7295$. The artifacts are stored in
+\texttt{ds\_mfg\_direct\_full\_qubo\_hardware\_pilot/}. This direct hardware
+result is descriptive feasibility evidence for the 36-qubit handoff, not a
+performance claim.
+
 The noisy simulation is model-based and should not be treated as a calibrated
 prediction of hardware behavior. Its transpiled \texttt{FakeFez} circuits had
 depths 1442--1557 and 1136--1156 \texttt{cz} gates, and the cached 9-job run
