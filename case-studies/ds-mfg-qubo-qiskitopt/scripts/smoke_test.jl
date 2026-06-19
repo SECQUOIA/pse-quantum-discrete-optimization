@@ -881,6 +881,14 @@ mktempdir() do direct_hardware_output_dir
         smoke_error("direct full-QUBO hardware manifest must record the 36-qubit problem")
     occursin("\"p\":2", manifest_text) ||
         smoke_error("direct full-QUBO hardware manifest must record p=2")
+    occursin("\"source\":\"QiskitOpt.QAOA.fixed_parameter_circuit\"", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record QiskitOpt fixed-parameter circuit source")
+    occursin("\"mode\":\"fixed_parameter_circuit\"", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record QiskitOpt fixed-parameter metadata")
+    occursin("\"qiskit_minimization_sign\":1", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record QiskitOpt minimization sign")
+    occursin("\"values_aligned_to\":\"parameter_names\"", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record QiskitOpt parameter alignment")
     occursin("\"submitted\":false", manifest_text) ||
         smoke_error("direct full-QUBO hardware dry-run manifest must not mark jobs submitted")
     !occursin("QISKIT_IBM_TOKEN", manifest_text) ||

@@ -283,7 +283,11 @@ The cached simulator-to-hardware comparison is stored in
 A direct full-QUBO p=2 `ibm_fez` hardware pilot using the optimized high-read
 parameters was also run as 1 job with 4096 shots. It found 0 top-50, 0 top-10,
 and 0 global repaired-flow hits; the best repaired objective was `91.7295`.
-The artifacts are in `ds_mfg_direct_full_qubo_hardware_pilot/`.
+The artifacts are in `ds_mfg_direct_full_qubo_hardware_pilot/`. This cached run
+used the original hand-built hardware-circuit path and is retained as legacy
+descriptive evidence; rerun with the current `QiskitOpt.QAOA.fixed_parameter_circuit`
+handoff before treating it as a validated comparison to the high-read noiseless
+reference.
 
 Relative to the ideal Aer rates, the model-based noisy simulation retained about
 5.9% of the top-50 hit rate, 5.4% of the top-10 hit rate, and 8.5% of the

@@ -64,7 +64,10 @@ Best cached results:
 - Direct full-QUBO hardware pilot: the optimized direct 36-variable full-QUBO
   p=2 QAOA circuit was submitted to `ibm_fez` for 1 job of 4096 shots. It found
   0 top-50, 0 top-10, and 0 global repaired-flow hits; its best repaired
-  objective was `91.7295`. Cached artifacts are in
+  objective was `91.7295`. This was collected with the original hand-built
+  hardware-circuit path and is retained as legacy descriptive evidence; rerun
+  with the current `QiskitOpt.QAOA.fixed_parameter_circuit` handoff before using
+  it as a validated comparison. Cached artifacts are in
   `ds_mfg_direct_full_qubo_hardware_pilot/`.
 - Simulator-to-hardware comparison: cached tables in
   `ds_mfg_simulator_hardware_comparison/` compare the ideal Aer top-10-targeted

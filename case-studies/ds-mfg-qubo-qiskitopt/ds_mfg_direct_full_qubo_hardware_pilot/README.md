@@ -1,8 +1,14 @@
 # Direct Full-QUBO IBM Hardware Pilot
 
 This directory caches the first real IBM Runtime run of the direct 36-variable
-DS-MFG full-QUBO p=2 QAOA circuit. The run used the optimized high-read
-parameter artifact:
+DS-MFG full-QUBO p=2 QAOA circuit. This run was collected with the original
+hand-built direct-QAOA hardware circuit path before the hardware handoff script
+was switched to `QiskitOpt.QAOA.fixed_parameter_circuit`. Retain it as
+descriptive legacy hardware evidence, not as a validated comparison to the
+QiskitOpt high-read noiseless reference. A comparable hardware run should be
+resubmitted with the current script.
+
+The run used the optimized high-read parameter artifact:
 
 ```text
 ds_mfg_direct_full_qubo_qaoa_highread/direct_full_qubo_qaoa_optimized_parameters.json
@@ -31,7 +37,8 @@ The cached files are:
   full-bitstring.
 - `summary.csv`: aggregate hit counts and hit-rate uncertainty columns.
 
-These artifacts are descriptive hardware evidence only. They are not evidence
-of quantum speedup or IBM hardware-performance superiority. The run found no
-top-50 repaired-flow hit in 4096 shots, whereas the corresponding noiseless
-high-read Aer sample found 4 repaired global-optimum hits in 32768 reads.
+These artifacts are descriptive legacy hardware evidence only. They are not
+evidence of quantum speedup or IBM hardware-performance superiority. The run
+found no top-50 repaired-flow hit in 4096 shots, whereas the corresponding
+noiseless high-read Aer sample found 4 repaired global-optimum hits in 32768
+reads.

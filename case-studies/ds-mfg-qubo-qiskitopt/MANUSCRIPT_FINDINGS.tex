@@ -935,8 +935,11 @@ A direct full-QUBO $p=2$ \texttt{ibm\_fez} hardware pilot using the optimized
 high-read parameter artifact was also run as one 4096-shot job. It found zero
 top-50, zero top-10, and zero global repaired-flow hits; the best repaired
 objective was $91.7295$. The artifacts are stored in
-\texttt{ds\_mfg\_direct\_full\_qubo\_hardware\_pilot/}. This direct hardware
-result is descriptive feasibility evidence for the 36-qubit handoff, not a
+\texttt{ds\_mfg\_direct\_full\_qubo\_hardware\_pilot/}. This cached run used
+the original hand-built hardware-circuit path and is retained as legacy
+descriptive evidence; it should be rerun with the current
+\texttt{QiskitOpt.QAOA.fixed\_parameter\_circuit} handoff before being treated
+as a validated comparison to the high-read noiseless reference. It is not a
 performance claim.
 
 The noisy simulation is model-based and should not be treated as a calibrated

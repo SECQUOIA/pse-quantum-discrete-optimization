@@ -143,7 +143,9 @@ IBM hardware pilot in this analysis bundle:
   global-optimum hits, and best repaired objective `11.8105` at rank 2.
 - direct 36-variable full-QUBO p=2 QAOA circuit on `ibm_fez`: 1 submitted job,
   4096 shots, 0 top-50 hits, 0 top-10 hits, 0 global-optimum hits, and best
-  repaired objective `91.7295`.
+  repaired objective `91.7295`. This cached run used the original hand-built
+  hardware-circuit path and should be treated as legacy descriptive evidence
+  until rerun with the current `QiskitOpt.QAOA.fixed_parameter_circuit` handoff.
 - simulator-to-hardware comparison tables in
   `ds_mfg_simulator_hardware_comparison/`: the current cache compares ideal
   Aer, model-based FakeFez/Aer noisy, and hardware hit rates using the cached

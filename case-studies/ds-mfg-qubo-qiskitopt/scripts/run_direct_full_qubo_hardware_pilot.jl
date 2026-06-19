@@ -10,9 +10,13 @@ end
 using Dates
 using Printf
 using PythonCall
+using QiskitOpt
+using QiskitOpt: QAOA
+using QUBODrivers
 
 include(joinpath(@__DIR__, "run_direct_full_qubo_audit.jl"))
 
+const DirectMOI = QUBODrivers.MOI
 const DIRECT_HARDWARE_ALGORITHM = "QAOA_direct_full_qubo_IBM_handoff"
 const DIRECT_HARDWARE_SCHEMA_VERSION = 1
 const DIRECT_HARDWARE_DEFAULT_OUTPUT_DIR = "ds_mfg_direct_full_qubo_hardware_pilot"
@@ -162,6 +166,47 @@ function read_direct_qaoa_parameters(path::AbstractString, qubo::QuboData)
     )
 end
 
+function direct_qubo_model(qubo::QuboData)
+    model = DirectMOI.instantiate(QAOA.Optimizer; with_cache_type = Float64)
+    x = DirectMOI.add_variables(model, qubo.n)
+    for variable in x
+        DirectMOI.add_constraint(model, variable, DirectMOI.ZeroOne())
+    end
+
+    quadratic_terms = DirectMOI.ScalarQuadraticTerm{Float64}[]
+    for i in 1:qubo.n, j in 1:qubo.n
+        coefficient = qubo.scale * qubo.quadratic[i, j]
+        iszero(coefficient) && continue
+        push!(quadratic_terms, DirectMOI.ScalarQuadraticTerm(i == j ? 2coefficient : coefficient, x[i], x[j]))
+    end
+
+    linear_terms = DirectMOI.ScalarAffineTerm{Float64}[]
+    for i in 1:qubo.n
+        coefficient = qubo.scale * qubo.linear[i]
+        iszero(coefficient) && continue
+        push!(linear_terms, DirectMOI.ScalarAffineTerm(coefficient, x[i]))
+    end
+
+    objective = DirectMOI.ScalarQuadraticFunction(
+        quadratic_terms,
+        linear_terms,
+        qubo.scale * qubo.offset,
+    )
+    DirectMOI.set(model, DirectMOI.ObjectiveSense(), DirectMOI.MIN_SENSE)
+    DirectMOI.set(model, DirectMOI.ObjectiveFunction{typeof(objective)}(), objective)
+    return model
+end
+
+function qiskitopt_direct_qaoa_circuit(qubo::QuboData, params::DirectQaoaParameters)
+    return QAOA.fixed_parameter_circuit(
+        direct_qubo_model(qubo);
+        parameters=params.angles,
+        reps=params.p,
+        parameter_order=:beta_then_gamma,
+        measure=true,
+    )
+end
+
 function direct_py_dict_to_julia(py_dict)
     converted = Dict{String,Int}()
     for item in py_dict.items()
@@ -170,18 +215,20 @@ function direct_py_dict_to_julia(py_dict)
     return converted
 end
 
-function direct_circuit_metadata(circuit, zz_pairs)
+function direct_circuit_metadata(circuit, fixed_metadata, qubo::QuboData)
     operation_counts = direct_py_dict_to_julia(circuit.count_ops())
     rzz_count = get(operation_counts, "rzz", 0)
     cx_count = get(operation_counts, "cx", 0)
     return Dict{String,Any}(
+        "source" => "QiskitOpt.QAOA.fixed_parameter_circuit",
         "num_qubits" => pyconvert(Int, circuit.num_qubits),
         "num_clbits" => pyconvert(Int, circuit.num_clbits),
         "depth" => pyconvert(Int, circuit.depth()),
         "operation_counts" => operation_counts,
-        "nonzero_ising_zz_pairs" => length(zz_pairs),
+        "nonzero_ising_zz_pairs" => length(effective_qubo_terms(qubo)[2]),
         "logical_two_qubit_ops" => rzz_count + cx_count,
         "measurement_bit_order" => "Qiskit count keys are reversed before scoring as x1..x36 full QUBO bits",
+        "qiskitopt_fixed_parameter_metadata" => fixed_metadata,
     )
 end
 
@@ -790,8 +837,8 @@ function main()
     components = read_aux_components(joinpath(REDUCED_DIR, "auxiliary_components.csv"), qubo)
     top_flows = read_exact_top_flows(joinpath(REDUCED_DIR, "reduced_exact_top_flows.csv"))
     params = read_direct_qaoa_parameters(config.parameter_path, qubo)
-    circuit, zz_pairs = build_direct_full_qubo_qaoa_circuit(qubo, params.p, params.angles)
-    circuit_info = direct_circuit_metadata(circuit, zz_pairs)
+    circuit, fixed_metadata = qiskitopt_direct_qaoa_circuit(qubo, params)
+    circuit_info = direct_circuit_metadata(circuit, fixed_metadata, qubo)
     paths = direct_output_paths(config)
     jobs = direct_planned_jobs(config)
     aggregate_full = Dict{String,Int}()
