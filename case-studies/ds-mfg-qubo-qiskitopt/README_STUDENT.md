@@ -16,8 +16,9 @@ hardware-performance superiority claim.
 
 Read these files in order:
 
-1. `MANUSCRIPT_FINDINGS.tex` for the manuscript-ready formulation, reduction,
-   and result narrative.
+1. `MANUSCRIPT_FINDINGS.tex` for the manuscript-ready introduction, method,
+   results, discussion, conclusion, formulation, reduction, and result
+   narrative.
 2. `ds_mfg_qubo_qiskitopt.ipynb` for the executable analysis record.
 3. `MANUSCRIPT_FINDINGS.md` for a compact summary.
 
@@ -234,7 +235,9 @@ attributes are not set.
 
 - `Fw_ DS mfg case qubo information.zip`: original QUBO/Gurobi input archive.
 - `Project.toml`, `Manifest.toml`, `CondaPkg.toml`: Julia and Python environment files for the notebook.
-- `MANUSCRIPT_FINDINGS.tex`: manuscript-ready LaTeX section with experiment details, cached artifact paths, result tables, and the hardware pilot.
+- `MANUSCRIPT_FINDINGS.tex`: manuscript-ready LaTeX body with introduction,
+  method, results, discussion, conclusion, experiment details, cached artifact
+  paths, result tables, and the hardware pilot.
 - `MANUSCRIPT_FINDINGS.md`: compact companion narrative for quick reading.
 - `ds_mfg_*` folders: cached result distributions and summaries used by the notebook.
 - `ds_mfg_ibm_qaoa_pilot_fez_4096x3/`: sanitized IBM hardware pilot manifest,

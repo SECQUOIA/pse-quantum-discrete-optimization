@@ -1,9 +1,10 @@
 # DS-MFG QUBO Case Study: Findings Narrative
 
 For manuscript incorporation, use `MANUSCRIPT_FINDINGS.tex`. That file is a
-LaTeX-ready section with experiment provenance, cached artifact paths, result
-tables, and the IBM hardware pilot. This Markdown file is kept as a compact
-companion summary.
+LaTeX-ready manuscript body organized as Introduction, Method, Results,
+Discussion, and Conclusion, with experiment provenance, cached artifact paths,
+result tables, and the IBM hardware pilot. This Markdown file is kept as a
+compact companion summary.
 
 ## Purpose
 
@@ -211,6 +212,20 @@ variables. The quantum-emulation workflow required a longer manual path:
 This burden is part of the result. The local QAOA and VQE experiments show that
 meaningful samples can be obtained, but not through a drop-in replacement for
 the classical solver.
+
+The workflow-effort rubric used for the manuscript is:
+
+| Workflow step | Effort class | Reproducibility status | Interpretation |
+| --- | --- | --- | --- |
+| QUBO reformulation | Manual interpretation of supplied artifact | Required input archive and CSV files are tracked | The 36-bit QUBO is not the same object as the 19-flow Gurobi model, so the flow/auxiliary split must be documented before sampling results are meaningful. |
+| Penalty and scaling interpretation | Manual review plus scripted loading | `scalars.csv`, `L_vector.csv`, and `Q_matrix.csv` are loaded by the notebook and helper scripts | Objective values are only comparable after applying the recorded scale and offset and after distinguishing raw QUBO energy from repaired flow objective. |
+| Auxiliary repair | Scripted once the split is identified | The repair components and exact repaired flow scores are cached under `ds_mfg_reduced_flow_objective/` | Exact repair is required for coherent comparison to the original Gurobi flow objective. |
+| Reduced surrogate construction | Scripted, problem-specific | The notebook enumerates all `2^19` repaired flow values and writes reduced surrogate CSVs | This enables QAOA/VQE interfaces that require quadratic QUBOs, but the surrogate remains an approximation scored against exact repair. |
+| Angle search | Optional scripted/manual tuning | `scripts/find_reduced_qaoa_angles_juliqaoa.jl` expects `JuliQAOA.jl` via a sibling clone or `JULIQAOA_PROJECT` | The strongest QAOA result required offline statevector angle search and parameter transfer rather than a default optimizer run. |
+| Backend selection | Manual choice with scripted settings | Aer MPS, FakeFez/Aer, and IBM Runtime paths are separate scripts or configuration gates | Backend choice changes the evidentiary tier: local emulation, model-based noisy simulation, or hardware feasibility. |
+| Transpilation | Scripted, backend-specific | Simulator and hardware scripts set or record transpile seeds | Hardware-comparable circuits require explicit transpilation provenance. |
+| IBM credential handling | Manual, hardware-specific, optional | `scripts/run_ibm_qaoa_pilot.jl` dry-runs by default and submits only when `DSMFG_RUN_IBM_HARDWARE=true` | IBM tokens and account files must remain outside the repository; dry-run artifacts should not expose secrets. |
+| Postprocessing and exact repair | Scripted and required for reported metrics | Scoring scripts and cached summaries report top-50, top-10, global, feasible-pool, Wilson interval, and time-to-solution fields | The reported result is the repaired-flow distribution, not merely raw sampled QUBO bitstrings. |
 
 ## Hardware Pilot Results
 

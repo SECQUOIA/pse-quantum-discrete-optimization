@@ -53,6 +53,24 @@ notebook.
 See `INSTALL.md` for fresh-device prerequisites, expected generated files, and
 notebook execution details.
 
+## Reproducibility Commands
+
+From `case-studies/ds-mfg-qubo-qiskitopt`, the primary reproducibility commands
+are:
+
+```bash
+scripts/bootstrap_ds_mfg.sh
+julia --project=. scripts/run_classical_baselines.jl
+QISKIT_IBM_BACKEND=ibm_fez julia --project=. scripts/run_ibm_qaoa_pilot.jl
+```
+
+The first command is the fresh-clone smoke test. The second regenerates the
+fixed-seed uniform-random and hill-climb classical baselines. The third is an
+IBM pilot dry run by default: it builds and scores the fixed-parameter QAOA
+handoff artifacts without submitting hardware jobs. Real IBM hardware
+submission requires credentials configured outside this repository and the
+explicit `DSMFG_RUN_IBM_HARDWARE=true` gate.
+
 Then read:
 
 1. `README_STUDENT.md` for the detailed guide to the notebook, environment,

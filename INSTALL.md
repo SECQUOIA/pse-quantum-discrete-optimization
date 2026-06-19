@@ -54,6 +54,27 @@ The smoke test checks that:
 - cached result summaries contain the expected DS-MFG optimum and sampler hit
   counts.
 
+## Reproducibility Workflow Map
+
+The repository separates required smoke checks from optional regeneration of
+expensive or hardware-specific artifacts:
+
+| Workflow item | Effort class | Exact command or setup |
+| --- | --- | --- |
+| Fresh-clone smoke test | Automatic/scripted, required | `case-studies/ds-mfg-qubo-qiskitopt/scripts/bootstrap_ds_mfg.sh` |
+| Manual smoke-test equivalent | Scripted, required for CI parity | `julia --project=. -e 'import Pkg; Pkg.instantiate(); Pkg.precompile()'` then `julia --project=. scripts/smoke_test.jl` from the case-study folder |
+| Classical baselines | Scripted, optional regeneration | `julia --project=. scripts/run_classical_baselines.jl` from the case-study folder |
+| Full notebook rerun | Scripted, optional and longer-running | `scripts/nbconvert_ds_mfg.sh` from the case-study folder |
+| Model-based noisy simulator rerun | Scripted, optional overnight simulation | `DSMFG_RUN_NOISY_SIMULATION=true julia --project=. scripts/run_noisy_qaoa_fake_backend.jl` then `julia --project=. scripts/update_simulator_hardware_comparison.jl` |
+| IBM QAOA pilot dry run | Scripted hardware-handoff check, no submission by default | `QISKIT_IBM_BACKEND=ibm_fez julia --project=. scripts/run_ibm_qaoa_pilot.jl` |
+| IBM QAOA hardware run | Manual credential setup plus explicit hardware gate | configure IBM credentials outside the repo, then set `DSMFG_RUN_IBM_HARDWARE=true` with the backend, channel, shot, repeat, and transpile-seed variables shown below |
+
+Manual interpretation is still part of the analysis. The QUBO reformulation,
+penalty/scaling files, flow/auxiliary split, reduced-surrogate construction,
+offline angle search, backend choice, transpilation seeds, and exact-repair
+postprocessing are documented as workflow effort in
+`case-studies/ds-mfg-qubo-qiskitopt/MANUSCRIPT_FINDINGS.tex`.
+
 ## Manual Equivalent
 
 From the case-study folder, the bootstrap script is equivalent to:
