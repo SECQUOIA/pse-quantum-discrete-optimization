@@ -155,6 +155,7 @@ for relpath in (
     "ds_mfg_qubo_qiskitopt.ipynb",
     "Fw_ DS mfg case qubo information.zip",
     "ds_mfg_qaoa_vqe_distribution.svg",
+    "scripts/artifact_paths.jl",
     "scripts/run_noisy_qaoa_fake_backend.jl",
     "scripts/run_direct_full_qubo_audit.jl",
     "scripts/run_direct_full_qubo_hardware_pilot.jl",

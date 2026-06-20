@@ -154,7 +154,7 @@ function noisy_manifest(config::NoisyConfig, data, circuit_info, jobs, paths)
             "transpile_seeds" => config.transpile_seeds,
             "simulator_seed_start" => config.simulator_seed_start,
             "optimization_level" => config.optimization_level,
-            "output_dir" => public_artifact_path(config.output_dir),
+            "output_dir" => public_artifact_path(config.output_dir, STUDY_ROOT),
             "run_simulation" => config.run_simulation,
             "max_jobs" => config.max_jobs,
         ),

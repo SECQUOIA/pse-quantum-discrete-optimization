@@ -340,6 +340,12 @@ design question; the current manuscript instead reports the uniform quadratic
 surrogate, exact repair scoring, direct full-QUBO evidence, classical
 baselines, noisy-model comparison, and small hardware pilots.
 
+The executed notebook still contains historical machine-local paths in captured
+outputs. Those paths are descriptive notebook provenance, not secrets or
+submission artifacts; sanitizing them is deferred to a future notebook rerun.
+For FOCAPO-CPC/PSE Press submission, `MANUSCRIPT_FINDINGS.tex` is body content
+intended to be inserted after `\psemaketitle` in the journal template wrapper.
+
 ## Interpretation
 
 The main methodological finding is that model interpretation matters as much as sampler behavior. Raw QUBO energies alone can be misleading because auxiliary-variable assignments may be inconsistent even when the projected flow is meaningful. Exact auxiliary repair makes the comparison to the original IP objective coherent.
