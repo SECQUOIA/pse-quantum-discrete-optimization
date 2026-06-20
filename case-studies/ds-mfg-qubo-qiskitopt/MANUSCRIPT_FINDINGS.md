@@ -308,6 +308,38 @@ The QAOA hardware pilot is a feasibility measurement of the fixed-circuit
 handoff and returned count scoring. It is not a hardware-performance or speedup
 claim.
 
+## Final Artifact Audit
+
+The manuscript claims are supported by tracked artifacts rather than by
+uncommitted reruns. The principal evidence paths are:
+
+- original QUBO/Gurobi archive: `Fw_ DS mfg case qubo information.zip`,
+- exact repair and reduced objective: `ds_mfg_reduced_flow_objective/`,
+- QAOA and VQE sampled distributions: `ds_mfg_*summary.csv` files listed in
+  the workflow table and checked by `scripts/smoke_test.jl`,
+- direct full-QUBO audit and high-read QAOA evidence:
+  `ds_mfg_direct_full_qubo_audit/` and
+  `ds_mfg_direct_full_qubo_qaoa_highread/`,
+- classical context: `ds_mfg_classical_baselines/` and
+  `ds_mfg_hit_rate_reports/time_to_solution_report.csv`,
+- hardware and simulator comparison:
+  `ds_mfg_ibm_qaoa_pilot_fez_4096x3/`,
+  `ds_mfg_direct_full_qubo_hardware_pilot/`,
+  `ds_mfg_fake_fez_qaoa_noisy_4096x3/`, and
+  `ds_mfg_simulator_hardware_comparison/`.
+
+The committed hardware and simulator manifests are sanitized provenance
+records. They retain public backend names, job IDs, shot counts, transpile
+seeds, parameter-artifact paths, and scoring paths, but they do not include IBM
+tokens, account files, Runtime instance CRNs, or absolute local output
+directories. Real submissions remain gated by explicit environment variables.
+
+The remaining low-energy-weighted surrogate study is future work, not a
+blocking result for this manuscript state. It would test a different surrogate
+design question; the current manuscript instead reports the uniform quadratic
+surrogate, exact repair scoring, direct full-QUBO evidence, classical
+baselines, noisy-model comparison, and small hardware pilots.
+
 ## Interpretation
 
 The main methodological finding is that model interpretation matters as much as sampler behavior. Raw QUBO energies alone can be misleading because auxiliary-variable assignments may be inconsistent even when the projected flow is meaningful. Exact auxiliary repair makes the comparison to the original IP objective coherent.

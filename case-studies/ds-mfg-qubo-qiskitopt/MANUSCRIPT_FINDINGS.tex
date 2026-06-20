@@ -961,6 +961,40 @@ The VQE hardware candidate remains a follow-up item. The cache identifies seed
 \texttt{EfficientSU2} parameter vector needed for a clean fixed-parameter
 hardware sampling experiment.
 
+\subsection{Final Artifact Audit}
+\label{subsec:ds-mfg-final-artifact-audit}
+
+The manuscript claims are supported by tracked artifacts rather than by
+uncommitted reruns. The original QUBO and Gurobi data are in
+\texttt{Fw\_ DS mfg case qubo information.zip}. Exact auxiliary repair and the
+reduced flow objective are cached under
+\texttt{ds\_mfg\_reduced\_flow\_objective/}. The QAOA and VQE distribution
+claims are backed by the summary CSVs listed in
+Table~\ref{tab:ds-mfg-qaoa-results} and
+Table~\ref{tab:ds-mfg-vqe-results}, and by the smoke test
+\texttt{scripts/smoke\_test.jl}. The direct full-QUBO evidence is stored in
+\texttt{ds\_mfg\_direct\_full\_qubo\_audit/} and
+\texttt{ds\_mfg\_direct\_full\_qubo\_qaoa\_highread/}. Classical context is
+stored in \texttt{ds\_mfg\_classical\_baselines/} and
+\texttt{ds\_mfg\_hit\_rate\_reports/time\_to\_solution\_report.csv}. Hardware
+and simulator comparison artifacts are stored in
+\texttt{ds\_mfg\_ibm\_qaoa\_pilot\_fez\_4096x3/},
+\texttt{ds\_mfg\_direct\_full\_qubo\_hardware\_pilot/},
+\texttt{ds\_mfg\_fake\_fez\_qaoa\_noisy\_4096x3/}, and
+\texttt{ds\_mfg\_simulator\_hardware\_comparison/}.
+
+The committed hardware and simulator manifests are sanitized provenance
+records. They retain public backend names, job IDs, shot counts, transpile
+seeds, parameter-artifact paths, and scoring paths, but they do not include IBM
+tokens, account files, Runtime instance CRNs, or absolute local output
+directories. Real submissions remain gated by explicit environment variables.
+
+The remaining low-energy-weighted surrogate study is future work, not a
+blocking result for this manuscript state. It would test a different surrogate
+design question; the current manuscript instead reports the uniform quadratic
+surrogate, exact repair scoring, direct full-QUBO evidence, classical
+baselines, noisy-model comparison, and small hardware pilots.
+
 \section{Discussion}
 \label{sec:ds-mfg-discussion}
 

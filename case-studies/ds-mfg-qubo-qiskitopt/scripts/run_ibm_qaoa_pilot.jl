@@ -73,6 +73,15 @@ function parse_int_list(value::AbstractString)
     return items
 end
 
+function public_artifact_path(path::AbstractString)
+    normalized = normpath(abspath(path))
+    relative = relpath(normalized, STUDY_ROOT)
+    if relative == ".." || startswith(relative, "../") || startswith(relative, "..\\")
+        return basename(normalized)
+    end
+    return relative
+end
+
 function read_config()
     backend_name = require_env("QISKIT_IBM_BACKEND")
     channel = strip(get(ENV, "QISKIT_IBM_CHANNEL", DEFAULT_IBM_RUNTIME_CHANNEL))
@@ -431,7 +440,7 @@ function manifest(config::PilotConfig, data, circuit_info, jobs, paths)
             "final_reads" => config.final_reads,
             "repeats" => config.repeats,
             "transpile_seeds" => config.transpile_seeds,
-            "output_dir" => config.output_dir,
+            "output_dir" => public_artifact_path(config.output_dir),
             "run_hardware" => config.run_hardware,
         ),
         "problem" => Dict{String,Any}(
