@@ -62,6 +62,7 @@ are:
 scripts/bootstrap_ds_mfg.sh
 julia --project=. scripts/run_classical_baselines.jl
 QISKIT_IBM_BACKEND=ibm_fez julia --project=. scripts/run_ibm_qaoa_pilot.jl
+QISKIT_IBM_BACKEND=ibm_fez julia --project=. scripts/run_direct_full_qubo_hardware_pilot.jl
 ```
 
 The first command is the fresh-clone smoke test. The second regenerates the
@@ -69,7 +70,11 @@ fixed-seed uniform-random and hill-climb classical baselines. The third is an
 IBM pilot dry run by default: it builds and scores the fixed-parameter QAOA
 handoff artifacts without submitting hardware jobs. Real IBM hardware
 submission requires credentials configured outside this repository and the
-explicit `DSMFG_RUN_IBM_HARDWARE=true` gate.
+explicit `DSMFG_RUN_IBM_HARDWARE=true` gate. The fourth dry-runs the direct
+36-variable full-QUBO QAOA hardware handoff. It defaults to the optimized p=2
+artifact that produced 4 repaired global-optimum hits in 32768 local Aer reads
+when that artifact is present; real submission is separately gated by
+`DSMFG_RUN_DIRECT_FULL_QUBO_HARDWARE=true`.
 
 Then read:
 
@@ -92,7 +97,12 @@ bundle also includes a small IBM hardware pilot for the reduced 19-qubit
 top-10-targeted p=5 QAOA circuit on `ibm_fez`: 9 jobs, 4096 shots each, 36864
 total reads, 6 top-50 repaired-flow hits, 1 top-10 hit, and no global-optimum
 hit. Cached simulator-to-hardware comparison tables are stored under
-`ds_mfg_simulator_hardware_comparison/`.
+`ds_mfg_simulator_hardware_comparison/`. A direct 36-qubit full-QUBO p=2
+hardware pilot using the optimized high-read parameters is also cached as
+legacy descriptive evidence: 1 `ibm_fez` job, 4096 shots, and no
+top-50/top-10/global repaired-flow hits. Rerun it with the current
+`QiskitOpt.QAOA.fixed_parameter_circuit` handoff before using it as a validated
+comparison.
 
 The manuscript narrative keeps that evidence boundary explicit and does not
 treat the pilot as a speedup or hardware-superiority result. The DS-MFG case
@@ -101,4 +111,8 @@ runner; see `INSTALL.md` for credential handling and the explicit
 `DSMFG_RUN_IBM_HARDWARE=true` submission gate. It also includes
 `scripts/run_noisy_qaoa_fake_backend.jl` for an overnight model-based
 FakeFez/Aer simulation; results from that script must be labeled as
-model-based simulation, not as calibrated hardware predictions.
+model-based simulation, not as calibrated hardware predictions. The direct
+full-QUBO p=2 QAOA hardware handoff is available as
+`scripts/run_direct_full_qubo_hardware_pilot.jl`; it prefers
+`ds_mfg_direct_full_qubo_qaoa_highread/direct_full_qubo_qaoa_optimized_parameters.json`
+when present and also dry-runs unless its direct hardware gate is enabled.

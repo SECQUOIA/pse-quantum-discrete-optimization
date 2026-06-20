@@ -39,6 +39,14 @@ Best cached results:
 - VQE: the final reduced-surrogate follow-up sampled the global optimum 28
   times across three 524288-read local Aer runs; seed 74018 produced 20 of
   those reads.
+- Direct original-QUBO audit: cached direct 36-variable QUBO QAOA/VQE
+  distributions are consolidated in `ds_mfg_direct_full_qubo_audit/`. The best
+  original 512-read direct full-QUBO QAOA row found 5 top-50 repaired-flow
+  reads, 1 top-10 read, and no global reads; a higher-read optimized p=2 direct
+  QAOA run in `ds_mfg_direct_full_qubo_qaoa_highread/` found 4 global-optimum
+  repaired-flow hits in 32768 final reads. The best direct full-QUBO VQE seed
+  found 2 top-50 reads, 1 top-10 read, and no global reads in 8192 final
+  samples.
 - Classical baselines: uniform random repaired-flow sampling found no global
   optimum hits at 262144 or 524288 samples, while the 262144-evaluation
   hill-climb restart baseline found 19 global hits. Cached outputs are in
@@ -53,6 +61,14 @@ Best cached results:
   run found 6 top-50 repaired-flow hits, 1 top-10 hit, 0 global-optimum hits,
   and a best repaired objective of `11.8105` at rank 2. Cached artifacts are in
   `ds_mfg_ibm_qaoa_pilot_fez_4096x3/`.
+- Direct full-QUBO hardware pilot: the optimized direct 36-variable full-QUBO
+  p=2 QAOA circuit was submitted to `ibm_fez` for 1 job of 4096 shots. It found
+  0 top-50, 0 top-10, and 0 global repaired-flow hits; its best repaired
+  objective was `91.7295`. This was collected with the original hand-built
+  hardware-circuit path and is retained as legacy descriptive evidence; rerun
+  with the current `QiskitOpt.QAOA.fixed_parameter_circuit` handoff before using
+  it as a validated comparison. Cached artifacts are in
+  `ds_mfg_direct_full_qubo_hardware_pilot/`.
 - Simulator-to-hardware comparison: cached tables in
   `ds_mfg_simulator_hardware_comparison/` compare the ideal Aer top-10-targeted
   p=5 transfer, the model-based FakeFez/Aer noisy simulation from
@@ -60,6 +76,43 @@ Best cached results:
 
 The IBM hardware pilot is reported descriptively. It is not evidence of quantum
 speedup or IBM hardware-performance superiority.
+
+To refresh the direct original-QUBO audit cache without running noisy samples:
+
+```bash
+julia --project=. scripts/run_direct_full_qubo_audit.jl
+```
+
+To also record gated FakeFez transpilation metadata for the direct full-QUBO
+p=2 circuit:
+
+```bash
+DSMFG_DIRECT_FULL_QUBO_TRANSPILE=true julia --project=. scripts/run_direct_full_qubo_audit.jl
+```
+
+To build the direct full-QUBO p=2 QAOA hardware handoff artifacts without
+submitting jobs:
+
+```bash
+QISKIT_IBM_BACKEND=ibm_fez julia --project=. scripts/run_direct_full_qubo_hardware_pilot.jl
+```
+
+When present, the hardware pilot defaults to the optimized high-read artifact
+`ds_mfg_direct_full_qubo_qaoa_highread/direct_full_qubo_qaoa_optimized_parameters.json`.
+The older audit artifact
+`ds_mfg_direct_full_qubo_audit/direct_full_qubo_qaoa_hardware_parameters.json`
+remains available as the warm-start parameter record. The hardware pilot
+dry-runs by default. Real IBM submission requires configured Runtime credentials
+and the explicit `DSMFG_RUN_DIRECT_FULL_QUBO_HARDWARE=true` gate.
+
+The cached resource row records 36 logical qubits, 202 logical `rzz` gates, a
+FakeFez-transpiled depth of 1344 with 1157 `cz` gates, and no direct noisy
+sample cache. The direct full-QUBO hardware pilot is a real hardware sample,
+not a noisy simulator cache. A dense noiseless statevector would require `2^36` amplitudes
+(`1099511627776` complex128 bytes), while exact dense noisy density-matrix
+simulation would require `2^72` complex entries. Aer automatic or MPS-style
+noisy simulation may avoid dense density-matrix storage for some circuits, but
+the cost is entanglement-dependent and was not run here at a useful shot budget.
 
 To rerun the model-based noisy simulation as an overnight job, run:
 

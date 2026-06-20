@@ -156,6 +156,9 @@ for relpath in (
     "Fw_ DS mfg case qubo information.zip",
     "ds_mfg_qaoa_vqe_distribution.svg",
     "scripts/run_noisy_qaoa_fake_backend.jl",
+    "scripts/run_direct_full_qubo_audit.jl",
+    "scripts/run_direct_full_qubo_hardware_pilot.jl",
+    "scripts/run_direct_full_qubo_qaoa_highread.jl",
     "scripts/update_simulator_hardware_comparison.jl",
 )
     require_file(relpath)
@@ -172,6 +175,9 @@ for relpath in (
     "ds_mfg_reduced_flow_objective",
     "ds_mfg_ibm_qaoa_pilot_fez_4096x3",
     "ds_mfg_simulator_hardware_comparison",
+    "ds_mfg_direct_full_qubo_audit",
+    "ds_mfg_direct_full_qubo_qaoa_highread",
+    "ds_mfg_direct_full_qubo_hardware_pilot",
     "ds_mfg_classical_baselines",
     "ds_mfg_hit_rate_reports",
     "scripts",
@@ -256,6 +262,257 @@ require_int(global_qaoa, "gurobi_pool_feasible_hits", 924)
 require_value(global_qaoa, "best_top50_match", "global_optimum")
 require_value(global_qaoa, "best_top50_flow_bits", GLOBAL_FLOW_BITS)
 require_hit_rate_stats(global_qaoa)
+
+println("Checking direct original-QUBO audit artifacts...")
+for filename in (
+    "README.md",
+    "direct_full_qubo_summary.csv",
+    "direct_full_qubo_qaoa_hardware_parameters.json",
+    "direct_full_qubo_resource_summary.csv",
+    "direct_full_qubo_resource_metadata.json",
+)
+    require_file(joinpath("ds_mfg_direct_full_qubo_audit", filename))
+end
+
+parameter_text = read(
+    require_file("ds_mfg_direct_full_qubo_audit/direct_full_qubo_qaoa_hardware_parameters.json"),
+    String,
+)
+occursin("\"artifact_role\":\"direct_full_qubo_qaoa_hardware_parameter_handoff\"", parameter_text) ||
+    smoke_error("direct full-QUBO parameter artifact must declare its hardware handoff role")
+occursin("\"p\":2", parameter_text) ||
+    smoke_error("direct full-QUBO parameter artifact must record p=2")
+occursin("\"qiskit_angles_beta_then_gamma\":[0.55500000000000005,0.29299999999999998,-0.48799999999999999,-0.89800000000000002]", parameter_text) ||
+    smoke_error("direct full-QUBO parameter artifact must record the fixed QAOA angles")
+occursin("fixed-parameter sampling only", parameter_text) ||
+    smoke_error("direct full-QUBO parameter artifact must record hardware sampling policy")
+
+direct_rows = parse_csv_rows("ds_mfg_direct_full_qubo_audit/direct_full_qubo_summary.csv")
+length(direct_rows) == 20 || smoke_error("expected 20 direct full-QUBO audit rows")
+direct_qaoa = only(filter(
+    row -> row["source_artifact"] == "ds_mfg_final_sampling_sweep_v2/qaoa_p2_optimizer_reads128_final_reads512_iter25_distribution.csv",
+    direct_rows,
+))
+require_value(direct_qaoa, "problem", "direct_original_36_variable_qubo")
+require_value(direct_qaoa, "mode", "cached_local_aer_emulation")
+require_int(direct_qaoa, "total_reads", 512)
+require_int(direct_qaoa, "projected_pool_hits", 3)
+require_int(direct_qaoa, "encoded_pool_hits", 0)
+require_int(direct_qaoa, "top50_hits", 5)
+require_int(direct_qaoa, "top10_hits", 1)
+require_int(direct_qaoa, "global_hits", 0)
+require_int(direct_qaoa, "gurobi_pool_feasible_hits", 3)
+require_value(direct_qaoa, "best_repaired_match", "gurobi_pool")
+require_value(direct_qaoa, "best_repaired_flow_bits", "1001110110011100011")
+require_float(direct_qaoa, "best_repaired_qubo_energy", 14.5505)
+require_hit_rate_stats(direct_qaoa)
+
+direct_vqe = only(filter(
+    row -> row["source_artifact"] == "ds_mfg_vqe_final_sampling_sweep_v2/vqe_full_random_seed73005_optimizer_reads128_final_reads8192_iter25_distribution.csv",
+    direct_rows,
+))
+require_int(direct_vqe, "total_reads", 8192)
+require_int(direct_vqe, "projected_pool_hits", 1)
+require_int(direct_vqe, "encoded_pool_hits", 0)
+require_int(direct_vqe, "top50_hits", 2)
+require_int(direct_vqe, "top10_hits", 1)
+require_int(direct_vqe, "global_hits", 0)
+require_value(direct_vqe, "best_repaired_match", "gurobi_pool")
+require_value(direct_vqe, "best_repaired_flow_bits", "1001110110011010011")
+require_float(direct_vqe, "best_repaired_qubo_energy", 14.6515)
+require_hit_rate_stats(direct_vqe)
+
+println("Checking direct full-QUBO QAOA high-read artifacts...")
+for filename in (
+    "direct_full_qubo_qaoa_highread_summary.csv",
+    "direct_full_qubo_qaoa_optimized_parameters.json",
+    "qaoa_direct_p2_seed96001_reads32768_distribution.csv",
+    "qaoa_direct_p2_seed96001_reads32768_optimized_parameters.json",
+)
+    require_file(joinpath("ds_mfg_direct_full_qubo_qaoa_highread", filename))
+end
+count_csv_data_rows(
+    "ds_mfg_direct_full_qubo_qaoa_highread/qaoa_direct_p2_seed96001_reads32768_distribution.csv",
+) == 32696 || smoke_error("unexpected direct full-QUBO high-read distribution row count")
+
+highread = only(parse_csv_rows("ds_mfg_direct_full_qubo_qaoa_highread/direct_full_qubo_qaoa_highread_summary.csv"))
+require_value(highread, "algorithm", "QAOA_direct_full_qubo_fixed_parameter_highread")
+require_value(highread, "parameter_source", "direct_p2")
+require_value(
+    highread,
+    "optimized_parameter_artifact",
+    "ds_mfg_direct_full_qubo_qaoa_highread/qaoa_direct_p2_seed96001_reads32768_optimized_parameters.json",
+)
+require_int(highread, "p", 2)
+require_int(highread, "seed", 96001)
+require_int(highread, "optimizer_reads", 32)
+require_int(highread, "final_reads", 32768)
+require_int(highread, "maximum_iterations", 25)
+require_int(highread, "total_reads", 32768)
+require_int(highread, "unique_states", 32696)
+require_int(highread, "top50_hits", 136)
+require_int(highread, "top10_hits", 27)
+require_int(highread, "global_hits", 4)
+require_int(highread, "gurobi_pool_feasible_hits", 99)
+require_value(highread, "best_top50_rank", "1")
+require_float(highread, "best_repaired_qubo_energy", GLOBAL_OBJECTIVE)
+require_value(highread, "best_repaired_match", "global_optimum")
+require_value(highread, "best_repaired_flow_bits", GLOBAL_FLOW_BITS)
+require_value(highread, "parameter_order", "beta_then_gamma")
+require_value(
+    highread,
+    "optimized_qiskit_angles_beta_then_gamma",
+    "0.39325958665050614;0.271838624642501;-0.008647503446280295;0.12401283690343518",
+)
+require_hit_rate_stats(highread)
+
+optimized_parameter_text = read(
+    require_file("ds_mfg_direct_full_qubo_qaoa_highread/direct_full_qubo_qaoa_optimized_parameters.json"),
+    String,
+)
+occursin("\"artifact_role\":\"direct_full_qubo_qaoa_hardware_parameter_handoff\"", optimized_parameter_text) ||
+    smoke_error("direct high-read optimized parameter artifact must declare its hardware handoff role")
+occursin("\"global_hits\":4", optimized_parameter_text) ||
+    smoke_error("direct high-read optimized parameter artifact must record the global-hit validation sample")
+occursin("\"qiskit_angles_beta_then_gamma\":[0.39325958665050614,0.27183862464250103,-0.0086475034462802948,0.12401283690343518]", optimized_parameter_text) ||
+    smoke_error("direct high-read optimized parameter artifact must record optimized QAOA angles")
+occursin("fixed-parameter sampling only", optimized_parameter_text) ||
+    smoke_error("direct high-read optimized parameter artifact must record hardware sampling policy")
+
+direct_highread = only(filter(
+    row -> row["source_artifact"] == "ds_mfg_direct_full_qubo_qaoa_highread/qaoa_direct_p2_seed96001_reads32768_distribution.csv",
+    direct_rows,
+))
+require_value(direct_highread, "algorithm", "QAOA_direct_full_qubo_fixed_parameter_highread")
+require_value(direct_highread, "problem", "direct_original_36_variable_qubo")
+require_value(direct_highread, "mode", "cached_local_aer_emulation")
+require_int(direct_highread, "total_reads", 32768)
+require_int(direct_highread, "projected_pool_hits", 99)
+require_int(direct_highread, "encoded_pool_hits", 0)
+require_int(direct_highread, "encoded_global_hits", 0)
+require_int(direct_highread, "top50_hits", 136)
+require_int(direct_highread, "top10_hits", 27)
+require_int(direct_highread, "global_hits", 4)
+require_int(direct_highread, "gurobi_pool_feasible_hits", 99)
+require_value(direct_highread, "best_repaired_rank", "1")
+require_float(direct_highread, "best_repaired_qubo_energy", GLOBAL_OBJECTIVE)
+require_value(direct_highread, "best_repaired_match", "global_optimum")
+require_value(direct_highread, "best_repaired_flow_bits", GLOBAL_FLOW_BITS)
+require_hit_rate_stats(direct_highread)
+
+println("Checking direct full-QUBO IBM hardware pilot artifacts...")
+for filename in ("README.md", "LEGACY_ARTIFACT.md", "job_manifest.json", "backend_metadata.json", "raw_counts.csv", "scored_counts.csv", "summary.csv")
+    require_file(joinpath("ds_mfg_direct_full_qubo_hardware_pilot", filename))
+end
+
+direct_hardware_legacy_notice = read(
+    require_file("ds_mfg_direct_full_qubo_hardware_pilot/LEGACY_ARTIFACT.md"),
+    String,
+)
+occursin("quarantined legacy hardware artifact", direct_hardware_legacy_notice) ||
+    smoke_error("direct full-QUBO hardware directory must include a legacy quarantine notice")
+occursin("Do not treat these cached counts as reproducible from the current script", direct_hardware_legacy_notice) ||
+    smoke_error("direct full-QUBO hardware legacy notice must mark cached counts non-reproducible from current script")
+
+direct_hardware_summary = only(parse_csv_rows("ds_mfg_direct_full_qubo_hardware_pilot/summary.csv"))
+require_value(direct_hardware_summary, "algorithm", "QAOA_direct_full_qubo_IBM_handoff")
+require_value(direct_hardware_summary, "mode", "hardware")
+require_value(direct_hardware_summary, "backend", "ibm_fez")
+require_value(
+    direct_hardware_summary,
+    "parameter_artifact",
+    "ds_mfg_direct_full_qubo_qaoa_highread/direct_full_qubo_qaoa_optimized_parameters.json",
+)
+require_int(direct_hardware_summary, "p", 2)
+require_int(direct_hardware_summary, "final_reads", 4096)
+require_int(direct_hardware_summary, "repeats", 1)
+require_value(direct_hardware_summary, "transpile_seeds", "92001")
+require_int(direct_hardware_summary, "submitted_jobs", 1)
+require_int(direct_hardware_summary, "unique_full_states", 4096)
+require_int(direct_hardware_summary, "unique_flows", 4057)
+require_int(direct_hardware_summary, "total_reads", 4096)
+require_int(direct_hardware_summary, "projected_pool_hits", 0)
+require_int(direct_hardware_summary, "encoded_pool_hits", 0)
+require_int(direct_hardware_summary, "encoded_global_hits", 0)
+require_int(direct_hardware_summary, "top50_hits", 0)
+require_int(direct_hardware_summary, "top10_hits", 0)
+require_int(direct_hardware_summary, "global_hits", 0)
+require_int(direct_hardware_summary, "gurobi_pool_feasible_hits", 0)
+require_value(direct_hardware_summary, "best_repaired_rank", "")
+require_float(direct_hardware_summary, "best_repaired_qubo_energy", 91.7295)
+require_value(direct_hardware_summary, "best_repaired_match", "not_top50")
+require_value(direct_hardware_summary, "best_repaired_flow_bits", "1010110110000000000")
+require_hit_rate_stats(direct_hardware_summary; time_key = "elapsed_sec")
+count_csv_data_rows("ds_mfg_direct_full_qubo_hardware_pilot/raw_counts.csv") == 4096 ||
+    smoke_error("unexpected direct full-QUBO hardware raw-count row count")
+count_csv_data_rows("ds_mfg_direct_full_qubo_hardware_pilot/scored_counts.csv") == 4096 ||
+    smoke_error("unexpected direct full-QUBO hardware scored-count row count")
+
+direct_hardware_manifest = read(require_file("ds_mfg_direct_full_qubo_hardware_pilot/job_manifest.json"), String)
+occursin("\"mode\":\"hardware\"", direct_hardware_manifest) ||
+    smoke_error("direct full-QUBO hardware manifest must record hardware mode")
+occursin("\"backend_name\":\"ibm_fez\"", direct_hardware_manifest) ||
+    smoke_error("direct full-QUBO hardware manifest must record ibm_fez backend")
+occursin("\"output_dir\":\"ds_mfg_direct_full_qubo_hardware_pilot\"", direct_hardware_manifest) ||
+    smoke_error("direct full-QUBO hardware manifest must store a repo-relative output directory")
+!occursin("/home/", direct_hardware_manifest) ||
+    smoke_error("direct full-QUBO hardware manifest must not include local home paths")
+occursin("\"run_hardware\":true", direct_hardware_manifest) ||
+    smoke_error("direct full-QUBO hardware manifest must record hardware execution")
+occursin("\"submitted\":true", direct_hardware_manifest) ||
+    smoke_error("direct full-QUBO hardware manifest must record submitted job")
+occursin("\"status\":\"DONE\"", direct_hardware_manifest) ||
+    smoke_error("direct full-QUBO hardware manifest must record completed job")
+occursin("\"qiskit_angles_beta_then_gamma\":[0.39325958665050614,0.27183862464250103,-0.0086475034462802948,0.12401283690343518]", direct_hardware_manifest) ||
+    smoke_error("direct full-QUBO hardware manifest must record optimized QAOA angles")
+
+direct_hardware_backend = read(require_file("ds_mfg_direct_full_qubo_hardware_pilot/backend_metadata.json"), String)
+occursin("\"backend_name_resolved\":\"ibm_fez\"", direct_hardware_backend) ||
+    smoke_error("direct full-QUBO backend metadata must record resolved backend")
+occursin("\"num_qubits\":156", direct_hardware_backend) ||
+    smoke_error("direct full-QUBO backend metadata must record ibm_fez qubit count")
+occursin("\"simulator\":false", direct_hardware_backend) ||
+    smoke_error("direct full-QUBO backend metadata must record non-simulator backend")
+for text in (direct_hardware_manifest, direct_hardware_backend)
+    !occursin("QISKIT_IBM_TOKEN", text) ||
+        smoke_error("direct full-QUBO hardware artifacts must not include token environment names")
+    !occursin("qiskit-ibm.json", text) ||
+        smoke_error("direct full-QUBO hardware artifacts must not include account file paths")
+    !occursin("crn:v1:", lowercase(text)) ||
+        smoke_error("direct full-QUBO hardware artifacts must not include Runtime instance CRNs")
+end
+
+resource_row = only(parse_csv_rows("ds_mfg_direct_full_qubo_audit/direct_full_qubo_resource_summary.csv"))
+require_value(resource_row, "problem", "direct_original_36_variable_qubo")
+require_value(resource_row, "mode", "resource_audit")
+require_value(resource_row, "fake_backend", "FakeFez")
+require_int(resource_row, "logical_qubits", 36)
+require_int(resource_row, "logical_rzz_count", 202)
+require_int(resource_row, "logical_two_qubit_ops", 202)
+require_value(resource_row, "statevector_amplitudes", "68719476736")
+require_value(resource_row, "statevector_complex128_bytes", "1099511627776")
+require_value(resource_row, "density_matrix_elements", "4722366482869645213696")
+require_value(resource_row, "density_matrix_complex128_bytes", "75557863725914323419136")
+require_value(resource_row, "noisy_method_considered", "qiskit_aer.AerSimulator.from_backend(FakeFez)")
+require_value(resource_row, "transpile_requested", "true")
+require_value(resource_row, "transpile_status", "DONE")
+require_int(resource_row, "transpiled_depth", 1344)
+require_int(resource_row, "transpiled_cz_count", 1157)
+require_value(resource_row, "transpile_elapsed_sec", "not_recorded_for_reproducible_artifacts")
+require_value(resource_row, "simulation_status", "not_run")
+resource_metadata = read(require_file("ds_mfg_direct_full_qubo_audit/direct_full_qubo_resource_metadata.json"), String)
+occursin("\"n_qubits\":36", resource_metadata) ||
+    smoke_error("direct full-QUBO resource metadata must record 36 qubits")
+occursin("\"cz_count\":1157", resource_metadata) ||
+    smoke_error("direct full-QUBO resource metadata must record FakeFez CZ count")
+occursin("\"dense_density_matrix_elements\":\"4722366482869645213696\"", resource_metadata) ||
+    smoke_error("direct full-QUBO metadata must record density-matrix size")
+occursin("not_recorded_for_reproducible_artifacts", resource_metadata) ||
+    smoke_error("direct full-QUBO metadata must avoid volatile transpile runtime")
+!occursin("created_at_utc", resource_metadata) ||
+    smoke_error("direct full-QUBO metadata must avoid volatile timestamps")
+occursin("Aer automatic or MPS simulation is entanglement-dependent", resource_metadata) ||
+    smoke_error("direct full-QUBO metadata must state noisy-simulator feasibility")
 
 vqe_rows = parse_csv_rows("ds_mfg_vqe_reduced_flow_objective_final/vqe_reduced_top50_sampling_summary.csv")
 length(vqe_rows) == 3 || smoke_error("expected three final VQE follow-up rows")
@@ -574,6 +831,94 @@ mktempdir() do noisy_output_dir
     length(summary_lines) == 2 || smoke_error("FakeFez noisy dry-run summary must contain one data row")
     occursin("QAOA_reduced_surrogate_JuliQAOA_FakeFez_noisy_simulation,dry_run,FakeFez,top10,5,4096,3,92001;92002;92003,93001,3,0,", summary_lines[2]) ||
         smoke_error("FakeFez noisy dry-run summary row has unexpected configuration values")
+end
+
+println("Checking direct full-QUBO audit dry-run schema...")
+mktempdir() do direct_output_dir
+    withenv(
+        "DSMFG_DIRECT_FULL_QUBO_OUTPUT_DIR" => direct_output_dir,
+        "DSMFG_DIRECT_FULL_QUBO_TRANSPILE" => "false",
+    ) do
+        run(`$(Base.julia_cmd()) --project=$(ROOT) scripts/run_direct_full_qubo_audit.jl`)
+    end
+
+    for filename in (
+        "direct_full_qubo_summary.csv",
+        "direct_full_qubo_qaoa_hardware_parameters.json",
+        "direct_full_qubo_resource_summary.csv",
+        "direct_full_qubo_resource_metadata.json",
+    )
+        path = joinpath(direct_output_dir, filename)
+        isfile(path) || smoke_error("direct full-QUBO dry run did not write $(filename)")
+        filesize(path) > 0 || smoke_error("direct full-QUBO dry-run file is empty: $(filename)")
+    end
+
+    dry_summary_rows = parse_csv_rows(joinpath(direct_output_dir, "direct_full_qubo_summary.csv"))
+    length(dry_summary_rows) == 20 || smoke_error("direct full-QUBO dry run must write 20 summary rows")
+    dry_resource_row = only(parse_csv_rows(joinpath(direct_output_dir, "direct_full_qubo_resource_summary.csv")))
+    require_value(dry_resource_row, "transpile_requested", "false")
+    require_value(dry_resource_row, "transpile_status", "not_requested")
+    require_int(dry_resource_row, "logical_qubits", 36)
+    require_int(dry_resource_row, "logical_rzz_count", 202)
+    require_value(dry_resource_row, "density_matrix_elements", "4722366482869645213696")
+    require_value(dry_resource_row, "transpile_elapsed_sec", "")
+    require_value(dry_resource_row, "simulation_status", "not_run")
+end
+
+println("Checking direct full-QUBO QAOA hardware dry-run schema...")
+mktempdir() do direct_hardware_output_dir
+    withenv(
+        "QISKIT_IBM_BACKEND" => "ibm_brisbane",
+        "QISKIT_IBM_INSTANCE" => "",
+        "DSMFG_DIRECT_HARDWARE_FINAL_READS" => "64",
+        "DSMFG_DIRECT_HARDWARE_REPEATS" => "1",
+        "DSMFG_DIRECT_HARDWARE_TRANSPILE_SEEDS" => "123",
+        "DSMFG_DIRECT_HARDWARE_OUTPUT_DIR" => direct_hardware_output_dir,
+        "DSMFG_RUN_DIRECT_FULL_QUBO_HARDWARE" => "false",
+    ) do
+        run(`$(Base.julia_cmd()) --project=$(ROOT) scripts/run_direct_full_qubo_hardware_pilot.jl`)
+    end
+
+    for filename in ("job_manifest.json", "backend_metadata.json", "raw_counts.csv", "scored_counts.csv", "summary.csv")
+        path = joinpath(direct_hardware_output_dir, filename)
+        isfile(path) || smoke_error("direct full-QUBO hardware dry run did not write $(filename)")
+        filesize(path) > 0 || smoke_error("direct full-QUBO hardware dry-run file is empty: $(filename)")
+    end
+
+    manifest_text = read(joinpath(direct_hardware_output_dir, "job_manifest.json"), String)
+    occursin("\"mode\":\"dry_run\"", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record dry_run mode")
+    occursin("\"run_hardware\":false", manifest_text) ||
+        smoke_error("direct full-QUBO hardware dry-run manifest must not mark hardware enabled")
+    occursin("\"output_dir\":\"$(basename(direct_hardware_output_dir))\"", manifest_text) ||
+        smoke_error("direct full-QUBO hardware dry-run manifest must avoid absolute output paths")
+    !occursin(direct_hardware_output_dir, manifest_text) ||
+        smoke_error("direct full-QUBO hardware dry-run manifest must not include the temp output path")
+    occursin("\"n_qubits\":36", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record the 36-qubit problem")
+    occursin("\"p\":2", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record p=2")
+    occursin("\"source\":\"QiskitOpt.QAOA.fixed_parameter_circuit\"", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record QiskitOpt fixed-parameter circuit source")
+    occursin("\"mode\":\"fixed_parameter_circuit\"", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record QiskitOpt fixed-parameter metadata")
+    occursin("\"qiskit_minimization_sign\":1", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record QiskitOpt minimization sign")
+    occursin("\"values_aligned_to\":\"parameter_names\"", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must record QiskitOpt parameter alignment")
+    occursin("\"submitted\":false", manifest_text) ||
+        smoke_error("direct full-QUBO hardware dry-run manifest must not mark jobs submitted")
+    !occursin("QISKIT_IBM_TOKEN", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must not include token environment names")
+    !occursin("qiskit-ibm.json", manifest_text) ||
+        smoke_error("direct full-QUBO hardware manifest must not include account file paths")
+
+    summary_lines = filter(line -> !isempty(strip(line)), readlines(joinpath(direct_hardware_output_dir, "summary.csv")))
+    length(summary_lines) == 2 || smoke_error("direct full-QUBO hardware dry-run summary must contain one data row")
+    occursin(
+        "QAOA_direct_full_qubo_IBM_handoff,dry_run,ibm_brisbane,ds_mfg_direct_full_qubo_qaoa_highread/direct_full_qubo_qaoa_optimized_parameters.json,2,64,1,123,0,",
+        summary_lines[2],
+    ) || smoke_error("direct full-QUBO hardware dry-run summary row has unexpected configuration values")
 end
 
 include(joinpath(@__DIR__, "run_ibm_qaoa_pilot.jl"))
