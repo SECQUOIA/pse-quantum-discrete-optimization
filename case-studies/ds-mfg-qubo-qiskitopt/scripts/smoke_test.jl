@@ -401,9 +401,18 @@ require_value(direct_highread, "best_repaired_flow_bits", GLOBAL_FLOW_BITS)
 require_hit_rate_stats(direct_highread)
 
 println("Checking direct full-QUBO IBM hardware pilot artifacts...")
-for filename in ("README.md", "job_manifest.json", "backend_metadata.json", "raw_counts.csv", "scored_counts.csv", "summary.csv")
+for filename in ("README.md", "LEGACY_ARTIFACT.md", "job_manifest.json", "backend_metadata.json", "raw_counts.csv", "scored_counts.csv", "summary.csv")
     require_file(joinpath("ds_mfg_direct_full_qubo_hardware_pilot", filename))
 end
+
+direct_hardware_legacy_notice = read(
+    require_file("ds_mfg_direct_full_qubo_hardware_pilot/LEGACY_ARTIFACT.md"),
+    String,
+)
+occursin("quarantined legacy hardware artifact", direct_hardware_legacy_notice) ||
+    smoke_error("direct full-QUBO hardware directory must include a legacy quarantine notice")
+occursin("Do not treat these cached counts as reproducible from the current script", direct_hardware_legacy_notice) ||
+    smoke_error("direct full-QUBO hardware legacy notice must mark cached counts non-reproducible from current script")
 
 direct_hardware_summary = only(parse_csv_rows("ds_mfg_direct_full_qubo_hardware_pilot/summary.csv"))
 require_value(direct_hardware_summary, "algorithm", "QAOA_direct_full_qubo_IBM_handoff")
@@ -444,6 +453,10 @@ occursin("\"mode\":\"hardware\"", direct_hardware_manifest) ||
     smoke_error("direct full-QUBO hardware manifest must record hardware mode")
 occursin("\"backend_name\":\"ibm_fez\"", direct_hardware_manifest) ||
     smoke_error("direct full-QUBO hardware manifest must record ibm_fez backend")
+occursin("\"output_dir\":\"ds_mfg_direct_full_qubo_hardware_pilot\"", direct_hardware_manifest) ||
+    smoke_error("direct full-QUBO hardware manifest must store a repo-relative output directory")
+!occursin("/home/", direct_hardware_manifest) ||
+    smoke_error("direct full-QUBO hardware manifest must not include local home paths")
 occursin("\"run_hardware\":true", direct_hardware_manifest) ||
     smoke_error("direct full-QUBO hardware manifest must record hardware execution")
 occursin("\"submitted\":true", direct_hardware_manifest) ||
@@ -877,6 +890,10 @@ mktempdir() do direct_hardware_output_dir
         smoke_error("direct full-QUBO hardware manifest must record dry_run mode")
     occursin("\"run_hardware\":false", manifest_text) ||
         smoke_error("direct full-QUBO hardware dry-run manifest must not mark hardware enabled")
+    occursin("\"output_dir\":\"$(basename(direct_hardware_output_dir))\"", manifest_text) ||
+        smoke_error("direct full-QUBO hardware dry-run manifest must avoid absolute output paths")
+    !occursin(direct_hardware_output_dir, manifest_text) ||
+        smoke_error("direct full-QUBO hardware dry-run manifest must not include the temp output path")
     occursin("\"n_qubits\":36", manifest_text) ||
         smoke_error("direct full-QUBO hardware manifest must record the 36-qubit problem")
     occursin("\"p\":2", manifest_text) ||

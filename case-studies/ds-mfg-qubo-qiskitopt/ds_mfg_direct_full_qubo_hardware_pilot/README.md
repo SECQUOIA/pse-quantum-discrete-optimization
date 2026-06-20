@@ -1,4 +1,4 @@
-# Direct Full-QUBO IBM Hardware Pilot
+# Legacy Direct Full-QUBO IBM Hardware Pilot
 
 This directory caches the first real IBM Runtime run of the direct 36-variable
 DS-MFG full-QUBO p=2 QAOA circuit. This run was collected with the original
@@ -7,6 +7,10 @@ was switched to `QiskitOpt.QAOA.fixed_parameter_circuit`. Retain it as
 descriptive legacy hardware evidence, not as a validated comparison to the
 QiskitOpt high-read noiseless reference. A comparable hardware run should be
 resubmitted with the current script.
+
+This directory is intentionally quarantined as a legacy artifact. The current
+`scripts/run_direct_full_qubo_hardware_pilot.jl` path should not be expected to
+regenerate these cached counts, circuit metadata, or the submitted job id.
 
 The run used the optimized high-read parameter artifact:
 

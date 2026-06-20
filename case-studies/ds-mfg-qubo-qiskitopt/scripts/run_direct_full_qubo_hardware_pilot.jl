@@ -96,6 +96,15 @@ function direct_abs_path(raw_path::AbstractString)
     return normpath(abspath(isabspath(path) ? path : joinpath(STUDY_ROOT, path)))
 end
 
+function direct_public_path(path::AbstractString)
+    normalized = normpath(abspath(path))
+    relative = relpath(normalized, STUDY_ROOT)
+    if relative == ".." || startswith(relative, "../") || startswith(relative, "..\\")
+        return basename(normalized)
+    end
+    return relative
+end
+
 function read_direct_hardware_config()
     backend_name = direct_require_env("QISKIT_IBM_BACKEND")
     channel = strip(get(ENV, "QISKIT_IBM_CHANNEL", DIRECT_HARDWARE_DEFAULT_CHANNEL))
@@ -296,7 +305,7 @@ function direct_manifest(
             "final_reads" => config.final_reads,
             "repeats" => config.repeats,
             "transpile_seeds" => config.transpile_seeds,
-            "output_dir" => config.output_dir,
+            "output_dir" => direct_public_path(config.output_dir),
             "run_hardware" => config.run_hardware,
             "parameter_path" => relpath(config.parameter_path, STUDY_ROOT),
         ),
