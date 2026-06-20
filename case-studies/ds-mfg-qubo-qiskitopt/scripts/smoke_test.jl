@@ -134,8 +134,8 @@ function require_hit_rate_stats(row; total_key = "total_reads", time_key = "solv
 end
 
 println("Checking Julia and Python package imports...")
-Base.pkgversion(QiskitOpt) == v"0.6.0" ||
-    smoke_error("expected QiskitOpt v0.6.0, got $(Base.pkgversion(QiskitOpt))")
+Base.pkgversion(QiskitOpt) == v"0.7.0" ||
+    smoke_error("expected QiskitOpt v0.7.0, got $(Base.pkgversion(QiskitOpt))")
 Base.pkgversion(QUBODrivers) >= v"0.6.1" ||
     smoke_error("expected QUBODrivers v0.6.1 or newer, got $(Base.pkgversion(QUBODrivers))")
 isdefined(QUBODrivers, :RandomSeed) ||

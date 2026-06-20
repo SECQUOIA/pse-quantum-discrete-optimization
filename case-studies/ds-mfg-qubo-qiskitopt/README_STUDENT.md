@@ -160,7 +160,7 @@ important for comparing distributions without rerunning the quantum emulation.
 ## What Was Run
 
 Most quantum-algorithm results in this bundle are local classical emulations.
-The current runnable project uses `QiskitOpt v0.6.0` with local Qiskit Aer. The
+The current runnable project uses `QiskitOpt v0.7.0` with local Qiskit Aer. The
 high-cost simulations use Aer's matrix-product-state backend with the
 package-level Aer options exposed by `QiskitOpt.jl`; the historical cached
 distributions remain tracked so the comparisons can be inspected without
@@ -247,7 +247,7 @@ avoids the extension-loading error that says to run `Pkg.instantiate()`.
 
 ## Package Setup
 
-This folder uses the registered `QiskitOpt v0.6.0` package from Julia's General
+This folder uses the registered `QiskitOpt v0.7.0` package from Julia's General
 registry. The notebook project is a normal Julia environment, not a local copy
 of the package source.
 
@@ -257,7 +257,7 @@ final sampler use more reads without increasing the optimizer/estimator reads at
 every iteration.
 
 The local QAOA/VQE revisit scripts use `QUBODrivers.RandomSeed()` as the
-standard sampler seed. With `QiskitOpt v0.6.0`, QiskitOpt derives local Aer
+standard sampler seed. With `QiskitOpt v0.7.0`, QiskitOpt derives local Aer
 simulator and transpiler seeds from that value when explicit QiskitOpt seed
 attributes are not set.
 

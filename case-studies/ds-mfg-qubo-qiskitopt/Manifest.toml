@@ -2,7 +2,7 @@
 
 julia_version = "1.10.11"
 manifest_format = "2.0"
-project_hash = "0fd8d235a6b1c53ce8431543e037e1736665e3e6"
+project_hash = "c171b93d3f6b911fbb875e4c56855ad823fc00e3"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -538,9 +538,9 @@ weakdeps = ["MathOptInterface"]
 
 [[deps.QiskitOpt]]
 deps = ["PythonCall", "QUBO"]
-git-tree-sha1 = "ae4d38da1b792c79e8062851e1cf6c39ce1b8691"
+git-tree-sha1 = "a601dccdd43fd0a8b18e63f3b771273817af49eb"
 uuid = "81b20daf-e62b-4502-a0d1-aa084de80e33"
-version = "0.6.0"
+version = "0.7.0"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
