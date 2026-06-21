@@ -12,6 +12,7 @@ using Printf
 using PythonCall
 
 isdefined(@__MODULE__, :hit_rate_stat_values) || include(joinpath(@__DIR__, "hit_rate_stats.jl"))
+isdefined(@__MODULE__, :public_artifact_path) || include(joinpath(@__DIR__, "artifact_paths.jl"))
 
 const STUDY_ROOT = normpath(abspath(joinpath(@__DIR__, "..")))
 const REDUCED_DIR = joinpath(STUDY_ROOT, "ds_mfg_reduced_flow_objective")
@@ -431,7 +432,7 @@ function manifest(config::PilotConfig, data, circuit_info, jobs, paths)
             "final_reads" => config.final_reads,
             "repeats" => config.repeats,
             "transpile_seeds" => config.transpile_seeds,
-            "output_dir" => config.output_dir,
+            "output_dir" => public_artifact_path(config.output_dir, STUDY_ROOT),
             "run_hardware" => config.run_hardware,
         ),
         "problem" => Dict{String,Any}(

@@ -15,6 +15,7 @@ using QiskitOpt: QAOA
 using QUBODrivers
 
 include(joinpath(@__DIR__, "run_direct_full_qubo_audit.jl"))
+isdefined(@__MODULE__, :public_artifact_path) || include(joinpath(@__DIR__, "artifact_paths.jl"))
 
 const DirectMOI = QUBODrivers.MOI
 const DIRECT_HARDWARE_ALGORITHM = "QAOA_direct_full_qubo_IBM_handoff"
@@ -94,15 +95,6 @@ function direct_abs_path(raw_path::AbstractString)
     path = strip(raw_path)
     isempty(path) && error("Path value must not be empty")
     return normpath(abspath(isabspath(path) ? path : joinpath(STUDY_ROOT, path)))
-end
-
-function direct_public_path(path::AbstractString)
-    normalized = normpath(abspath(path))
-    relative = relpath(normalized, STUDY_ROOT)
-    if relative == ".." || startswith(relative, "../") || startswith(relative, "..\\")
-        return basename(normalized)
-    end
-    return relative
 end
 
 function read_direct_hardware_config()
@@ -305,7 +297,7 @@ function direct_manifest(
             "final_reads" => config.final_reads,
             "repeats" => config.repeats,
             "transpile_seeds" => config.transpile_seeds,
-            "output_dir" => direct_public_path(config.output_dir),
+            "output_dir" => public_artifact_path(config.output_dir, STUDY_ROOT),
             "run_hardware" => config.run_hardware,
             "parameter_path" => relpath(config.parameter_path, STUDY_ROOT),
         ),

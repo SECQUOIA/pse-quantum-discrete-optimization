@@ -155,6 +155,7 @@ for relpath in (
     "ds_mfg_qubo_qiskitopt.ipynb",
     "Fw_ DS mfg case qubo information.zip",
     "ds_mfg_qaoa_vqe_distribution.svg",
+    "scripts/artifact_paths.jl",
     "scripts/run_noisy_qaoa_fake_backend.jl",
     "scripts/run_direct_full_qubo_audit.jl",
     "scripts/run_direct_full_qubo_hardware_pilot.jl",
@@ -659,6 +660,8 @@ occursin("\"submitted\":true", hardware_manifest) ||
     smoke_error("hardware manifest must record submitted jobs")
 occursin("\"status\":\"DONE\"", hardware_manifest) ||
     smoke_error("hardware manifest must record completed jobs")
+occursin("\"output_dir\":\"ds_mfg_ibm_qaoa_pilot_fez_4096x3\"", hardware_manifest) ||
+    smoke_error("hardware manifest must record a repository-relative output directory")
 
 hardware_backend = read(require_file("ds_mfg_ibm_qaoa_pilot_fez_4096x3/backend_metadata.json"), String)
 occursin("\"backend_name_resolved\":\"ibm_fez\"", hardware_backend) ||
@@ -675,6 +678,8 @@ for text in (hardware_manifest, hardware_backend)
         smoke_error("hardware artifacts must not include account file paths")
     !occursin("crn:v1:", lowercase(text)) ||
         smoke_error("hardware artifacts must not include Runtime instance CRNs")
+    !occursin("/home/", text) ||
+        smoke_error("hardware artifacts must not include absolute home-directory paths")
 end
 
 println("Checking simulator-to-hardware comparison artifacts...")
@@ -719,6 +724,10 @@ occursin("\"status\":\"DONE\"", noisy_manifest) ||
     smoke_error("FakeFez noisy manifest must record completed jobs")
 !occursin("\"status\":\"FAILED\"", noisy_manifest) ||
     smoke_error("FakeFez noisy manifest must not record failed jobs")
+occursin("\"output_dir\":\"ds_mfg_fake_fez_qaoa_noisy_4096x3\"", noisy_manifest) ||
+    smoke_error("FakeFez noisy manifest must record a repository-relative output directory")
+!occursin("/home/", noisy_manifest) ||
+    smoke_error("FakeFez noisy manifest must not include absolute home-directory paths")
 
 comparison_rows = parse_csv_rows("ds_mfg_simulator_hardware_comparison/simulator_hardware_comparison_summary.csv")
 length(comparison_rows) == 3 || smoke_error("expected three simulator/hardware comparison rows")
@@ -795,6 +804,10 @@ mktempdir() do pilot_output_dir
         smoke_error("IBM pilot manifest must not include token environment names")
     !occursin("qiskit-ibm.json", manifest_text) ||
         smoke_error("IBM pilot manifest must not include account file paths")
+    occursin("\"output_dir\":\"$(basename(pilot_output_dir))\"", manifest_text) ||
+        smoke_error("IBM pilot manifest must record only a public output directory")
+    !occursin(pilot_output_dir, manifest_text) ||
+        smoke_error("IBM pilot manifest must not include absolute output paths")
 
     summary_lines = filter(line -> !isempty(strip(line)), readlines(joinpath(pilot_output_dir, "summary.csv")))
     length(summary_lines) == 2 || smoke_error("IBM pilot dry-run summary must contain one data row")
@@ -826,6 +839,10 @@ mktempdir() do noisy_output_dir
         smoke_error("FakeFez noisy dry-run manifest must not mark simulation enabled")
     occursin("model-based fake-backend simulation", manifest_text) ||
         smoke_error("FakeFez noisy manifest must include model-based interpretation warning")
+    occursin("\"output_dir\":\"$(basename(noisy_output_dir))\"", manifest_text) ||
+        smoke_error("FakeFez noisy manifest must record only a public output directory")
+    !occursin(noisy_output_dir, manifest_text) ||
+        smoke_error("FakeFez noisy manifest must not include absolute output paths")
 
     summary_lines = filter(line -> !isempty(strip(line)), readlines(joinpath(noisy_output_dir, "summary.csv")))
     length(summary_lines) == 2 || smoke_error("FakeFez noisy dry-run summary must contain one data row")
@@ -1000,6 +1017,10 @@ mktempdir() do pilot_output_dir
         smoke_error("IBM pilot manifest must persist submitted job state")
     occursin("\"job_id\":\"synthetic-runtime-job\"", manifest_text) ||
         smoke_error("IBM pilot manifest must persist Runtime job IDs")
+    occursin("\"output_dir\":\"$(basename(pilot_output_dir))\"", manifest_text) ||
+        smoke_error("IBM pilot durability helper must use public output directory paths")
+    !occursin(pilot_output_dir, manifest_text) ||
+        smoke_error("IBM pilot durability helper must not persist absolute output paths")
 
     try
         error("synthetic after-submission failure")
