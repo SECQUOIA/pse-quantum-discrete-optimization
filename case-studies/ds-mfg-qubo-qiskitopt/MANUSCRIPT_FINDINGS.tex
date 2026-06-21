@@ -115,9 +115,15 @@ rules such as requiring a holding tank when a continuous unit is followed by a
 batch operation. The authoritative instance data for this audit are the Gurobi
 export and QUBO archive. In that export the model is named \texttt{capex}; it
 has 19 binary flow variables, 20 constraints, 58 nonzeros, and a minimization
-objective. The Gurobi solve was run with solution-pool search enabled and
-returned 36 pool solutions. We use this pool as classical ground truth over the
-original 19-variable decision space.
+objective. The retained Gurobi export records solution-pool search with
+\texttt{PoolSearchMode=2}, \texttt{PoolSolutions=36}, 36 retained solutions,
+and a solve time of 0.0733 s, with the best retained objective equal to
+$11.7095$. The export does not retain the Gurobi version, final status code,
+\texttt{MIPGap}, or \texttt{PoolGap}; those fields are now explicitly tracked
+as unavailable in
+\texttt{ds\_mfg\_gurobi\_provenance/gurobi\_pool\_metadata.json}. We use this
+pool as classical ground truth over the original 19-variable decision space,
+while avoiding an exhaustive-pool claim not supported by the retained export.
 
 The computational task in this case study is not merely to recover one bitstring
 with low raw QUBO energy. Rather, for each quantum-emulation method $A$, the
@@ -314,6 +320,12 @@ sampling reads were separated with \texttt{QUBODrivers.FinalNumberOfReads()}
 when supported by the package. The runnable revisit scripts also set
 \texttt{QUBODrivers.RandomSeed()} so \texttt{QiskitOpt.jl v0.7.0} derives local
 Aer simulator and transpiler seeds through the standard sampler seed interface.
+\texttt{scripts/revisit\_reduced\_vqe.jl} now writes one metadata JSON artifact
+per seed. A selected seed-74018 reduced-surrogate rerun is committed under
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_seed74018\_metadata/}; it
+records the QiskitOpt \texttt{SampleSet} metadata, including initial VQE
+parameters, optimized \texttt{EfficientSU2} parameters, optimizer status fields,
+backend settings, and package seed metadata.
 
 Because most runs are simulator experiments, timing and hit-rate observations
 are not hardware-performance measurements. The reported local results should be
@@ -747,6 +759,13 @@ $11.7095$; artifact
 \end{tabular}
 \end{table}
 
+The selected seed-74018 metadata rerun stores the optimized
+\texttt{EfficientSU2} parameter vector for a 32768-read reduced-surrogate VQE
+run with 128 optimizer reads and 25 function evaluations. That rerun produced
+five Gurobi-pool top-50 hits and no global hits, so it is used as provenance for
+the fixed-parameter vector rather than as a replacement for the higher-read
+final VQE follow-up.
+
 \subsection{Classical Sampling Baselines}
 \label{subsec:ds-mfg-classical-baselines}
 
@@ -956,10 +975,12 @@ effects, and backend noise during the hardware execution. This comparison is
 descriptive and should not be interpreted as a speedup or hardware-superiority
 claim.
 
-The VQE hardware candidate remains a follow-up item. The cache identifies seed
-74018 as the best final VQE follow-up, but it does not yet persist the optimized
-\texttt{EfficientSU2} parameter vector needed for a clean fixed-parameter
-hardware sampling experiment.
+The VQE hardware candidate remains a follow-up item. The committed cache
+identifies seed 74018 as the best final VQE follow-up, and the selected
+seed-74018 metadata rerun now persists an optimized \texttt{EfficientSU2}
+parameter vector for a clean fixed-parameter hardware-sampling handoff. The
+32768-read metadata rerun is not used to replace the higher-read final VQE hit
+counts because it produced no global hits at that smaller sampling budget.
 
 \subsection{Final Artifact Audit}
 \label{subsec:ds-mfg-final-artifact-audit}
@@ -974,7 +995,10 @@ Table~\ref{tab:ds-mfg-qaoa-results} and
 Table~\ref{tab:ds-mfg-vqe-results}, and by the smoke test
 \texttt{scripts/smoke\_test.jl}. The direct full-QUBO evidence is stored in
 \texttt{ds\_mfg\_direct\_full\_qubo\_audit/} and
-\texttt{ds\_mfg\_direct\_full\_qubo\_qaoa\_highread/}. Classical context is
+\texttt{ds\_mfg\_direct\_full\_qubo\_qaoa\_highread/}. The selected VQE
+optimized-parameter metadata rerun is stored in
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_seed74018\_metadata/}.
+Classical context is
 stored in \texttt{ds\_mfg\_classical\_baselines/} and
 \texttt{ds\_mfg\_hit\_rate\_reports/time\_to\_solution\_report.csv}. Hardware
 and simulator comparison artifacts are stored in
@@ -987,7 +1011,11 @@ The committed hardware and simulator manifests are sanitized provenance
 records. They retain public backend names, job IDs, shot counts, transpile
 seeds, parameter-artifact paths, and scoring paths, but they do not include IBM
 tokens, account files, Runtime instance CRNs, or absolute local output
-directories. Real submissions remain gated by explicit environment variables.
+directories. The reduced-surrogate IBM pilot script now emits a versioned
+manifest schema for future submissions and dry runs with explicit transpiler
+optimization level, pass-manager source, mitigation flags, queue-timing fields,
+and transpiled-circuit resource fields when a hardware job is actually
+transpiled. Real submissions remain gated by explicit environment variables.
 
 The remaining low-energy-weighted surrogate study is future work, not a
 blocking result for this manuscript state. It would test a different surrogate
