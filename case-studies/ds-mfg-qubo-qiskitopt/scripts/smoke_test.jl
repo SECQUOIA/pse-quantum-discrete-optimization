@@ -170,6 +170,7 @@ for relpath in (
     "scripts/run_direct_full_qubo_qaoa_highread.jl",
     "scripts/update_simulator_hardware_comparison.jl",
     "scripts/enumerate_ip_provenance.py",
+    "scripts/run_gurobi_pool_provenance.py",
 )
     require_file(relpath)
 end
