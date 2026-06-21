@@ -64,12 +64,15 @@ The original Gurobi model is the 19-variable DS-MFG flow problem. The exported
 QUBO has 36 binary variables: the first 19 bits are the original flow variables,
 while the remaining 17 are auxiliary/slack bits introduced by the reformulation.
 Gurobi reports solutions in the original 19 flow variables. The retained Gurobi
-export does not include the solver version, final status, `MIPGap`, or
-`PoolGap`, so `scripts/enumerate_ip_provenance.py` also deterministically
+export does not include the historical solver version, final status, `MIPGap`,
+or `PoolGap`, so `scripts/enumerate_ip_provenance.py` deterministically
 enumerates all `2^19` flow assignments. That enumeration finds 36 feasible
 flows, confirms the `11.7095` optimum, and matches the retained 36-solution
-pool. A quantum sample can therefore project to a Gurobi-pool flow but still
-have the wrong auxiliary bits and a poor raw QUBO energy.
+pool. A local Gurobi 13.0.2 rerun using `PoolSearchMode=2` and
+`PoolSolutions=100` also returns `OPTIMAL`, `MIPGap=0.0`, 36 solutions, and
+exact retained-pool agreement. A quantum sample can therefore project to a
+Gurobi-pool flow but still have the wrong auxiliary bits and a poor raw QUBO
+energy.
 
 For this reason, the notebook reports:
 
@@ -290,6 +293,9 @@ attributes are not set.
   `ip_exact_feasible_flows.csv`: deterministic enumeration of all 19-flow IP
   assignments, confirming 36 feasible flows and exact agreement with the
   retained Gurobi pool.
+- `ds_mfg_gurobi_provenance/gurobi_local_pool_rerun_summary.json` and
+  `gurobi_local_pool_rerun_solutions.csv`: local licensed Gurobi rerun with
+  sanitized solver version, status, gap, and retained-pool comparison metadata.
 - `Project.toml`, `Manifest.toml`, `CondaPkg.toml`: Julia and Python environment files for the notebook.
 - `MANUSCRIPT_FINDINGS.tex`: manuscript-ready LaTeX body with introduction,
   method, results, discussion, conclusion, experiment details, cached artifact
@@ -315,9 +321,10 @@ attributes are not set.
 - `scripts/nbconvert_ds_mfg.sh`: full notebook execution helper.
 - `scripts/enumerate_ip_provenance.py`: stdlib-only deterministic fallback that
   enumerates all 19-flow IP assignments without a Gurobi installation.
-- `scripts/run_gurobi_pool_provenance.py`: optional local Gurobi rerun helper
-  for machines with `gurobipy` and a valid Gurobi license; it writes sanitized
-  solver-version, status, gap, and pool-comparison artifacts.
+- `scripts/run_gurobi_pool_provenance.py`: local Gurobi rerun helper for
+  machines with `gurobipy`, a valid Gurobi license, and WLS token access when
+  required; it writes sanitized solver-version, status, gap, and
+  pool-comparison artifacts.
 - `scripts/find_reduced_qaoa_angles_juliqaoa.jl`: optional angle-search helper that expects a local sibling clone of `JuliQAOA.jl`, or a path set by `JULIQAOA_PROJECT`.
 - `scripts/revisit_reduced_qaoa_juliqaoa.jl`: transfers cached JuliQAOA angles into `QiskitOpt.QAOA` and scores the Aer samples.
 - `scripts/run_ibm_qaoa_pilot.jl`: dry-run-safe IBM Runtime pilot for the

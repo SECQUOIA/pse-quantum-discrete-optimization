@@ -3,7 +3,7 @@
   "artifact_role": "ds_mfg_gurobi_pool_provenance",
   "source_archive": "Fw_ DS mfg case qubo information.zip",
   "source_member": "gurobi_pool_solutions_n36_20260126_105706.json",
-  "recovery_status": "retained_export_metadata_plus_exact_ip_enumeration",
+  "recovery_status": "retained_export_metadata_plus_exact_ip_enumeration_plus_local_gurobi_rerun",
   "model_info": {
     "model_name": "capex",
     "number_of_variables": 19,
@@ -41,6 +41,11 @@
     "feasible_flows": "ds_mfg_gurobi_provenance/ip_exact_feasible_flows.csv",
     "status": "Exact enumeration of all 2^19 original flow assignments certifies 36 feasible assignments and optimum objective 11.7095 for the encoded IP constraints."
   },
-  "claim_boundary": "This artifact records retained Gurobi pool provenance available from the committed archive and points to an exact 19-flow IP enumeration certificate. The exact enumeration certifies the encoded IP optimum and feasible set, but this artifact still does not recover Gurobi version, status code, MIPGap, or PoolGap.",
+  "local_gurobi_rerun_artifacts": {
+    "summary": "ds_mfg_gurobi_provenance/gurobi_local_pool_rerun_summary.json",
+    "solutions": "ds_mfg_gurobi_provenance/gurobi_local_pool_rerun_solutions.csv",
+    "status": "Local Gurobi 13.0.2 rerun with PoolSearchMode=2 and PoolSolutions=100 returned OPTIMAL status, MIPGap 0.0, 36 solutions, optimum objective 11.7095, and exact agreement with the retained pool."
+  },
+  "claim_boundary": "This artifact records retained Gurobi pool provenance available from the committed archive and points to exact 19-flow IP enumeration and local Gurobi rerun certificates. The exact enumeration and local rerun certify the encoded IP optimum, feasible set, and retained-pool match, but the original retained export still does not recover the historical Gurobi version, status code, MIPGap, or PoolGap.",
   "credential_policy": "No solver licenses, credentials, account files, or machine-local private paths are stored."
 }

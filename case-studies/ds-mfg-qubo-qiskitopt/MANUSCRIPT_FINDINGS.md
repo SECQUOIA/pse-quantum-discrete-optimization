@@ -25,8 +25,9 @@ The analysis keeps three evidence tiers separate:
 - Gurobi ground truth: the original 19-flow-variable integer program and
   solution pool define the optimum and scoring reference. The retained Gurobi
   export lacks solver version/status/gap fields, so a deterministic enumeration
-  of all `2^19` flow assignments now confirms the 36 feasible flows and the
-  `11.7095` optimum.
+  of all `2^19` flow assignments confirms the 36 feasible flows and the
+  `11.7095` optimum. A local Gurobi 13.0.2 rerun also returns `OPTIMAL`,
+  `MIPGap=0.0`, 36 solutions, and exact agreement with the retained pool.
 - Local Aer emulation: `QiskitOpt.jl`/Qiskit Aer QAOA and VQE runs test whether
   simulated sampling distributions place observable mass on useful repaired
   flow assignments.
@@ -321,7 +322,7 @@ The manuscript claims are supported by tracked artifacts rather than by
 uncommitted reruns. The principal evidence paths are:
 
 - original QUBO/Gurobi archive: `Fw_ DS mfg case qubo information.zip`,
-- Gurobi-pool provenance and exact 19-flow IP enumeration:
+- Gurobi-pool provenance, exact 19-flow IP enumeration, and local Gurobi rerun:
   `ds_mfg_gurobi_provenance/`,
 - exact repair and reduced objective: `ds_mfg_reduced_flow_objective/`,
 - QAOA and VQE sampled distributions: `ds_mfg_*summary.csv` files listed in

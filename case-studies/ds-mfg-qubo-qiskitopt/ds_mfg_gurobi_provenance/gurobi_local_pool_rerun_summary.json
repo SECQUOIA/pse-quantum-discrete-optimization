@@ -1,0 +1,49 @@
+{
+  "artifact_role": "ds_mfg_local_gurobi_pool_rerun",
+  "artifacts": {
+    "solutions_csv": "ds_mfg_gurobi_provenance/gurobi_local_pool_rerun_solutions.csv"
+  },
+  "claim_boundary": "This is a local Gurobi rerun under the recorded Gurobi version. It validates the model/pool behavior for the committed constraints but does not recover the original run's unrecorded status fields.",
+  "configuration": {
+    "output_flag": 0,
+    "pool_search_mode": 2,
+    "pool_solutions": 100
+  },
+  "credential_policy": "No solver license paths, account files, credentials, or machine-local private paths are stored.",
+  "model_info": {
+    "is_mip": true,
+    "model_name": "capex",
+    "number_of_binary_variables": 19,
+    "number_of_constraints": 20,
+    "number_of_integer_variables": 19,
+    "number_of_nonzeros": 58,
+    "number_of_objectives": 1,
+    "number_of_variables": 19,
+    "objective_sense": "Min"
+  },
+  "retained_pool_comparison": {
+    "extra_in_local_rerun": [],
+    "local_rerun_matches_retained_pool": true,
+    "local_rerun_solution_count": 36,
+    "missing_from_local_rerun": [],
+    "retained_pool_solution_count": 36,
+    "source_archive": "Fw_ DS mfg case qubo information.zip",
+    "source_member": "gurobi_pool_solutions_n36_20260126_105706.json"
+  },
+  "schema_version": 1,
+  "script": "scripts/run_gurobi_pool_provenance.py",
+  "solve_metadata": {
+    "mip_gap": 0.0,
+    "objective_bound": 11.709499999999998,
+    "objective_value": 11.7095,
+    "pool_obj_bound": null,
+    "solution_count": 36,
+    "solve_time_sec": 0.007743120193481445,
+    "status_code": 2,
+    "status_text": "OPTIMAL"
+  },
+  "solver": {
+    "gurobi_version": "13.0.2",
+    "python_api": "gurobipy"
+  }
+}

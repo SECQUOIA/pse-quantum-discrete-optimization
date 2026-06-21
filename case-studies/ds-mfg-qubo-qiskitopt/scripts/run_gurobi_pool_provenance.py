@@ -85,8 +85,8 @@ def add_flow_conservation(model, variables):
             model.addConstr(inflow == outflow, name=f"flow_conservation[{node}]")
 
 
-def build_model():
-    model = gp.Model("capex")
+def build_model(env):
+    model = gp.Model("capex", env=env)
     variables = {
         flow: model.addVar(vtype=GRB.BINARY, name=f"f({flow})")
         for flow in FLOW_ORDER
@@ -212,8 +212,10 @@ def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     pool_solutions = int(os.environ.get("DSMFG_GUROBI_POOL_SOLUTIONS", "100"))
     retained_pool = retained_pool_records()
-    model, variables = build_model()
-    model.Params.OutputFlag = 0
+    env = gp.Env(empty=True)
+    env.setParam("OutputFlag", 0)
+    env.start()
+    model, variables = build_model(env)
     model.Params.PoolSearchMode = 2
     model.Params.PoolSolutions = pool_solutions
     model.optimize()

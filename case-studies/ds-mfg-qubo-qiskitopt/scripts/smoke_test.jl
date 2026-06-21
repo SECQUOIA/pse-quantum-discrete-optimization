@@ -217,6 +217,7 @@ gurobi_metadata = require_text(
         "\"mip_gap\": null",
         "\"gurobi_version\": null",
         "\"pool_completeness_certificate\"",
+        "\"local_gurobi_rerun_artifacts\"",
     ),
 )
 !occursin("/home/", gurobi_metadata) ||
@@ -244,6 +245,36 @@ require_value(first_ip_flow, "flow_bits", GLOBAL_FLOW_BITS)
 last_ip_flow = last(ip_flows)
 require_value(last_ip_flow, "rank", "36")
 require_value(last_ip_flow, "ip_obj_value", "22.9925")
+
+local_gurobi_rerun = require_text(
+    "ds_mfg_gurobi_provenance/gurobi_local_pool_rerun_summary.json",
+    (
+        "\"artifact_role\": \"ds_mfg_local_gurobi_pool_rerun\"",
+        "\"gurobi_version\": \"13.0.2\"",
+        "\"pool_search_mode\": 2",
+        "\"pool_solutions\": 100",
+        "\"status_code\": 2",
+        "\"status_text\": \"OPTIMAL\"",
+        "\"mip_gap\": 0.0",
+        "\"objective_value\": 11.7095",
+        "\"solution_count\": 36",
+        "\"local_rerun_matches_retained_pool\": true",
+    ),
+)
+!occursin("/home/", local_gurobi_rerun) ||
+    smoke_error("local Gurobi rerun artifact must not include absolute home-directory paths")
+!occursin("WLSSecret", local_gurobi_rerun) ||
+    smoke_error("local Gurobi rerun artifact must not include WLS secret field names")
+count_csv_data_rows("ds_mfg_gurobi_provenance/gurobi_local_pool_rerun_solutions.csv") == 36 ||
+    smoke_error("local Gurobi rerun must list 36 feasible flows")
+gurobi_rerun_flows = parse_csv_rows("ds_mfg_gurobi_provenance/gurobi_local_pool_rerun_solutions.csv")
+first_gurobi_rerun_flow = first(gurobi_rerun_flows)
+require_value(first_gurobi_rerun_flow, "rank", "1")
+require_value(first_gurobi_rerun_flow, "ip_obj_value", "11.7095")
+require_value(first_gurobi_rerun_flow, "flow_bits", GLOBAL_FLOW_BITS)
+last_gurobi_rerun_flow = last(gurobi_rerun_flows)
+require_value(last_gurobi_rerun_flow, "rank", "36")
+require_value(last_gurobi_rerun_flow, "ip_obj_value", "22.9925")
 
 reduced = only(parse_csv_rows("ds_mfg_reduced_flow_objective/reduced_flow_summary.csv"))
 require_value(reduced, "n_flow_variables", "19")
