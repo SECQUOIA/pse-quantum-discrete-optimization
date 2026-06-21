@@ -23,7 +23,10 @@ Gurobi, and it does not include IBM hardware-performance superiority evidence.
 The analysis keeps three evidence tiers separate:
 
 - Gurobi ground truth: the original 19-flow-variable integer program and
-  solution pool define the optimum and scoring reference.
+  solution pool define the optimum and scoring reference. The retained Gurobi
+  export lacks solver version/status/gap fields, so a deterministic enumeration
+  of all `2^19` flow assignments now confirms the 36 feasible flows and the
+  `11.7095` optimum.
 - Local Aer emulation: `QiskitOpt.jl`/Qiskit Aer QAOA and VQE runs test whether
   simulated sampling distributions place observable mass on useful repaired
   flow assignments.
@@ -142,6 +145,10 @@ global optimum 3 times. A high-read follow-up on selected seeds with 262144
 final reads sampled the global optimum 19 times. The final follow-up doubled
 final sampling to 524288 reads on seeds 74018, 74007, and 74001; it sampled the
 global optimum 28 times total, with seed 74018 producing 20 of those reads.
+A current metadata rerun of the same three seeds at the same final-read budget
+produced 4 global reads total (`74018: 0`, `74007: 1`, `74001: 3`). That rerun
+is retained as current optimized-parameter and simulator metadata provenance,
+not as a replacement for the historical cached final follow-up.
 
 Thus, VQE can reach the global optimum on the reduced surrogate, but its global-hit rate is much lower than the transferred-angle QAOA run.
 
@@ -314,12 +321,17 @@ The manuscript claims are supported by tracked artifacts rather than by
 uncommitted reruns. The principal evidence paths are:
 
 - original QUBO/Gurobi archive: `Fw_ DS mfg case qubo information.zip`,
+- Gurobi-pool provenance and exact 19-flow IP enumeration:
+  `ds_mfg_gurobi_provenance/`,
 - exact repair and reduced objective: `ds_mfg_reduced_flow_objective/`,
 - QAOA and VQE sampled distributions: `ds_mfg_*summary.csv` files listed in
   the workflow table and checked by `scripts/smoke_test.jl`,
 - direct full-QUBO audit and high-read QAOA evidence:
   `ds_mfg_direct_full_qubo_audit/` and
   `ds_mfg_direct_full_qubo_qaoa_highread/`,
+- selected VQE optimized-parameter metadata:
+  `ds_mfg_vqe_reduced_flow_objective_seed74018_metadata/` and
+  `ds_mfg_vqe_reduced_flow_objective_selected_metadata/`,
 - classical context: `ds_mfg_classical_baselines/` and
   `ds_mfg_hit_rate_reports/time_to_solution_report.csv`,
 - hardware and simulator comparison:
