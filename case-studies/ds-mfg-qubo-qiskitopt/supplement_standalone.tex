@@ -1,0 +1,404 @@
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage{psepress}
+\usepackage{enumitem}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\renewcommand{\pseactivatearticlebodygeometry}{}
+\captionsetup{font=footnotesize}
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\DeclareRobustCommand{\artifact}[1]{%
+  {\begingroup\urlstyle{tt}\footnotesize\nolinkurl{#1}\endgroup}%
+}
+\DeclareRobustCommand{\codeid}[1]{%
+  {\begingroup\urlstyle{tt}\nolinkurl{#1}\endgroup}%
+}
+\setlist{nosep,leftmargin=*}
+\emergencystretch=3em
+
+\renewcommand{\PaperTitle}{Supplementary Material: Repair-Aware Quantum Sampling for a Discrete Process-Design QUBO}
+\renewcommand{\PaperAuthors}{%
+Yirang ~Park\textsuperscript{a}
+and David E. ~Bernal Neira\textsuperscript{a}}
+\renewcommand{\PaperAffiliations}{%
+\textsuperscript{a} Davidson School of Chemical Engineering, Purdue University, West Lafayette, IN 47907, USA\\
+}
+\renewcommand{\PaperAbstract}{%
+This supplement records provenance, validation, and artifact anchors for the
+DS-MFG repair-aware quantum-sampling manuscript. It is intended to be compiled
+and submitted separately from the main conference paper if appendices are not
+counted as article body material in the submission workflow.
+}
+\renewcommand{\PaperKeywords}{%
+supplementary material, quantum optimization, process design, reproducibility}
+\renewcommand{\HeaderArticleType}{Supplementary Material}
+\renewcommand{\HeaderReviewType}{Peer Reviewed Conference Proceeding}
+\renewcommand{\HeaderConference}{FOCAPO-CPC 2027}
+\renewcommand{\HeaderLocation}{Tucson, Arizona, USA, 10-14 January 2027}
+\renewcommand{\FooterJournalInfo}{Syst Control Trans V:XXXX-YYYY (2027), Supplement}
+\renewcommand{\FirstPageFooterID}{[DOI\_DoNotChange]}
+\renewcommand{\BodyPageFooterID}{[LAPSE\_DoNotChange]}
+
+\begin{document}
+\psemaketitle
+
+\section{Repository and Packaging}
+\label{sec:supp-repository}
+
+The main manuscript keeps only the narrative-critical values. This supplement
+keeps the audit data close to the manuscript source while allowing the main
+article to remain within the conference page limit. The repository URL is
+\url{https://github.com/SECQUOIA/pse-quantum-discrete-optimization}. A final
+archival DOI has not yet been assigned. It will be added before camera-ready
+submission if one is minted; the review artifact is identified by the
+repository snapshot that contains this supplement and by the checksums below.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Current reproducibility pins validated for the DS-MFG case study.}
+\label{tab:supp-current-pins}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.23\linewidth}L{0.35\linewidth}L{0.34\linewidth}}
+\hline
+Layer & Current pin or check & Repository anchor \\
+\hline
+Julia optimization wrapper &
+\texttt{QiskitOpt.jl} v0.7.0; manifest git tree
+\codeid{a601dccdd43fd0a8b18e63f3b771273817af49eb}. &
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/Project.toml};
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/Manifest.toml}. \\
+\hline
+Julia QUBO stack &
+\texttt{QUBODrivers.jl} v0.6.1, \texttt{QUBOTools.jl} v0.13.0,
+\texttt{QUBO.jl} v0.6.0. &
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/Project.toml};
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/Manifest.toml}. \\
+\hline
+Python bridge &
+Qiskit 2.3.1, Qiskit Aer 0.17.2, Qiskit Optimization 0.7.0, Qiskit IBM
+Runtime 0.46.1, NumPy 2.2.6, SciPy 1.15.3. &
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/CondaPkg.toml}. \\
+\hline
+Fresh-clone validation &
+\texttt{julia --project=. scripts/smoke\_test.jl} imports packages, checks
+required artifacts, and validates cached summary values. &
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/scripts/smoke\_test.jl}. \\
+\hline
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Reproducibility levels used for the DS-MFG manuscript package.}
+\label{tab:supp-reproducibility-levels}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.24\linewidth}L{0.36\linewidth}L{0.32\linewidth}}
+\hline
+Level & Meaning & Current support \\
+\hline
+Score-from-cache reproducible &
+Retained samples, summaries, and repair tables can be inspected and rescored
+without rerunning the stochastic campaigns. &
+Supported by cached distributions, hit-rate reports, checksums, and the smoke
+test. This is the main reproducibility level for the manuscript claims. \\
+\hline
+Rerunnable with retained scripts &
+The scripts and pinned environment can rerun selected QAOA/VQE, classical, and
+hardware-handoff workflows, subject to stochastic variation and credential
+availability. &
+Partially supported. QAOA fixed-angle parameters and sampled outputs are
+retained; selected VQE metadata reruns now retain optimized ansatz vectors for
+seed 74018 and for the final-budget selected seeds 74018, 74007, and 74001. \\
+\hline
+Full campaign replay &
+Every stochastic campaign can be reproduced byte-for-byte from retained
+optimizer states, simulator logs, hardware calibration, and submitted-circuit
+metadata. &
+Not claimed. Some optimizer, MPS truncation, and submitted-job hardware
+metadata were not retained. \\
+\hline
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Checksums for retained archives and primary cached summaries.}
+\label{tab:supp-checksums}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.52\linewidth}L{0.40\linewidth}}
+\hline
+Artifact & SHA-256 checksum \\
+\hline
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/Fw\_ DS mfg case qubo information.zip} &
+\codeid{aa20d793fc45c25c2bd7cc0a231877f71b225bf80daee11531cef6eb6cac5af2} \\
+\hline
+\artifact{ds\_mfg\_ibm\_qaoa\_pilot\_fez\_4096x3.zip} &
+\codeid{88af6f74b0fc10dcece69e783c37782649d1082e3220a88c61f389274665dff9} \\
+\hline
+\artifact{ds\_mfg\_direct\_full\_qubo\_hardware\_pilot.zip} &
+\codeid{fe7a60bd6576e66da9059d8aa6831424ef6fcbbf47bd934e60850b7933558091} \\
+\hline
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/ds\_mfg\_qaoa\_juliqaoa\_transfer\_highread/qaoa\_juliqaoa\_transfer\_summary.csv} &
+\codeid{10bb3bc9b746fb12a87eadc1fd2b819c1a3cacbc84025c9bd54797c1088c34b7} \\
+\hline
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/ds\_mfg\_vqe\_reduced\_flow\_objective\_final/vqe\_reduced\_top50\_sampling\_summary.csv} &
+\codeid{aac0299d49314b8d0e4d54b088f50cc728f1d212540613348ab62d209a132ee1} \\
+\hline
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/ds\_mfg\_gurobi\_provenance/ip\_exact\_enumeration\_summary.json} &
+\codeid{1298dcb07aa82c0adc05ead3fb1b3f4b86ae9ef38e9a276b98f97ec5a7606e5e} \\
+\hline
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/ds\_mfg\_gurobi\_provenance/gurobi\_local\_pool\_rerun\_summary.json} &
+\codeid{13f7683c41cbf14b4225326e41778c6f42ae3979e4d1303af65c7132fe35a6e7} \\
+\hline
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/ds\_mfg\_vqe\_reduced\_flow\_objective\_selected\_metadata/vqe\_reduced\_top50\_sampling\_summary.csv} &
+\codeid{df82de49b921e3b70d5d24f0896e77b6da64477c3a13cffc0a0761d6e9ebd2db} \\
+\hline
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/ds\_mfg\_hit\_rate\_reports/time\_to\_solution\_report.csv} &
+\codeid{c27e70684f3b753efc4eb8cf2b75e79afe4b15402bcd6b3ca7d7a598310f2efd} \\
+\hline
+\end{tabular}
+\end{table*}
+
+\clearpage
+
+\section{Validation Facts}
+\label{sec:supp-validation}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Numerical validation facts used to support the manuscript claims.}
+\label{tab:supp-validation-facts}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.25\linewidth}L{0.38\linewidth}L{0.29\linewidth}}
+\hline
+Check & Retained value & Anchor \\
+\hline
+Exact repaired optimum &
+$F(y^\star)=11.7095$ at flow
+\codeid{1001110100111100011}. &
+\artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_flow\_summary.csv};
+\artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_exact\_top\_flows.csv}. \\
+\hline
+Gurobi pool bridge &
+All 36 stored Gurobi-pool flows match the repaired QUBO score within
+$3.1\times 10^{-13}$. &
+\artifact{MANUSCRIPT\_FINDINGS.tex};
+\artifact{Fw\_ DS mfg case qubo information.zip}. \\
+\hline
+Retained Gurobi metadata &
+Model \texttt{capex}: 19 binary variables, 20 constraints, 58 nonzeros;
+\texttt{PoolSearchMode=2}, \texttt{PoolSolutions=36}, solve time 0.073 s,
+36 solutions found. Solver version, status code, MIPGap, PoolGap, and pool
+completeness/diversity intent were not retained in the original export. A
+local Gurobi 13.0.2 rerun with \texttt{PoolSearchMode=2} and
+\texttt{PoolSolutions=100} returned \texttt{OPTIMAL}, \texttt{MIPGap=0.0}, 36
+solutions, and exact retained-pool agreement. &
+\artifact{Fw\_ DS mfg case qubo information.zip/gurobi\_pool\_solutions\_n36\_20260126\_105706.json}. \\
+\hline
+Quadratic surrogate weakness &
+Global fit $R^2 \approx 0.999$, but the surrogate optimum repairs to 14.5505.
+The true repaired optimum is surrogate rank 33; the surrogate optimum is exact
+repaired rank 6. &
+\artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_flow\_summary.csv};
+Figure~\ref{fig:supp-surrogate-rank}. \\
+\hline
+Low-energy surrogate audit &
+The exact top-50 repaired flows include 14 non-pool flows. In the lowest
+1\% repaired-flow set, exact-rank versus surrogate-rank Spearman correlation
+is 0.901. Exact enumeration wall time was not retained. &
+\artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_exact\_top\_flows.csv};
+\artifact{MANUSCRIPT\_FINDINGS.tex}. \\
+\hline
+Primary QAOA simulator check &
+JuliQAOA statevector probability on the reference optimum was
+$2.63\times10^{-3}$ for the energy-targeted $p=5$ angles. The cached Aer MPS
+sampled rate was $2.53\times10^{-3}$, inside its Wilson 95\% interval
+$[2.35,2.73]\times10^{-3}$. MPS truncation logs were not retained. &
+\artifact{ds\_mfg\_qaoa\_juliqaoa\_angle\_search/juliqaoa\_angle\_summary.csv};
+\artifact{ds\_mfg\_qaoa\_juliqaoa\_transfer\_highread/qaoa\_juliqaoa\_transfer\_summary.csv}. \\
+\hline
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Implications of missing provenance values for the manuscript claims.}
+\label{tab:supp-missing-provenance}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.24\linewidth}L{0.18\linewidth}L{0.22\linewidth}L{0.28\linewidth}}
+\hline
+Missing value & Affects main claim? & Affects full rerun? & Current mitigation \\
+\hline
+Historical Gurobi final status and MIPGap &
+No for the current claim after rerun; the original export still lacks these
+fields, but the model/pool behavior has been rerun locally. &
+Partly; exact historical solver state is unavailable, but current solver
+provenance is retained. &
+The same flow is certified by exact enumeration over all $2^{19}$ flows and by
+a local Gurobi 13.0.2 rerun with \texttt{OPTIMAL} status, \texttt{MIPGap=0.0},
+36 solutions, and exact retained-pool agreement. \\
+\hline
+MPS truncation logs &
+No for the central QAOA sampling claim. &
+Yes, for simulator-forensics replay. &
+The energy-targeted QAOA row is cross-checked against independent JuliQAOA
+statevector probabilities, which agree with the Aer MPS sampled rate within
+the Wilson interval. \\
+\hline
+VQE optimized parameter vectors &
+No; VQE is secondary and reported as a retained sampled distribution. &
+Partly; selected fixed-circuit replay is now supported, but full historical
+optimizer replay is not claimed. &
+Metadata reruns retain optimized \texttt{EfficientSU2} vectors for seed 74018
+and for seeds 74018, 74007, and 74001 at the final sampling budget. The current
+metadata rerun produced 4 reference hits total and is provenance, not a
+replacement for the historical 28-hit final follow-up. \\
+\hline
+Submitted hardware layout, depth, and two-qubit count &
+No, because the hardware row is a submission-and-scoring handoff only. &
+Yes, for hardware-performance diagnosis. &
+The manifest retains backend, job IDs, shots, seeds, logical circuit metadata,
+and scored counts. No noise-mechanism claim is made. \\
+\hline
+Hardware calibration or mitigation metadata &
+No under the current claim. &
+Yes, for calibrated hardware analysis. &
+The manuscript states that no readout or error mitigation is claimed and that
+the retained metadata cannot diagnose a specific noise source. \\
+\hline
+Exact enumeration wall time &
+No. &
+Partly, for cost accounting. &
+The enumeration is documented as exact over all $2^{19}$ flows; issue 24
+tracks recording wall time if the enumeration script is rerun. \\
+\hline
+\end{tabular}
+\end{table*}
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.82\linewidth,
+    height=0.42\linewidth,
+    xlabel={Exact repaired rank among the top 50},
+    ylabel={Rank under quadratic surrogate},
+    xmin=0, xmax=51,
+    ymin=0, ymax=120,
+    grid=both,
+    grid style={gray!20},
+    legend style={draw=none, fill=none, at={(0.98,0.98)}, anchor=north east},
+]
+\addplot[gray!70, only marks, mark=*, mark size=1.6pt] coordinates {
+(1,33) (2,34) (3,35) (4,9) (5,10) (6,1) (7,11) (8,12) (9,2) (10,13)
+(11,14) (12,3) (13,25) (14,26) (15,36) (16,27) (17,28) (18,29) (19,30)
+(20,15) (21,16) (22,4) (23,17) (24,18) (25,5) (26,19) (27,20) (28,6)
+(29,21) (30,22) (31,7) (32,31) (33,32) (34,23) (35,24) (36,8) (37,37)
+(38,38) (39,39) (40,40) (41,41) (42,42) (43,107) (44,108) (45,109)
+(46,110) (47,111) (48,112) (49,113) (50,114)
+};
+\addlegendentry{exact top-50 flows}
+\addplot[blue!70!black, only marks, mark=*, mark size=2.5pt] coordinates {(1,33)};
+\addlegendentry{true optimum}
+\addplot[red!70!black, only marks, mark=triangle*, mark size=3pt] coordinates {(6,1)};
+\addlegendentry{surrogate optimum}
+\addplot[black, dashed, domain=1:50, samples=2] {x};
+\end{axis}
+\end{tikzpicture}
+\caption{Surrogate rank audit for the exact top-50 repaired flows. The
+quadratic surrogate has high global $R^2$ but imperfect low-energy ordering:
+the exact optimum is only rank 33 under the surrogate, while the surrogate
+minimum repairs to the sixth-best exact flow. Quantum-sampling outcomes are
+therefore scored using the exact repaired objective $F$, not the surrogate
+$\widehat F$.}
+\label{fig:supp-surrogate-rank}
+\end{figure*}
+
+\clearpage
+
+\section{Variational and Hardware Provenance}
+\label{sec:supp-variational}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Variational-parameter provenance for the central QAOA and VQE rows.}
+\label{tab:supp-variational-provenance}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.18\linewidth}L{0.16\linewidth}L{0.23\linewidth}L{0.21\linewidth}L{0.14\linewidth}}
+\hline
+Workflow & Circuit / ansatz & Objective and optimizer & Parameter source & Validation metric \\
+\hline
+Energy-targeted QAOA &
+$p=5$ QAOA on the 19-flow surrogate. &
+Minimize $\mathbb{E}_{p_\theta}[\widehat F(y)]$ with JuliQAOA
+\texttt{find\_angles\_bh}; seed 91001; 5 basin-hopping iterations. &
+\artifact{ds\_mfg\_qaoa\_juliqaoa\_angle\_search/juliqaoa\_angle\_summary.csv};
+angles transferred beta-then-gamma to \texttt{QiskitOpt.QAOA}. &
+664 reference hits / 262144 reads; 39661 top-50 reads. \\
+\hline
+Top-10 QAOA diagnostic &
+$p=5$ QAOA on the 19-flow surrogate. &
+Maximize probability on the enumerated exact top-10 set; oracle-aided because
+the repaired ranking is known. &
+Top-10 angle vector retained in
+\artifact{ds\_mfg\_ibm\_qaoa\_pilot\_fez\_4096x3.zip/job\_manifest.json};
+local 1007-hit diagnostic CSV was not retained. &
+1007 reference hits / 262144 reads in the retained manuscript summary; hardware
+handoff used this circuit. \\
+\hline
+Reduced-surrogate VQE &
+\texttt{EfficientSU2}; 152 initial parameters on the 19-flow surrogate. &
+COBYLA through \texttt{QiskitOpt.VQE}; 128 optimizer reads; 25 iterations;
+seeds 74001, 74007, and 74018 in the final follow-up. &
+Historical sampled distributions retained; current metadata reruns persist
+optimized ansatz vectors in
+\artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_seed74018\_metadata/} and
+\artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_selected\_metadata/}. &
+Historical final follow-up: seed 74018 had 20 reference hits / 524288 reads;
+three seeds had 28 reference hits / 1572864 reads. Current metadata rerun:
+4 reference hits / 1572864 reads. \\
+\hline
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Hardware pilot provenance retained in the submitted-job archive.}
+\label{tab:supp-hardware-provenance}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.24\linewidth}L{0.36\linewidth}L{0.32\linewidth}}
+\hline
+Item & Retained metadata & Limitation \\
+\hline
+Backend and jobs &
+\texttt{ibm\_fez}; backend queried 2026-06-17 20:19 UTC; 156 qubits;
+9 completed jobs; 4096 shots per job; repeats 1--3; transpile seeds
+92001--92003; job IDs retained. &
+Queue time, calibration snapshot, readout mitigation, and error mitigation
+metadata were not retained. \\
+\hline
+Logical circuit &
+19 qubits and 19 classical bits; pre-transpile depth 86; operation counts:
+19 \texttt{h}, 95 \texttt{rx}, 95 \texttt{rz}, 255 \texttt{rzz}, and
+19 measurements; scoring reverses Qiskit count keys to $x_1,\ldots,x_{19}$. &
+Submitted-job transpiled depth, two-qubit-gate count, physical layout, and
+measurement map were not retained. \\
+\hline
+Hardware outcome &
+36864 total reads; 6 top-50 reads; 1 top-10 read; 4 stored Gurobi-pool reads;
+0 reference-optimum reads; best repaired flow rank 2 with objective 11.8105. &
+The pilot validates submission and scoring only; it cannot diagnose a specific
+noise mechanism. \\
+\hline
+\end{tabular}
+\end{table*}
+
+\end{document}
