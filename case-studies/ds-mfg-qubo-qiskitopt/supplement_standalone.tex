@@ -165,11 +165,6 @@ Artifact & SHA-256 checksum \\
 \end{tabular}
 \end{table*}
 
-\clearpage
-
-\section{Validation Facts}
-\label{sec:supp-validation}
-
 \begin{table*}[t]
 \centering
 \footnotesize
@@ -204,7 +199,8 @@ Gurobi 13.0.2 rerun of the same IP with \texttt{PoolSearchMode=2} and
 \texttt{PoolSolutions=100}: \texttt{OPTIMAL}, \texttt{MIPGap=0.0}, best
 objective 11.7095, objective bound 11.7095, 36 solutions, local solve time
 0.0077 s, and exact retained-pool agreement. PoolGap is null in the rerun
-summary and pool completeness/diversity is not claimed. &
+summary and pool completeness/diversity is not claimed. This is a classical
+provenance validation and did not involve quantum hardware. &
 \artifact{ds\_mfg\_gurobi\_provenance/gurobi\_local\_pool\_rerun\_summary.json};
 \artifact{ds\_mfg\_gurobi\_provenance/gurobi\_local\_pool\_rerun\_solutions.csv}. \\
 \hline
@@ -326,14 +322,9 @@ quadratic surrogate has high global $R^2$ but imperfect low-energy ordering:
 the exact optimum is only rank 33 under the surrogate, while the surrogate
 minimum repairs to the sixth-best exact flow. Quantum-sampling outcomes are
 therefore scored using the exact repaired objective $F$, not the surrogate
-$\widehat F$.}
+$\hat F$.}
 \label{fig:supp-surrogate-rank}
 \end{figure*}
-
-\clearpage
-
-\section{Variational and Hardware Provenance}
-\label{sec:supp-variational}
 
 \begin{table*}[t]
 \centering
@@ -347,7 +338,7 @@ Workflow & Circuit / ansatz & Objective and optimizer & Parameter source & Valid
 \hline
 Energy-targeted QAOA &
 $p=5$ QAOA on the 19-flow surrogate. &
-Minimize $\mathbb{E}_{p_\theta}[\widehat F(y)]$ with JuliQAOA
+Minimize $\mathbb{E}_{y\sim p_\theta}[\hat F(y)]$ with JuliQAOA
 \texttt{find\_angles\_bh}; seed 91001; 5 basin-hopping iterations. &
 \artifact{ds\_mfg\_qaoa\_juliqaoa\_angle\_search/juliqaoa\_angle\_summary.csv};
 angles transferred beta-then-gamma to \texttt{QiskitOpt.QAOA}. &
@@ -359,9 +350,10 @@ Maximize probability on the enumerated exact top-10 set; oracle-aided because
 the repaired ranking is known. &
 Top-10 angle vector retained in
 \artifact{ds\_mfg\_ibm\_qaoa\_pilot\_fez\_4096x3.zip/job\_manifest.json};
-local 1007-hit diagnostic CSV was not retained. &
-1007 reference hits / 262144 reads in the retained manuscript summary; hardware
-handoff used this circuit. \\
+the local diagnostic sampled-distribution CSV was not retained, so this row is
+supported by the retained angle vector and aggregate manuscript summary. &
+1007 reference hits / 262144 reads in the retained manuscript summary;
+oracle-aided diagnostic only; hardware handoff used this circuit. \\
 \hline
 Historical cached reduced-surrogate VQE &
 \texttt{EfficientSU2}; 152 initial parameters on the 19-flow surrogate. &
