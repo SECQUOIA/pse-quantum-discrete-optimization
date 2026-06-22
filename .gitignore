@@ -14,9 +14,14 @@ case-studies/*/.julia-depot-nbconvert/
 case-studies/*/*_executed.ipynb
 case-studies/ds-mfg-qubo-qiskitopt/ds_mfg_ibm_qaoa_pilot/
 ds_mfg_ibm_qaoa_pilot_*.zip
+!ds_mfg_ibm_qaoa_pilot_fez_4096x3.zip
 case-studies/ds-mfg-qubo-qiskitopt/_old_noisy_runs/
 case-studies/ds-mfg-qubo-qiskitopt/noisy_*.log
 case-studies/ds-mfg-qubo-qiskitopt/noisy_*.pid
+
+# Local submission/export bundles
+/FOCAPO_CPC_*.pdf
+/FOCAPO_CPC_*.zip
 
 # Python and tooling caches
 __pycache__/
@@ -65,3 +70,6 @@ _minted-*/
 Thumbs.db
 *~
 *.swp
+*:PG$Secure
+*:Zone.Identifier
+*:sec.endpointdlp
