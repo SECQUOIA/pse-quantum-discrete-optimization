@@ -20,8 +20,9 @@ const ANGLE_DIR = joinpath(STUDY_ROOT, "ds_mfg_qaoa_juliqaoa_objective_angle_sea
 const ANGLE_TARGET = "top10"
 const ANGLE_P = 5
 const ALGORITHM = "QAOA_reduced_surrogate_JuliQAOA_IBM_pilot"
-const SCHEMA_VERSION = 1
+const SCHEMA_VERSION = 2
 const DEFAULT_IBM_RUNTIME_CHANNEL = "ibm_quantum_platform"
+const TRANSPILER_OPTIMIZATION_LEVEL = 3
 
 struct PilotConfig
     channel::String
@@ -333,15 +334,48 @@ function py_dict_to_julia(py_dict)
 end
 
 function circuit_metadata(circuit)
+    operation_counts = py_dict_to_julia(circuit.count_ops())
     return Dict{String,Any}(
         "num_qubits" => pyconvert(Int, circuit.num_qubits),
         "num_clbits" => pyconvert(Int, circuit.num_clbits),
         "depth" => pyconvert(Int, circuit.depth()),
-        "operation_counts" => py_dict_to_julia(circuit.count_ops()),
+        "operation_counts" => operation_counts,
+        "two_qubit_gate_count" => sum(
+            count for (gate, count) in operation_counts if gate in ("cx", "cz", "ecr", "iswap", "rxx", "ryy", "rzz", "swap")
+        ),
         "cost_unitary" => "exp(-i gamma C(x)) for the reduced surrogate QUBO",
         "mixer_unitary" => "exp(-i beta sum X)",
         "measurement_bit_order" => "Qiskit count keys are reversed before scoring as x1..x19 flow bits",
     )
+end
+
+function circuit_summary(circuit)
+    operation_counts = py_dict_to_julia(circuit.count_ops())
+    return Dict{String,Any}(
+        "num_qubits" => pyconvert(Int, circuit.num_qubits),
+        "num_clbits" => pyconvert(Int, circuit.num_clbits),
+        "depth" => pyconvert(Int, circuit.depth()),
+        "operation_counts" => operation_counts,
+        "two_qubit_gate_count" => sum(
+            count for (gate, count) in operation_counts if gate in ("cx", "cz", "ecr", "iswap", "rxx", "ryy", "rzz", "swap")
+        ),
+    )
+end
+
+function layout_metadata(circuit)
+    layout = maybe_py_attr(circuit, "layout")
+    isnothing(layout) && return nothing
+    return Dict{String,Any}(
+        "layout_string" => string(layout),
+        "measurement_map" => "Qiskit count keys are reversed before scoring as x1..x19 flow bits",
+    )
+end
+
+function transpiled_circuit_metadata(circuit)
+    metadata = circuit_summary(circuit)
+    layout = layout_metadata(circuit)
+    isnothing(layout) || (metadata["layout"] = layout)
+    return metadata
 end
 
 function normalize_qiskit_key(key::AbstractString, n::Integer)
@@ -383,6 +417,19 @@ function planned_jobs(config::PilotConfig)
                 "repeat" => repeat,
                 "transpile_seed" => seed,
                 "shots" => config.final_reads,
+                "transpiler_optimization_level" => TRANSPILER_OPTIMIZATION_LEVEL,
+                "pass_manager_source" => "qiskit.transpile",
+                "readout_mitigation" => false,
+                "error_mitigation" => false,
+                "submission_started_at_utc" => nothing,
+                "submission_completed_at_utc" => nothing,
+                "result_retrieval_started_at_utc" => nothing,
+                "result_retrieval_completed_at_utc" => nothing,
+                "queue_timing" => Dict{String,Any}(
+                    "backend_job_timestamps_available" => false,
+                    "reason" => "No Runtime job object exists until hardware submission.",
+                ),
+                "transpiled_circuit" => nothing,
                 "submitted" => false,
                 "job_id" => nothing,
                 "status" => "planned",
@@ -445,6 +492,12 @@ function manifest(config::PilotConfig, data, circuit_info, jobs, paths)
         "angle_source" => angle_metadata(data),
         "circuit" => circuit_info,
         "jobs" => jobs,
+        "manifest_schema_notes" => Dict{String,Any}(
+            "calibration_snapshot_policy" => "backend metadata records public backend properties when exposed by the Runtime API; dry runs do not contact IBM Quantum Runtime",
+            "transpiled_circuit_policy" => "hardware jobs record transpiled depth, operation counts, two-qubit gate count, and layout string after transpilation",
+            "mitigation_policy" => "readout_mitigation and error_mitigation are explicit false flags unless a future script enables them",
+            "credential_policy" => "No IBM tokens, account files, Runtime instance CRNs, credential paths, or local private output paths are written.",
+        ),
         "output_files" => Dict(key => relpath(path, config.output_dir) for (key, path) in paths),
         "credential_policy" => "No IBM tokens, account files, credential paths, or backend secrets are written by this script.",
     )
@@ -465,6 +518,9 @@ function dry_run_backend_metadata(config::PilotConfig)
         "queried" => false,
         "reason" => "Dry run does not contact IBM Quantum Runtime.",
         "qiskit_ibm_instance_configured" => !isnothing(config.instance),
+        "backend_target_summary" => nothing,
+        "calibration_timestamp" => nothing,
+        "queue_timing_available" => false,
         "credential_fields_written" => String[],
     )
 end
@@ -495,6 +551,9 @@ function real_backend_metadata(config::PilotConfig, backend)
     target = maybe_py_attr(backend, "target")
     if !isnothing(target) && pyhasattr(target, "operation_names")
         metadata["operation_names"] = sort(pyconvert(Vector{String}, target.operation_names))
+        metadata["backend_target_summary"] = Dict{String,Any}(
+            "operation_names" => metadata["operation_names"],
+        )
     end
 
     if pyhasattr(backend, "configuration")
@@ -802,10 +861,13 @@ function run_hardware_jobs!(config::PilotConfig, data, circuit, circuit_info, jo
                         circuit;
                         backend = backend,
                         seed_transpiler = job_plan["transpile_seed"],
-                        optimization_level = 3,
+                        optimization_level = TRANSPILER_OPTIMIZATION_LEVEL,
                     )
+                    job_plan["transpiled_circuit"] = transpiled_circuit_metadata(transpiled)
+                    job_plan["submission_started_at_utc"] = utc_timestamp()
                     sampler = runtime.SamplerV2(; mode = backend)
                     runtime_job = sampler.run([transpiled]; shots = config.final_reads)
+                    job_plan["submission_completed_at_utc"] = utc_timestamp()
                     submitted = true
                     job_plan["submitted"] = true
                     job_plan["job_id"] = pyconvert(String, runtime_job.job_id())
@@ -813,7 +875,9 @@ function run_hardware_jobs!(config::PilotConfig, data, circuit, circuit_info, jo
                     submitted_jobs += 1
                     persist_job_manifest!(config, data, circuit_info, jobs, paths)
 
+                    job_plan["result_retrieval_started_at_utc"] = utc_timestamp()
                     result = runtime_job.result()
+                    job_plan["result_retrieval_completed_at_utc"] = utc_timestamp()
                     counts = sampler_counts(result)
                     job_plan["status"] = job_status_text(runtime_job)
                     job_plan["unique_raw_bitstrings"] = length(counts)

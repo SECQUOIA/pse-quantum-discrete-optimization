@@ -133,6 +133,14 @@ function require_hit_rate_stats(row; total_key = "total_reads", time_key = "solv
     end
 end
 
+function require_text(relpath, required)
+    text = read(require_file(relpath), String)
+    for value in required
+        occursin(value, text) || smoke_error("expected $(relpath) to contain $(value)")
+    end
+    return text
+end
+
 println("Checking Julia and Python package imports...")
 Base.pkgversion(QiskitOpt) == v"0.7.0" ||
     smoke_error("expected QiskitOpt v0.7.0, got $(Base.pkgversion(QiskitOpt))")
@@ -161,6 +169,8 @@ for relpath in (
     "scripts/run_direct_full_qubo_hardware_pilot.jl",
     "scripts/run_direct_full_qubo_qaoa_highread.jl",
     "scripts/update_simulator_hardware_comparison.jl",
+    "scripts/enumerate_ip_provenance.py",
+    "scripts/run_gurobi_pool_provenance.py",
 )
     require_file(relpath)
 end
@@ -173,12 +183,15 @@ for relpath in (
     "ds_mfg_qaoa_juliqaoa_global_angle_search_p3",
     "ds_mfg_qaoa_juliqaoa_global_transfer_p3",
     "ds_mfg_vqe_reduced_flow_objective_final",
+    "ds_mfg_vqe_reduced_flow_objective_seed74018_metadata",
+    "ds_mfg_vqe_reduced_flow_objective_selected_metadata",
     "ds_mfg_reduced_flow_objective",
     "ds_mfg_ibm_qaoa_pilot_fez_4096x3",
     "ds_mfg_simulator_hardware_comparison",
     "ds_mfg_direct_full_qubo_audit",
     "ds_mfg_direct_full_qubo_qaoa_highread",
     "ds_mfg_direct_full_qubo_hardware_pilot",
+    "ds_mfg_gurobi_provenance",
     "ds_mfg_classical_baselines",
     "ds_mfg_hit_rate_reports",
     "scripts",
@@ -191,6 +204,77 @@ metadata = parse_key_value_csv("ds_mfg_saved_distributions/run_metadata.csv")
 isapprox(parse(Float64, metadata["gurobi_best_objective"]), GLOBAL_OBJECTIVE; atol = 1e-8, rtol = 0.0) ||
     smoke_error("unexpected Gurobi best objective in run metadata")
 metadata["qubo_dimension"] == "36" || smoke_error("unexpected QUBO dimension in run metadata")
+
+println("Checking Gurobi provenance artifact...")
+gurobi_metadata = require_text(
+    "ds_mfg_gurobi_provenance/gurobi_pool_metadata.json",
+    (
+        "\"artifact_role\": \"ds_mfg_gurobi_pool_provenance\"",
+        "\"pool_search_mode\": 2",
+        "\"pool_solutions\": 36",
+        "\"solution_count\": 36",
+        "\"objective_value\": 11.7095",
+        "\"mip_gap\": null",
+        "\"gurobi_version\": null",
+        "\"pool_completeness_certificate\"",
+        "\"local_gurobi_rerun_artifacts\"",
+    ),
+)
+!occursin("/home/", gurobi_metadata) ||
+    smoke_error("Gurobi provenance artifact must not include absolute home-directory paths")
+ip_enumeration = require_text(
+    "ds_mfg_gurobi_provenance/ip_exact_enumeration_summary.json",
+    (
+        "\"artifact_role\": \"ds_mfg_exact_ip_enumeration_provenance\"",
+        "\"total_binary_assignments\": 524288",
+        "\"feasible_assignment_count\": 36",
+        "\"optimum_objective\": 11.7095",
+        "\"optimum_flow_bits\": \"1001110100111100011\"",
+        "\"feasible_set_matches_retained_pool\": true",
+    ),
+)
+!occursin("/home/", ip_enumeration) ||
+    smoke_error("exact IP enumeration artifact must not include absolute home-directory paths")
+count_csv_data_rows("ds_mfg_gurobi_provenance/ip_exact_feasible_flows.csv") == 36 ||
+    smoke_error("exact IP enumeration must list 36 feasible flows")
+ip_flows = parse_csv_rows("ds_mfg_gurobi_provenance/ip_exact_feasible_flows.csv")
+first_ip_flow = first(ip_flows)
+require_value(first_ip_flow, "rank", "1")
+require_value(first_ip_flow, "ip_obj_value", "11.7095")
+require_value(first_ip_flow, "flow_bits", GLOBAL_FLOW_BITS)
+last_ip_flow = last(ip_flows)
+require_value(last_ip_flow, "rank", "36")
+require_value(last_ip_flow, "ip_obj_value", "22.9925")
+
+local_gurobi_rerun = require_text(
+    "ds_mfg_gurobi_provenance/gurobi_local_pool_rerun_summary.json",
+    (
+        "\"artifact_role\": \"ds_mfg_local_gurobi_pool_rerun\"",
+        "\"gurobi_version\": \"13.0.2\"",
+        "\"pool_search_mode\": 2",
+        "\"pool_solutions\": 100",
+        "\"status_code\": 2",
+        "\"status_text\": \"OPTIMAL\"",
+        "\"mip_gap\": 0.0",
+        "\"objective_value\": 11.7095",
+        "\"solution_count\": 36",
+        "\"local_rerun_matches_retained_pool\": true",
+    ),
+)
+!occursin("/home/", local_gurobi_rerun) ||
+    smoke_error("local Gurobi rerun artifact must not include absolute home-directory paths")
+!occursin("WLSSecret", local_gurobi_rerun) ||
+    smoke_error("local Gurobi rerun artifact must not include WLS secret field names")
+count_csv_data_rows("ds_mfg_gurobi_provenance/gurobi_local_pool_rerun_solutions.csv") == 36 ||
+    smoke_error("local Gurobi rerun must list 36 feasible flows")
+gurobi_rerun_flows = parse_csv_rows("ds_mfg_gurobi_provenance/gurobi_local_pool_rerun_solutions.csv")
+first_gurobi_rerun_flow = first(gurobi_rerun_flows)
+require_value(first_gurobi_rerun_flow, "rank", "1")
+require_value(first_gurobi_rerun_flow, "ip_obj_value", "11.7095")
+require_value(first_gurobi_rerun_flow, "flow_bits", GLOBAL_FLOW_BITS)
+last_gurobi_rerun_flow = last(gurobi_rerun_flows)
+require_value(last_gurobi_rerun_flow, "rank", "36")
+require_value(last_gurobi_rerun_flow, "ip_obj_value", "22.9925")
 
 reduced = only(parse_csv_rows("ds_mfg_reduced_flow_objective/reduced_flow_summary.csv"))
 require_value(reduced, "n_flow_variables", "19")
@@ -529,6 +613,104 @@ for row in vqe_rows
     require_hit_rate_stats(row)
 end
 
+println("Checking selected VQE optimized-parameter metadata artifact...")
+for filename in (
+    "vqe_reduced_seed74018_metadata.json",
+    "vqe_reduced_top50_sampling_summary.csv",
+    "vqe_reduced_top50_sampling_hits.csv",
+)
+    require_file(joinpath("ds_mfg_vqe_reduced_flow_objective_seed74018_metadata", filename))
+end
+vqe_metadata_summary = only(parse_csv_rows(
+    "ds_mfg_vqe_reduced_flow_objective_seed74018_metadata/vqe_reduced_top50_sampling_summary.csv",
+))
+require_value(vqe_metadata_summary, "algorithm", "VQE_reduced_surrogate_top50_revisit")
+require_int(vqe_metadata_summary, "seed", 74018)
+require_int(vqe_metadata_summary, "optimizer_reads", 128)
+require_int(vqe_metadata_summary, "final_reads", 32768)
+require_int(vqe_metadata_summary, "maximum_iterations", 25)
+require_int(vqe_metadata_summary, "total_reads", 32768)
+require_int(vqe_metadata_summary, "top50_hits", 5)
+require_int(vqe_metadata_summary, "global_hits", 0)
+require_value(vqe_metadata_summary, "best_top50_rank", "12")
+require_value(vqe_metadata_summary, "best_top50_match", "gurobi_pool")
+require_hit_rate_stats(vqe_metadata_summary)
+
+vqe_metadata_text = require_text(
+    "ds_mfg_vqe_reduced_flow_objective_seed74018_metadata/vqe_reduced_seed74018_metadata.json",
+    (
+        "\"artifact_role\":\"ds_mfg_reduced_surrogate_vqe_seed_metadata\"",
+        "\"seed\":74018",
+        "\"optimized_parameter_artifact_status\":\"retained_from_qiskitopt_sampleset_metadata\"",
+        "\"initial_parameters\"",
+        "\"optimized_parameters\"",
+        "\"parameter_names\"",
+        "\"values\"",
+        "\"backend_configuration\"",
+        "\"matrix_product_state\"",
+    ),
+)
+!occursin("/home/", vqe_metadata_text) ||
+    smoke_error("selected VQE metadata artifact must not include absolute home-directory paths")
+!occursin("QISKIT_IBM_TOKEN", vqe_metadata_text) ||
+    smoke_error("selected VQE metadata artifact must not include token environment names")
+
+println("Checking selected final-budget VQE optimized-parameter metadata artifacts...")
+for filename in (
+    "vqe_reduced_seed74018_metadata.json",
+    "vqe_reduced_seed74007_metadata.json",
+    "vqe_reduced_seed74001_metadata.json",
+    "vqe_reduced_top50_sampling_summary.csv",
+    "vqe_reduced_top50_sampling_hits.csv",
+)
+    require_file(joinpath("ds_mfg_vqe_reduced_flow_objective_selected_metadata", filename))
+end
+selected_vqe_rows = parse_csv_rows(
+    "ds_mfg_vqe_reduced_flow_objective_selected_metadata/vqe_reduced_top50_sampling_summary.csv",
+)
+length(selected_vqe_rows) == 3 || smoke_error("expected three selected VQE metadata rows")
+all(row["algorithm"] == "VQE_reduced_surrogate_top50_revisit" for row in selected_vqe_rows) ||
+    smoke_error("selected VQE metadata rows must use the revisit algorithm label")
+all(row["optimizer_reads"] == "128" for row in selected_vqe_rows) ||
+    smoke_error("selected VQE metadata rows must record 128 optimizer reads")
+all(row["final_reads"] == "524288" for row in selected_vqe_rows) ||
+    smoke_error("selected VQE metadata rows must record 524288 final reads")
+all(row["maximum_iterations"] == "25" for row in selected_vqe_rows) ||
+    smoke_error("selected VQE metadata rows must record 25 maximum iterations")
+sum(parse(Int, row["global_hits"]) for row in selected_vqe_rows) == 4 ||
+    smoke_error("unexpected selected VQE metadata global-hit total")
+sum(parse(Int, row["gurobi_pool_feasible_hits"]) for row in selected_vqe_rows) == 266 ||
+    smoke_error("unexpected selected VQE metadata Gurobi-pool feasible-hit total")
+selected_by_seed = Dict(row["seed"] => row for row in selected_vqe_rows)
+require_value(selected_by_seed["74018"], "best_top50_rank", "3")
+require_int(selected_by_seed["74018"], "global_hits", 0)
+require_value(selected_by_seed["74007"], "best_top50_match", "global_optimum")
+require_int(selected_by_seed["74007"], "global_hits", 1)
+require_value(selected_by_seed["74001"], "best_top50_match", "global_optimum")
+require_int(selected_by_seed["74001"], "global_hits", 3)
+for row in selected_vqe_rows
+    require_hit_rate_stats(row)
+end
+for seed in ("74018", "74007", "74001")
+    metadata_text = require_text(
+        joinpath(
+            "ds_mfg_vqe_reduced_flow_objective_selected_metadata",
+            "vqe_reduced_seed$(seed)_metadata.json",
+        ),
+        (
+            "\"artifact_role\":\"ds_mfg_reduced_surrogate_vqe_seed_metadata\"",
+            "\"seed\":$(seed)",
+            "\"optimized_parameter_artifact_status\":\"retained_from_qiskitopt_sampleset_metadata\"",
+            "\"optimized_parameters\"",
+            "\"parameter_names\"",
+            "\"values\"",
+            "\"matrix_product_state\"",
+        ),
+    )
+    !occursin("/home/", metadata_text) ||
+        smoke_error("selected VQE metadata artifact for seed $(seed) must not include absolute home-directory paths")
+end
+
 classical_rows = parse_csv_rows("ds_mfg_classical_baselines/classical_baseline_summary.csv")
 length(classical_rows) == 3 || smoke_error("expected three classical baseline rows")
 uniform_262 = only(filter(
@@ -662,6 +844,8 @@ occursin("\"status\":\"DONE\"", hardware_manifest) ||
     smoke_error("hardware manifest must record completed jobs")
 occursin("\"output_dir\":\"ds_mfg_ibm_qaoa_pilot_fez_4096x3\"", hardware_manifest) ||
     smoke_error("hardware manifest must record a repository-relative output directory")
+occursin("\"schema_version\":1", hardware_manifest) ||
+    smoke_error("cached hardware manifest must record schema version 1 before rerun")
 
 hardware_backend = read(require_file("ds_mfg_ibm_qaoa_pilot_fez_4096x3/backend_metadata.json"), String)
 occursin("\"backend_name_resolved\":\"ibm_fez\"", hardware_backend) ||
@@ -808,6 +992,18 @@ mktempdir() do pilot_output_dir
         smoke_error("IBM pilot manifest must record only a public output directory")
     !occursin(pilot_output_dir, manifest_text) ||
         smoke_error("IBM pilot manifest must not include absolute output paths")
+    occursin("\"schema_version\":2", manifest_text) ||
+        smoke_error("IBM pilot dry-run manifest must record schema version 2")
+    occursin("\"transpiler_optimization_level\":3", manifest_text) ||
+        smoke_error("IBM pilot dry-run manifest must record transpiler optimization level")
+    occursin("\"readout_mitigation\":false", manifest_text) ||
+        smoke_error("IBM pilot dry-run manifest must record readout mitigation policy")
+    occursin("\"error_mitigation\":false", manifest_text) ||
+        smoke_error("IBM pilot dry-run manifest must record error mitigation policy")
+    occursin("\"transpiled_circuit\":null", manifest_text) ||
+        smoke_error("IBM pilot dry-run manifest must include transpiled-circuit schema field")
+    occursin("\"queue_timing\"", manifest_text) ||
+        smoke_error("IBM pilot dry-run manifest must include queue timing schema field")
 
     summary_lines = filter(line -> !isempty(strip(line)), readlines(joinpath(pilot_output_dir, "summary.csv")))
     length(summary_lines) == 2 || smoke_error("IBM pilot dry-run summary must contain one data row")

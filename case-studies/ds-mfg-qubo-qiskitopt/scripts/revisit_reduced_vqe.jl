@@ -135,6 +135,87 @@ function csv_value(value)
     return string(value)
 end
 
+function json_escape(value::AbstractString)
+    escaped = replace(value, "\\" => "\\\\", "\"" => "\\\"")
+    escaped = replace(escaped, "\n" => "\\n", "\r" => "\\r", "\t" => "\\t")
+    return escaped
+end
+
+function write_json_value(io::IO, value)
+    if value === nothing || ismissing(value)
+        print(io, "null")
+    elseif value isa Bool
+        print(io, value ? "true" : "false")
+    elseif value isa AbstractString
+        print(io, "\"", json_escape(value), "\"")
+    elseif value isa Integer
+        print(io, value)
+    elseif value isa AbstractFloat
+        isfinite(value) ? print(io, @sprintf("%.17g", value)) : print(io, "null")
+    elseif value isa AbstractDict
+        print(io, "{")
+        first_item = true
+        for key in sort(collect(keys(value)); by = string)
+            first_item || print(io, ",")
+            first_item = false
+            write_json_value(io, string(key))
+            print(io, ":")
+            write_json_value(io, value[key])
+        end
+        print(io, "}")
+    elseif value isa Tuple || value isa AbstractVector
+        print(io, "[")
+        for (index, item) in enumerate(value)
+            index == 1 || print(io, ",")
+            write_json_value(io, item)
+        end
+        print(io, "]")
+    else
+        write_json_value(io, string(value))
+    end
+end
+
+function write_json_file(path::AbstractString, value)
+    mkpath(dirname(path))
+    open(path, "w") do io
+        write_json_value(io, value)
+        println(io)
+    end
+end
+
+function sampleset_metadata(model)
+    raw = MOI.get(model, MOI.RawSolver())
+    return deepcopy(QUBOTools.metadata(QUBOTools.solution(raw)))
+end
+
+function vqe_metadata_artifact(seed, optimizer_reads, final_reads, maximum_iterations, solve_time, result_count, total_reads, metadata)
+    return Dict{String,Any}(
+        "schema_version" => 1,
+        "artifact_role" => "ds_mfg_reduced_surrogate_vqe_seed_metadata",
+        "algorithm" => "VQE_reduced_surrogate_top50_revisit",
+        "seed" => seed,
+        "configuration" => Dict{String,Any}(
+            "optimizer_reads" => optimizer_reads,
+            "final_reads" => final_reads,
+            "maximum_iterations" => maximum_iterations,
+            "ansatz" => "Qiskit EfficientSU2",
+            "problem" => "DS-MFG reduced 19-flow quadratic surrogate",
+        ),
+        "result_summary" => Dict{String,Any}(
+            "solve_time_sec" => solve_time,
+            "unique_states" => result_count,
+            "total_reads" => total_reads,
+        ),
+        "qiskitopt_sampleset_metadata" => metadata,
+        "optimized_parameter_artifact_status" => if haskey(metadata, "optimized_parameters")
+            "retained_from_qiskitopt_sampleset_metadata"
+        else
+            "not_exposed_by_qiskitopt_sampleset_metadata"
+        end,
+        "credential_policy" => "No IBM tokens, account files, credential paths, or machine-local private output paths are written.",
+    )
+end
+
 function main()
     base = abspath(joinpath(@__DIR__, ".."))
     reduced_dir = joinpath(base, "ds_mfg_reduced_flow_objective")
@@ -181,6 +262,21 @@ function main()
                 result_count = MOI.get(model, MOI.ResultCount())
                 total_reads = sum(MOI.get(model, SampleReads(result)) for result in 1:result_count; init = 0)
                 solve_time = MOI.get(model, MOI.SolveTimeSec())
+                metadata = sampleset_metadata(model)
+                metadata_path = joinpath(output_dir, "vqe_reduced_seed$(seed)_metadata.json")
+                write_json_file(
+                    metadata_path,
+                    vqe_metadata_artifact(
+                        seed,
+                        optimizer_reads,
+                        final_reads,
+                        maximum_iterations,
+                        solve_time,
+                        result_count,
+                        total_reads,
+                        metadata,
+                    ),
+                )
                 top50_hits = 0
                 top10_hits = 0
                 global_hits = 0

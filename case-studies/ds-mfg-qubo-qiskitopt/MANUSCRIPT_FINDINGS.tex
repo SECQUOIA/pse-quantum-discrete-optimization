@@ -20,7 +20,7 @@ speedup claim. The case study evaluates local classical emulations of the
 quantum approximate optimization algorithm (QAOA) and variational quantum
 eigensolver (VQE) on a drug-substance manufacturing (DS-MFG) discrete design
 QUBO instance using \texttt{QiskitOpt.jl}. It also includes a small
-fixed-parameter IBM hardware pilot for the strongest QAOA handoff. The input
+fixed-parameter IBM hardware pilot for the highest-concentration QAOA handoff. The input
 data are the exported \texttt{scalars.csv}, \texttt{L\_vector.csv}, and
 \texttt{Q\_matrix.csv} files from the DS-MFG archive, with the Gurobi solution
 pool used as ground truth for the original integer-programming variables. All
@@ -51,7 +51,7 @@ samples? The answer is organized around three separate evidence tiers:
 Evidence tier & Role in this case study & Claim supported \\
 \hline
 Gurobi ground truth & Original 19-flow-variable integer program and solution
-pool. & Defines the global optimum, near-optimal flow assignments, and the
+pool. & Defines the reference optimum, near-optimal flow assignments, and the
 reference objective values used for scoring. \\
 \hline
 Local Aer emulation & \texttt{QiskitOpt.jl}/Qiskit Aer QAOA and VQE runs on
@@ -113,11 +113,26 @@ to orient the reader, not a complete literal listing of the \texttt{capex}
 instance. For example, the logic-constraint class can represent compatibility
 rules such as requiring a holding tank when a continuous unit is followed by a
 batch operation. The authoritative instance data for this audit are the Gurobi
-export and QUBO archive. In that export the model is named \texttt{capex}; it
-has 19 binary flow variables, 20 constraints, 58 nonzeros, and a minimization
-objective. The Gurobi solve was run with solution-pool search enabled and
-returned 36 pool solutions. We use this pool as classical ground truth over the
-original 19-variable decision space.
+export, QUBO archive, and deterministic reconstruction artifacts. In the
+retained Gurobi export the model is named \texttt{capex}; it has 19 binary flow
+variables, 20 constraints, 58 nonzeros, and a minimization objective. The
+retained Gurobi export records solution-pool search with
+\texttt{PoolSearchMode=2}, \texttt{PoolSolutions=36}, 36 retained solutions, and
+a solve time of 0.0733 s, with the best retained objective equal to $11.7095$.
+The export does not retain the Gurobi version, final status code,
+\texttt{MIPGap}, or \texttt{PoolGap}; those fields are explicitly tracked as
+unavailable in
+\texttt{ds\_mfg\_gurobi\_provenance/gurobi\_pool\_metadata.json}. To avoid
+depending only on unavailable historical solver metadata, the 19-flow IP
+constraints were also enumerated exactly over all $2^{19}$ assignments. The
+enumeration found 36 feasible flow assignments, optimum objective $11.7095$ with
+flow bitstring \texttt{1001110100111100011}, and exact agreement with the
+retained 36-solution pool. A local Gurobi 13.0.2 rerun using
+\texttt{PoolSearchMode=2} and \texttt{PoolSolutions=100} also returned
+\texttt{OPTIMAL} status, \texttt{MIPGap=0.0}, 36 solutions, and exact agreement
+with the retained pool. We therefore use the retained pool as classical ground
+truth over the original 19-variable decision space while separating recovered
+current-rerun solver status from the unavailable historical run-status fields.
 
 The computational task in this case study is not merely to recover one bitstring
 with low raw QUBO energy. Rather, for each quantum-emulation method $A$, the
@@ -132,13 +147,13 @@ variables exactly. The reported performance quantities are therefore:
     \item the best repaired objective sampled by the method;
     \item the number of sampled reads whose flow projection appears in the
     Gurobi pool;
-    \item the number of sampled reads whose flow projection is the Gurobi global
+    \item the number of sampled reads whose flow projection is the Gurobi reference
     optimum;
     \item the concentration of the distribution on the top repaired flow
     assignments.
 \end{enumerate}
 
-The Gurobi global optimum has IP objective $11.7095$ and flow bitstring
+The Gurobi reference optimum has IP objective $11.7095$ and flow bitstring
 \texttt{1001110100111100011} when the flow variables are ordered as
 \texttt{f00}, \texttt{f01}, \ldots, \texttt{f18}. The first audit question is
 whether local QAOA or VQE emulations place observable probability on this flow.
@@ -210,7 +225,7 @@ This objective is the correct bridge between the QUBO formulation and the
 original IP solution pool: it asks what QUBO energy is obtained by the best
 auxiliary completion of the sampled flow decision. If $y$ appears in the Gurobi
 pool, $F(y)$ is also directly comparable to the Gurobi objective value; for the
-global optimum above, $F(y^\star)=11.7095$ up to floating-point roundoff.
+reference optimum above, $F(y^\star)=11.7095$ up to floating-point roundoff.
 
 The reduction is tractable because fixing $y$ removes all flow-variable
 uncertainty from Eq.~\eqref{eq:ds-mfg-partitioned-qubo}. The remaining
@@ -262,7 +277,7 @@ Component & Auxiliary indices & Flow-neighbor set & Aux. vars. & Flow-neighbor c
 \end{table}
 
 The notebook evaluates $F(y)$ for all $2^{19}$ flow assignments and verifies
-that the exact reduced objective recovers the Gurobi global optimum. This
+that the exact reduced objective recovers the Gurobi reference optimum. This
 enumeration also gives a ranked list of the best repaired flow assignments and
 is used to score every sampled QAOA and VQE distribution.
 
@@ -286,7 +301,7 @@ $F(y)$ over all $2^{19}$ flow assignments. The fitted surrogate is stored as
 scale is $1.0$.
 
 The surrogate has high global fit quality ($R^2 = 0.9990819$), but the
-surrogate optimum is not the repaired global optimum. The fitted surrogate is
+surrogate optimum is not the repaired reference optimum. The fitted surrogate is
 minimized by flow \texttt{1001110110011100011}, whose exact repaired objective
 is $14.5505$, whereas the true repaired optimum is
 \texttt{1001110100111100011} with objective $11.7095$. This is why all
@@ -314,6 +329,13 @@ sampling reads were separated with \texttt{QUBODrivers.FinalNumberOfReads()}
 when supported by the package. The runnable revisit scripts also set
 \texttt{QUBODrivers.RandomSeed()} so \texttt{QiskitOpt.jl v0.7.0} derives local
 Aer simulator and transpiler seeds through the standard sampler seed interface.
+\texttt{scripts/revisit\_reduced\_vqe.jl} now writes one metadata JSON artifact
+per seed. Metadata reruns are committed under
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_seed74018\_metadata/} and
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_selected\_metadata/}; they
+record the QiskitOpt \texttt{SampleSet} metadata, including initial VQE
+parameters, optimized \texttt{EfficientSU2} parameters, optimizer status fields,
+backend settings, and package seed metadata.
 
 Because most runs are simulator experiments, timing and hit-rate observations
 are not hardware-performance measurements. The reported local results should be
@@ -321,7 +343,7 @@ read as evidence about workflow feasibility and sampled-distribution quality
 under local Aer emulation, not as evidence of quantum speedup or hardware
 superiority. The hardware pilot is reported separately and descriptively.
 
-The strongest QAOA workflow used an additional offline angle-search step. That
+The highest-concentration QAOA workflow used an additional offline angle-search step. That
 step was run from the local sibling clone of LANL's \texttt{JuliQAOA.jl}. The
 script enumerates all $2^{19}$ reduced-surrogate energies for statevector
 probability evaluation, normalizes those energies, and then uses
@@ -366,7 +388,7 @@ where $\mathrm{TTT}_s$ is the time required to reach a target with probability
 $s$, $\tau$ is the measured run-local time per sample or solve, and
 $p_{\mathrm{target}}$ is the empirical probability of sampling the target.
 Here $s=0.99$ is used for empirical 99\% time-to-solution columns. The target
-is either the Gurobi global optimum or membership in the Gurobi solution pool
+is either the Gurobi reference optimum or membership in the Gurobi solution pool
 after exact auxiliary repair. For deterministic Gurobi optimality,
 $p_{\mathrm{target}}=1$ and the time-to-target is the solver time itself.
 Rows with zero observed target hits are reported with infinite empirical
@@ -431,7 +453,7 @@ surrogate remains an approximation scored against exact repair. \\
 Angle search & Optional scripted/manual tuning &
 \texttt{scripts/find\_reduced\_qaoa\_angles\_juliqaoa.jl} expects
 \texttt{JuliQAOA.jl} via a sibling clone or \texttt{JULIQAOA\_PROJECT}. & The
-strongest QAOA result required offline statevector angle search and parameter
+highest-concentration QAOA result required offline statevector angle search and parameter
 transfer rather than a default optimizer run. \\
 \hline
 Backend selection & Manual choice with scripted settings & Aer MPS,
@@ -450,7 +472,7 @@ must remain outside the repository; dry-run artifacts should not expose
 secrets. \\
 \hline
 Postprocessing and exact repair & Scripted and required for reported metrics &
-Scoring scripts and cached summaries report top-50, top-10, global,
+Scoring scripts and cached summaries report top-50, top-10, reference,
 feasible-pool, Wilson interval, and time-to-solution fields. & The reported
 result is the repaired-flow distribution, not merely raw sampled QUBO
 bitstrings. \\
@@ -551,7 +573,7 @@ repair. &
 Hit-rate uncertainty and time to solution & Cached QAOA, VQE, and classical
 summary rows &
 Two-sided 95\% Wilson hit-rate intervals and empirical 99\% time to solution
-for top-50, top-10, global-optimum, and Gurobi-pool-feasible events. &
+for top-50, top-10, reference-optimum, and stored-Gurobi-pool events. &
 \texttt{ds\_mfg\_hit\_rate\_reports/time\_to\_solution\_report.csv} \\
 \hline
 \end{tabular}
@@ -564,95 +586,95 @@ The initial full-QUBO QAOA experiments did not concentrate probability mass on
 encoded Gurobi-pool solutions. Fixed-angle QAOA with $p=2$ produced one
 projected Gurobi-pool read in 128 samples, but no encoded pool read. After
 exact auxiliary repair, that projected flow had objective $18.0745$, well above
-the global optimum. Perturbing those $p=2$ fixed angles did not improve the
+the reference optimum. Perturbing those $p=2$ fixed angles did not improve the
 result. Separating optimizer reads from final sampling on the full QUBO improved
 the best repaired pool objective to $14.5505$ and produced three projected pool
-reads in 512 samples, but still did not sample the global optimum.
+reads in 512 samples, but still did not sample the reference optimum.
 The direct original-QUBO audit cache rescored this full-QUBO final-sampling row
 against exact repair and the top-flow table: it contains five top-50
-repaired-flow reads, one top-10 read, zero global reads, and zero encoded
+repaired-flow reads, one top-10 read, zero reference reads, and zero encoded
 Gurobi-pool reads.
 A higher-read direct full-QUBO $p=2$ run starting from the same parameter source
-and allowing 25 optimizer iterations found the repaired global optimum four
+and allowing 25 optimizer iterations found the repaired reference optimum four
 times in 32768 final reads. The optimized beta-then-gamma vector is cached in
 \texttt{ds\_mfg\_direct\_full\_qubo\_qaoa\_highread/direct\_full\_qubo\_qaoa\_optimized\_parameters.json}.
-These are repaired-flow global hits; the sampled auxiliary bits were not encoded
-global completions.
+These are repaired-flow reference hits; the sampled auxiliary bits were not the
+optimal auxiliary completions.
 
-The strongest QAOA result was obtained by optimizing angles offline on the
+The highest-concentration QAOA result was obtained by optimizing angles offline on the
 reduced surrogate with \texttt{JuliQAOA.jl} and then transferring those angles
 into \texttt{QiskitOpt.QAOA}. For the original energy-targeted $p=5$ search,
 the offline statevector calculation
 predicted a probability of $0.1506823$ on the top 50 repaired flows, $0.0340277$
-on the top 10 repaired flows, and $0.00263256$ on the exact global optimum. The
-high-read Aer follow-up sampled the global optimum 664 times in 262144 reads,
-corresponding to an empirical global-hit rate of $0.002533$.
+on the top 10 repaired flows, and $0.00263256$ on the exact reference optimum. The
+high-read Aer follow-up sampled the reference optimum 664 times in 262144 reads,
+corresponding to an empirical reference-hit rate of $0.002533$.
 
-Additional objective-targeted searches tested top-50, top-10, and direct-global
+Additional objective-targeted searches tested top-50, top-10, and direct-reference
 JuliQAOA objectives. The top-50 and top-10 $p=5$ searches predicted larger
-global-optimum probabilities than the energy-targeted search, and both improved
-the empirical high-read Aer result. The top-50 target sampled the global optimum
+reference-optimum probabilities than the energy-targeted search, and both improved
+the empirical high-read Aer result. The top-50 target sampled the reference optimum
 979 times in 262144 reads, while the top-10 target sampled it 1007 times in
-262144 reads. A bounded direct-global search through $p=3$ did not compete,
-sampling the global optimum 45 times in the same read budget.
+262144 reads. A bounded direct-reference search through $p=3$ did not compete,
+sampling the reference optimum 45 times in the same read budget.
 
 \begin{table}[t]
 \centering
 \scriptsize
-\caption{QAOA experiments scored by exact auxiliary repair. ``Global'' means
-the Gurobi global optimum \texttt{1001110100111100011}.}
+\caption{QAOA experiments scored by exact auxiliary repair. ``Reference'' means
+the Gurobi reference optimum \texttt{1001110100111100011}.}
 \label{tab:ds-mfg-qaoa-results}
 \begin{tabular}{p{0.25\linewidth}p{0.19\linewidth}p{0.22\linewidth}p{0.25\linewidth}}
 \hline
 Experiment & Settings & Hit counts & Best repaired result \\
 \hline
 Fixed-angle QAOA, best full-QUBO case & $p=2$; 128 reads; 25 iterations; full
-36-variable QUBO & 1 projected pool read; 0 encoded pool reads; 0 global reads &
+36-variable QUBO & 1 projected pool read; 0 encoded pool reads; 0 reference reads &
 Objective $18.0745$; flow \texttt{1001110101011100011}; artifact
 \texttt{repair\_summary.csv} \\
 \hline
 Perturbed $p=2$ fixed-angle QAOA & $\sigma=0.05,0.10,0.20$; 128 reads; 10
-iterations; full 36-variable QUBO & 0 projected pool reads and 0 global reads
+iterations; full 36-variable QUBO & 0 projected pool reads and 0 reference reads
 for all three perturbations & Best repaired objective $86.8695$ at
 $\sigma=0.10$; artifact \texttt{p2\_perturbation\_summary.csv} \\
 \hline
 Full-QUBO QAOA with separated final sampling & $p=2$; 128 optimizer reads; 512
 final reads; 25 iterations & 3 projected pool reads; 0 encoded pool reads; 0
-global reads & Objective $14.5505$; flow
+reference reads & Objective $14.5505$; flow
 \texttt{1001110110011100011}; artifact
 \texttt{final\_sampling\_summary.csv} \\
 \hline
 Optimized direct full-QUBO QAOA high-read run & $p=2$; 32 optimizer reads; 32768
 final reads; 25 iterations & 99 projected pool reads; 0 encoded pool reads; 4
-global reads & Objective $11.7095$; flow
+reference reads & Objective $11.7095$; flow
 \texttt{1001110100111100011}; artifact
 \texttt{direct\_full\_qubo\_qaoa\_highread\_summary.csv} \\
 \hline
 Reduced-surrogate QAOA before offline angle transfer & $p=2$; 128 optimizer
-reads; 512 final reads; 25 iterations & 0 pool reads and 0 global reads &
+reads; 512 final reads; 25 iterations & 0 pool reads and 0 reference reads &
 Best sampled repaired objective $102.7385$; artifact
 \texttt{reduced\_flow\_summary.csv} \\
 \hline
 Transferred-angle QAOA, sweep & $p=2,\ldots,5$; 32768 final reads per depth;
-\texttt{MaximumIterations() = 0} & Global reads increased from 16 at $p=2$ to
-96 at $p=5$ & Every depth sampled the global optimum at least once; artifact
+\texttt{MaximumIterations() = 0} & Reference reads increased from 16 at $p=2$ to
+96 at $p=5$ & Every depth sampled the reference optimum at least once; artifact
 \texttt{qaoa\_juliqaoa\_transfer\_summary.csv} \\
 \hline
 Energy-targeted transferred-angle QAOA, high-read follow-up & $p=5$; 16 optimizer reads;
 262144 final reads; \texttt{MaximumIterations() = 0} & 39661 top-50 reads;
-8964 top-10 reads; 664 global reads & Objective $11.7095$; flow
+8964 top-10 reads; 664 reference reads & Objective $11.7095$; flow
 \texttt{1001110100111100011}; artifact
 \texttt{qaoa\_juliqaoa\_transfer\_highread/qaoa\_juliqaoa\_transfer\_summary.csv} \\
 \hline
 Objective-targeted transferred-angle QAOA, high-read follow-up & top-50 and
-top-10 targets at $p=5$; direct-global target bounded to $p=3$; 16 optimizer
+top-10 targets at $p=5$; direct-reference target bounded to $p=3$; 16 optimizer
 reads; 262144 final reads; \texttt{MaximumIterations() = 0} & Top-50 target:
-62964 top-50 reads, 14221 top-10 reads, 979 global reads. Top-10 target: 62597
-top-50 reads, 14326 top-10 reads, 1007 global reads. Direct-global $p=3$: 45
-global reads. & The top-10 target is the strongest cached QAOA result;
+62964 top-50 reads, 14221 top-10 reads, 979 reference reads. Top-10 target: 62597
+top-50 reads, 14326 top-10 reads, 1007 reference reads. Direct-reference $p=3$: 45
+reference reads. & The top-10 target is the highest-concentration cached QAOA result;
 artifact
 \texttt{qaoa\_juliqaoa\_objective\_transfer\_highread/qaoa\_juliqaoa\_transfer\_summary.csv}.
-The direct-global check is stored in
+The direct-reference check is stored in
 \texttt{qaoa\_juliqaoa\_global\_transfer\_p3/qaoa\_juliqaoa\_transfer\_summary.csv}. \\
 \hline
 \end{tabular}
@@ -674,9 +696,9 @@ Section~\ref{subsec:ds-mfg-hardware-pilot}.
 The initial VQE experiments were less concentrated than the best QAOA workflow.
 On the full 36-variable QUBO, a five-seed \texttt{EfficientSU2} sweep with
 8192 final reads per seed produced one projected pool read and no encoded or
-global read. The best repaired full-QUBO VQE objective was $14.6515$.
+reference read. The best repaired full-QUBO VQE objective was $14.6515$.
 The direct original-QUBO audit cache reports that the best full-QUBO VQE seed
-had two top-50 repaired-flow reads, one top-10 read, zero global reads, and zero
+had two top-50 repaired-flow reads, one top-10 read, zero reference reads, and zero
 encoded Gurobi-pool reads.
 
 The same audit records direct noisy-simulator resource evidence for the
@@ -689,7 +711,7 @@ samples are cached because a useful-shot direct noisy run was not established as
 practical for this circuit. The audit persists the same $p=2$ warm-start
 beta-then-gamma QAOA parameter vector in
 \texttt{ds\_mfg\_direct\_full\_qubo\_audit/direct\_full\_qubo\_qaoa\_hardware\_parameters.json}.
-The optimized global-hit vector is cached in
+The optimized reference-hit vector is cached in
 \texttt{ds\_mfg\_direct\_full\_qubo\_qaoa\_highread/direct\_full\_qubo\_qaoa\_optimized\_parameters.json}.
 \texttt{scripts/run\_direct\_full\_qubo\_hardware\_pilot.jl} prefers that
 artifact when present and builds a dry-run-safe direct full-QUBO IBM Runtime
@@ -698,12 +720,12 @@ handoff; actual submission remains gated by
 
 The reduced-surrogate VQE runs performed better. A five-seed sweep with 8192
 final reads found a near-optimal pool flow with repaired objective $11.8105$,
-but no global read. A 20-seed sweep with 32768 final reads per seed then
-sampled the global optimum three times in 655360 total reads. Subsequent
+but no reference read. A 20-seed sweep with 32768 final reads per seed then
+sampled the reference optimum three times in 655360 total reads. Subsequent
 high-read follow-ups on seeds 74001, 74007, and 74018 increased the total
-number of observed global reads to 19 at 262144 reads per seed, and to 28 at
+number of observed reference reads to 19 at 262144 reads per seed, and to 28 at
 524288 reads per seed. The final follow-up identified seed 74018 as the best
-VQE candidate, with 20 global reads, 152 top-10 reads, and 391 top-50 reads in
+VQE candidate, with 20 reference reads, 152 top-10 reads, and 391 top-50 reads in
 524288 final samples.
 
 \begin{table}[t]
@@ -718,34 +740,45 @@ Experiment & Settings & Hit counts & Best repaired result \\
 \hline
 Full-QUBO VQE, five seeds & Seeds 73001--73005; 128 optimizer reads; 8192
 final reads per seed; 25 iterations & 1 projected pool read; 0 encoded pool
-reads; 0 global reads & Objective $14.6515$ from seed 73005; artifact
+reads; 0 reference reads & Objective $14.6515$ from seed 73005; artifact
 \texttt{vqe\_final\_sampling\_summary.csv} \\
 \hline
 Reduced-surrogate VQE, five seeds & Seeds 73001--73005; 128 optimizer reads;
-8192 final reads per seed; 25 iterations & 2 pool reads total; 0 global reads &
+8192 final reads per seed; 25 iterations & 2 pool reads total; 0 reference reads &
 Objective $11.8105$ from seed 73003; flow
 \texttt{1001110100111010011}; artifact
 \texttt{vqe\_reduced\_flow\_summary.csv} \\
 \hline
 Reduced-surrogate VQE, 20 seeds & Seeds 74001--74020; 32768 final reads per
-seed; 25 iterations & 3 global reads in 655360 total reads; seed 74018 had the
-largest top-50 count but no global read at this read count & Objective
+seed; 25 iterations & 3 reference reads in 655360 total reads; seed 74018 had the
+largest top-50 count but no reference read at this read count & Objective
 $11.7095$ observed at seeds 74001 and 74007; artifact
 \texttt{vqe\_reduced\_top50\_sampling\_summary.csv} \\
 \hline
 Reduced-surrogate VQE, high-read selected seeds & Seeds 74001, 74007, 74018;
-262144 final reads per seed & 19 global reads in 786432 total reads; seed
-74018 produced 13 global reads & Objective $11.7095$; artifact
+262144 final reads per seed & 19 reference reads in 786432 total reads; seed
+74018 produced 13 reference reads & Objective $11.7095$; artifact
 \texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_v4/} \\
 \hline
 Reduced-surrogate VQE, final follow-up & Seeds 74018, 74007, 74001; 524288
-final reads per seed & 28 global reads in 1572864 total reads; seed 74018
-produced 20 global reads, 152 top-10 reads, and 391 top-50 reads & Objective
+final reads per seed & 28 reference reads in 1572864 total reads; seed 74018
+produced 20 reference reads, 152 top-10 reads, and 391 top-50 reads & Objective
 $11.7095$; artifact
 \texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_final/} \\
 \hline
 \end{tabular}
 \end{table}
+
+The metadata reruns store optimized \texttt{EfficientSU2} parameter vectors for
+the reduced-surrogate VQE configuration with 128 optimizer reads and 25 function
+evaluations. The single-seed seed-74018 metadata rerun used 32768 final reads
+and produced five Gurobi-pool top-50 hits and no reference hits. A separate
+final-budget metadata rerun over seeds 74018, 74007, and 74001 used 524288 final
+reads per seed and produced four reference hits in total: zero for seed 74018, one
+for seed 74007, and three for seed 74001. These reruns are used as provenance
+for the fixed-parameter vectors and current simulator metadata rather than as
+replacements for the historical higher-read final VQE follow-up summarized in
+Table~\ref{tab:ds-mfg-vqe-results}.
 
 \subsection{Classical Sampling Baselines}
 \label{subsec:ds-mfg-classical-baselines}
@@ -756,7 +789,7 @@ $F(y)$. The first baseline samples flow assignments uniformly at random and
 then applies exact auxiliary repair. The second baseline uses steepest-descent
 single-bit-flip hill climbing with random restarts; each evaluated flow counts
 against the same sample/evaluation budget used in the table. Both baselines use
-fixed seeds and the same top-50, top-10, and global-optimum definitions used for
+fixed seeds and the same top-50, top-10, and reference-optimum definitions used for
 the QAOA and VQE summaries. The cached outputs include a compressed aggregate
 distribution over every unique sampled flow, a compact retained-flow file for
 sampled top-50 and best-sampled flows, and a summary that records counts over
@@ -765,7 +798,7 @@ the full budget.
 \begin{table}[t]
 \centering
 \scriptsize
-\caption{Classical baseline context for the strongest local QAOA and VQE
+\caption{Classical baseline context for the highest-concentration local QAOA and VQE
 sampling results. ``Samples'' are reads for QAOA/VQE and repaired-flow
 objective evaluations for the classical baselines.}
 \label{tab:ds-mfg-classical-baseline-context}
@@ -773,30 +806,30 @@ objective evaluations for the classical baselines.}
 \hline
 Method & Samples / evaluations & Top-hit counts & Best repaired result \\
 \hline
-Uniform random, seed 81001 & 262144 & 24 top-50; 5 top-10; 0 global &
+Uniform random, seed 81001 & 262144 & 24 top-50; 5 top-10; 0 reference &
 Objective $11.8105$; rank 2; flow \texttt{1001110100111010011} \\
 \hline
-Uniform random, seed 81002 & 524288 & 49 top-50; 11 top-10; 0 global &
+Uniform random, seed 81002 & 524288 & 49 top-50; 11 top-10; 0 reference &
 Objective $12.2415$; rank 3; flow \texttt{1001110100111001011} \\
 \hline
 Hill-climb restarts, seed 82001 & 262144 evaluations; 2055 restarts &
-883 top-50; 177 top-10; 19 global &
+883 top-50; 177 top-10; 19 reference &
 Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
 \hline
 Top-10-targeted transferred QAOA, $p=5$ & 262144 local Aer reads &
-62597 top-50; 14326 top-10; 1007 global &
+62597 top-50; 14326 top-10; 1007 reference &
 Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
 \hline
 Reduced-surrogate VQE, seed 74018 & 524288 local Aer reads &
-391 top-50; 152 top-10; 20 global &
+391 top-50; 152 top-10; 20 reference &
 Objective $11.7095$; rank 1; flow \texttt{1001110100111100011} \\
 \hline
 \end{tabular}
 \end{table}
 
 The cached QAOA, reduced-surrogate VQE, and classical-baseline summary CSVs
-also report empirical hit rates for the top-50, top-10, global-optimum, and
-Gurobi-pool-feasible events. The Gurobi-pool-feasible event counts sampled
+also report empirical hit rates for the top-50, top-10, reference-optimum, and
+stored-Gurobi-pool events. The stored-Gurobi-pool event counts sampled
 flows whose repaired projection matches either \texttt{global\_optimum} or
 \texttt{gurobi\_pool}. Each rate is paired with a two-sided 95\% Wilson score
 confidence interval. The same rows carry \texttt{gurobi\_pool\_feasible\_*}
@@ -813,9 +846,9 @@ use script \texttt{wall\_time\_sec}. The consolidated artifact is
 \begin{table}[t]
 \centering
 \scriptsize
-\caption{Representative global-optimum and Gurobi-pool-feasible-hit empirical 99\% time to
+\caption{Representative reference-optimum and stored-Gurobi-pool-hit empirical 99\% time to
 solution from cached local runs.}
-\label{tab:ds-mfg-global-hit-uncertainty}
+\label{tab:ds-mfg-reference-hit-uncertainty}
 \begin{tabular}{p{0.28\linewidth}p{0.16\linewidth}p{0.15\linewidth}p{0.18\linewidth}p{0.15\linewidth}}
 \hline
 Run & Optimal hits & Optimal \texttt{tts99\_sec} & Gurobi-pool feasible hits & Gurobi-pool feasible \texttt{tts99\_sec} \\
@@ -836,19 +869,19 @@ Uniform random, seed 81001 & 0 / 262144 & $\infty$ &
 \end{table}
 
 Uniform random sampling provides a useful lower baseline for concentration. At
-262144 samples it found 24 top-50 flows, 5 top-10 flows, and no global optimum
+262144 samples it found 24 top-50 flows, 5 top-10 flows, and no reference optimum
 read; at 524288 samples it found 49 top-50 flows, 11 top-10 flows, and again no
-global optimum read. Both reduced-surrogate QAOA and the selected VQE follow-up
+reference optimum read. Both reduced-surrogate QAOA and the historical selected-seed VQE follow-up
 therefore show much stronger concentration on low repaired-objective flows than
 uniform random sampling at comparable sample counts.
 
 The hill-climbing baseline is a stronger classical comparator because it uses
 the repaired objective adaptively. With the same 262144 evaluation budget used
-for the QAOA high-read follow-up, it found the global optimum 19 times and
+for the QAOA high-read follow-up, it found the reference optimum 19 times and
 reached 883 top-50 evaluations. This confirms that simple classical search can
 also exploit $F(y)$ once exact repair is available. However, the transferred
 $p=5$ QAOA distribution was still more concentrated in this cached comparison,
-with 1007 global reads and 62597 top-50 reads at the same nominal count for the
+with 1007 reference reads and 62597 top-50 reads at the same nominal count for the
 top-10-targeted angle search. The
 comparison does not imply a runtime advantage for QAOA; it shows that sampled
 distribution concentration should be interpreted relative to simple classical
@@ -857,7 +890,7 @@ sampling baselines, not only relative to Gurobi.
 \subsection{Hardware Pilot Results}
 \label{subsec:ds-mfg-hardware-pilot}
 
-The strongest local QAOA configuration was submitted as a fixed-parameter IBM
+The highest-concentration local QAOA configuration was submitted as a fixed-parameter IBM
 hardware pilot. The pilot used the reduced 19-flow quadratic surrogate,
 top-10-targeted $p=5$ JuliQAOA-learned angles, and
 \texttt{MaximumIterations() = 0}. The fixed circuit was submitted to
@@ -879,8 +912,8 @@ Aer outputs.}
 Backend and budget & Hit counts & Best repaired result & Artifact \\
 \hline
 \texttt{ibm\_fez}; 9 jobs; 4096 shots per job; 36864 total reads; transpile
-seeds 92001--92003 & 6 top-50 hits; 1 top-10 hit; 0 global hits; 4
-Gurobi-pool-feasible hits & Rank 2; objective $11.8105$; flow
+seeds 92001--92003 & 6 top-50 hits; 1 top-10 hit; 0 reference hits; 4
+stored-Gurobi-pool hits & Rank 2; objective $11.8105$; flow
 \texttt{1001110100111010011}; match \texttt{gurobi\_pool} &
 \texttt{ds\_mfg\_ibm\_qaoa\_pilot\_fez\_4096x3/summary.csv} \\
 \hline
@@ -921,8 +954,8 @@ logical fixed-parameter QAOA setup and angles, but they do not use the same
 compiled physical circuit: the ideal Aer row is an ideal local reference, the
 \texttt{FakeFez}/Aer row is a model-based fake-backend simulation, and the
 \texttt{ibm\_fez} row is real hardware execution. The model-based noisy row
-sampled the global optimum 12 times in 36864 reads, retaining about 8.5\% of
-the ideal global-optimum hit rate. The hardware row observed no global-optimum
+sampled the reference optimum 12 times in 36864 reads, retaining about 8.5\% of
+the ideal reference-optimum hit rate. The hardware row observed no reference-optimum
 reads and only one top-10 repaired-flow read in the same 36864-read budget.
 Relative to the ideal Aer rates, the hardware pilot retained approximately
 0.068\% of the top-50 hit rate and 0.050\% of the top-10 hit rate. The cached
@@ -933,7 +966,7 @@ and
 
 A direct full-QUBO $p=2$ \texttt{ibm\_fez} hardware pilot using the optimized
 high-read parameter artifact was also run as one 4096-shot job. It found zero
-top-50, zero top-10, and zero global repaired-flow hits; the best repaired
+top-50, zero top-10, and zero reference-optimum repaired-flow hits; the best repaired
 objective was $91.7295$. The artifacts are stored in
 \texttt{ds\_mfg\_direct\_full\_qubo\_hardware\_pilot/}. This cached run used
 the original hand-built hardware-circuit path and is retained as legacy
@@ -956,25 +989,34 @@ effects, and backend noise during the hardware execution. This comparison is
 descriptive and should not be interpreted as a speedup or hardware-superiority
 claim.
 
-The VQE hardware candidate remains a follow-up item. The cache identifies seed
-74018 as the best final VQE follow-up, but it does not yet persist the optimized
-\texttt{EfficientSU2} parameter vector needed for a clean fixed-parameter
-hardware sampling experiment.
+The VQE hardware candidate remains a follow-up item, not a prerequisite for the
+current claim. The committed historical cache identifies seed 74018 as the best
+final VQE follow-up, while the selected metadata reruns now persist optimized
+\texttt{EfficientSU2} parameter vectors for a clean fixed-parameter
+hardware-sampling handoff. These metadata reruns are not used to replace the
+higher-read final VQE hit counts because current stochastic reruns did not
+reproduce the historical counts bit-for-bit.
 
 \subsection{Final Artifact Audit}
 \label{subsec:ds-mfg-final-artifact-audit}
 
 The manuscript claims are supported by tracked artifacts rather than by
 uncommitted reruns. The original QUBO and Gurobi data are in
-\texttt{Fw\_ DS mfg case qubo information.zip}. Exact auxiliary repair and the
-reduced flow objective are cached under
+\texttt{Fw\_ DS mfg case qubo information.zip}. Gurobi-pool provenance, the
+exact 19-flow IP enumeration, and the local Gurobi pool rerun are stored in
+\texttt{ds\_mfg\_gurobi\_provenance/}. Exact auxiliary repair and the reduced
+flow objective are cached under
 \texttt{ds\_mfg\_reduced\_flow\_objective/}. The QAOA and VQE distribution
 claims are backed by the summary CSVs listed in
 Table~\ref{tab:ds-mfg-qaoa-results} and
 Table~\ref{tab:ds-mfg-vqe-results}, and by the smoke test
 \texttt{scripts/smoke\_test.jl}. The direct full-QUBO evidence is stored in
 \texttt{ds\_mfg\_direct\_full\_qubo\_audit/} and
-\texttt{ds\_mfg\_direct\_full\_qubo\_qaoa\_highread/}. Classical context is
+\texttt{ds\_mfg\_direct\_full\_qubo\_qaoa\_highread/}. The selected-seed VQE
+optimized-parameter metadata reruns are stored in
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_seed74018\_metadata/} and
+\texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_selected\_metadata/}.
+Classical context is
 stored in \texttt{ds\_mfg\_classical\_baselines/} and
 \texttt{ds\_mfg\_hit\_rate\_reports/time\_to\_solution\_report.csv}. Hardware
 and simulator comparison artifacts are stored in
@@ -987,7 +1029,11 @@ The committed hardware and simulator manifests are sanitized provenance
 records. They retain public backend names, job IDs, shot counts, transpile
 seeds, parameter-artifact paths, and scoring paths, but they do not include IBM
 tokens, account files, Runtime instance CRNs, or absolute local output
-directories. Real submissions remain gated by explicit environment variables.
+directories. The reduced-surrogate IBM pilot script now emits a versioned
+manifest schema for future submissions and dry runs with explicit transpiler
+optimization level, pass-manager source, mitigation flags, queue-timing fields,
+and transpiled-circuit resource fields when a hardware job is actually
+transpiled. Real submissions remain gated by explicit environment variables.
 
 The remaining low-energy-weighted surrogate study is future work, not a
 blocking result for this manuscript state. It would test a different surrogate
@@ -1013,22 +1059,22 @@ auxiliary bits give a poor raw QUBO energy. Exact auxiliary repair therefore
 provides the correct comparison to the Gurobi solution pool and the original IP
 objective.
 
-The dominant algorithmic point is that transferred-angle QAOA was the strongest
+The dominant algorithmic point is that transferred-angle QAOA was the highest-concentration
 workflow tested. Direct local optimization of the full 36-variable QUBO was weak
 for both QAOA and VQE. Reducing the problem to the 19 flow variables and
 repairing auxiliary variables exactly made the problem interpretable, and
 offline statevector QAOA angle search on the reduced surrogate produced a
-distribution with visible mass on the global optimum. VQE also reached the
-global optimum on the reduced surrogate, but at a much lower empirical rate:
-the best final VQE follow-up saw 20 global reads in 524288 samples for seed
+distribution with visible mass on the reference optimum. VQE also reached the
+reference optimum on the reduced surrogate, but at a much lower empirical rate:
+the best final VQE follow-up saw 20 reference reads in 524288 samples for seed
 74018, whereas the top-10-targeted transferred $p=5$ QAOA follow-up saw 1007
-global reads in 262144 samples.
+reference reads in 262144 samples.
 
 The classical baselines add sampling context to this conclusion. Uniform random
-sampling almost never reaches the global optimum at the budgets used here, so
-both the QAOA transfer result and the selected VQE follow-up are meaningfully
+sampling almost never reaches the reference optimum at the budgets used here, so
+both the QAOA transfer result and the historical selected-seed VQE follow-up are meaningfully
 more concentrated than random repaired-flow sampling. A simple hill-climbing
-baseline can also reach the global optimum using the repaired objective, which
+baseline can also reach the reference optimum using the repaired objective, which
 underscores that exact repair and objective access are powerful classical tools
 in their own right. The quantum-emulation results should therefore be framed as
 sampled-distribution evidence after substantial preprocessing, not as evidence
@@ -1050,7 +1096,7 @@ pilot is small and descriptive; it tests fixed-circuit execution and scoring,
 not speedup or IBM hardware superiority. The reduced objective is exact after
 auxiliary repair, but the QAOA and VQE experiments use a quadratic surrogate
 fit to that exact objective. Although the surrogate has high global $R^2$, its
-minimizer is not the true repaired global optimum. Future work should test
+minimizer is not the true repaired reference optimum. Future work should test
 either an interface that optimizes the exact reduced objective directly or a
 surrogate fit weighted toward the low-energy region of the repaired objective.
 The VQE workflow should also persist optimized ansatz parameters so that future
@@ -1063,11 +1109,11 @@ classical optimization loop on hardware.
 This DS-MFG case study shows that current QAOA and VQE software can be used to
 sample meaningful process-design candidates after the original IP variables are
 separated from QUBO auxiliary variables, exact repair is added, and reduced
-surrogate models are constructed. The strongest local result was not a default
+surrogate models are constructed. The highest-concentration local result was not a default
 optimizer run: it required exact auxiliary elimination, a 19-flow quadratic
 surrogate, offline \texttt{JuliQAOA.jl} angle search, parameter transfer back
 into \texttt{QiskitOpt.jl}, and exact repaired-flow postprocessing. That
-pipeline sampled the Gurobi global optimum in local Aer emulation and provided
+pipeline sampled the Gurobi reference optimum in local Aer emulation and provided
 the fixed circuit used in the IBM hardware pilot.
 
 The same evidence also defines the boundary of the claim. Gurobi remains the

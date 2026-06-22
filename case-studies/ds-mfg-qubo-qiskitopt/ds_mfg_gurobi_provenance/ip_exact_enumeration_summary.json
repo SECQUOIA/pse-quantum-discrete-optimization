@@ -1,0 +1,45 @@
+{
+  "artifact_role": "ds_mfg_exact_ip_enumeration_provenance",
+  "claim_boundary": "This deterministic enumeration certifies the 19-flow IP feasible set and optimum for the encoded constraints. It does not recover Gurobi version, status code, MIPGap, or PoolGap.",
+  "credential_policy": "No solver licenses, credentials, account files, or machine-local private paths are stored.",
+  "enumeration": {
+    "feasible_assignment_count": 36,
+    "number_of_binary_flow_variables": 19,
+    "objective_sense": "Min",
+    "optimum_flow_bits": "1001110100111100011",
+    "optimum_objective": 11.7095,
+    "total_binary_assignments": 524288
+  },
+  "flow_order": [
+    "f00",
+    "f01",
+    "f02",
+    "f03",
+    "f04",
+    "f05",
+    "f06",
+    "f07",
+    "f08",
+    "f09",
+    "f10",
+    "f11",
+    "f12",
+    "f13",
+    "f14",
+    "f15",
+    "f16",
+    "f17",
+    "f18"
+  ],
+  "retained_pool_comparison": {
+    "extra_in_retained_pool": [],
+    "feasible_set_matches_retained_pool": true,
+    "missing_from_retained_pool": [],
+    "retained_pool_solution_count": 36,
+    "source_archive": "Fw_ DS mfg case qubo information.zip",
+    "source_member": "gurobi_pool_solutions_n36_20260126_105706.json"
+  },
+  "schema_version": 1,
+  "script": "scripts/enumerate_ip_provenance.py",
+  "source_model": "Flow-conservation and logic constraints from SECQUOIA/pd_ising ds-mfg/discrete_ip/flst_opti_IP.py"
+}
