@@ -206,23 +206,24 @@ infeasible by the pool alone.
 The exact repaired objective is not generally quadratic in $y$. To use QAOA and
 VQE interfaces that expect a QUBO, we fit a 19-variable quadratic surrogate,
 \begin{equation}
-    \text{quadratic surrogate } \hat{F}(y)
+    S(y)
     =
-    \hat{b}
-    + \hat{\ell}^{\top} y
-    + y^{\top} \hat{Q} y,
+    b_S
+    + \ell_S^{\top} y
+    + y^{\top} Q_S y,
     \label{eq:ds-mfg-quadratic-surrogate}
 \end{equation}
-by least squares over all $2^{19}$ repaired flow assignments. Although the
-surrogate has high global fit quality ($R^2 \approx 0.999$), it is not reliable
-as a minimizer: the surrogate optimum repairs to 14.5505 rather than the true
-11.7095 optimum. The true optimum is only rank 33 under the surrogate, and
-among the exact top-50 repaired flows the median and maximum absolute surrogate
-errors are 18.7 and 29.4, respectively. In the lowest 1\% of repaired flows,
-the exact-rank versus surrogate-rank Spearman correlation is 0.901. The
-surrogate $\hat{F}$ is used only to generate variational samples; all
-reported sample-quality metrics are evaluated using the exact repaired
-objective $F$, not $\hat{F}$.
+by least squares over all $2^{19}$ repaired flow assignments. Here $S$ denotes
+the fitted quadratic surrogate for the exact repaired objective $F$. Although
+the surrogate has high global fit quality ($R^2 \approx 0.999$), it is not
+reliable as a minimizer: the surrogate optimum repairs to 14.5505 rather than
+the true 11.7095 optimum. The true optimum is only rank 33 under the surrogate,
+and among the exact top-50 repaired flows the median and maximum absolute
+surrogate errors are 18.7 and 29.4, respectively. In the lowest 1\% of repaired
+flows, the exact-rank versus surrogate-rank Spearman correlation is 0.901. The
+surrogate $S$ is used only to generate variational samples; all reported
+sample-quality metrics are evaluated using the exact repaired objective $F$,
+not $S$.
 
 \subsection{Quantum, Classical, and Hardware Workflows}
 \label{subsec:ds-mfg-workflows}
@@ -269,11 +270,11 @@ minimizing the expected surrogate energy
 \begin{equation}
     \mathcal{J}_{\mathrm{energy}}(\theta)
     =
-    \mathbb{E}_{y\sim p_{\theta}}\!\left[
-      \text{quadratic surrogate } \hat{F}(y)
-    \right].
+    \mathbb{E}_{y\sim p_{\theta}}\!\left[S(y)\right].
     \label{eq:ds-mfg-energy-target}
 \end{equation}
+This objective uses the reduced surrogate, not the exact repaired top-$k$
+ranking.
 The top-10-targeted diagnostic maximized
 \begin{equation}
     \mathcal{J}_{10}(\theta)
@@ -360,7 +361,8 @@ repair-cache construction.
 }
 \draw[->, thick] (0.95,0.70) -- (0.95,4.48);
 \draw[->, thick] (0.95,0.70) -- (7.35,0.70);
-\node[rotate=90, anchor=south] at (-0.02,2.50) {$P(\mathrm{repaired\ reference})$};
+\node[rotate=90, anchor=south, align=center] at (-0.02,2.50)
+    {Probability of sampling\\the reference optimum\\after repair};
 
 \draw[orange!90!black, densely dashed, thick] (1.49,0.70) -- (1.49,0.90);
 \draw[orange!90!black, thick, fill=white] (1.49,0.98) -- (1.39,0.84) -- (1.59,0.84) -- cycle;

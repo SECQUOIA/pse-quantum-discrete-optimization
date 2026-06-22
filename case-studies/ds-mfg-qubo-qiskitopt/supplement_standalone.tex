@@ -323,7 +323,7 @@ quadratic surrogate has high global $R^2$ but imperfect low-energy ordering:
 the exact optimum is only rank 33 under the surrogate, while the surrogate
 minimum repairs to the sixth-best exact flow. Quantum-sampling outcomes are
 therefore scored using the exact repaired objective $F$, not the surrogate
-$\hat F$.}
+$S$.}
 \label{fig:supp-surrogate-rank}
 \end{figure*}
 
@@ -339,7 +339,7 @@ Workflow & Circuit / ansatz & Objective and optimizer & Parameter source & Valid
 \hline
 Energy-targeted QAOA &
 $p=5$ QAOA on the 19-flow surrogate. &
-Minimize surrogate $\mathbb{E}_{y\sim p_\theta}[\hat{F}(y)]$ with JuliQAOA
+Minimize $\mathbb{E}_{y\sim p_\theta}[S(y)]$ (fitted quadratic surrogate) with JuliQAOA
 \texttt{find\_angles\_bh}; seed 91001; 5 basin-hopping iterations. &
 \artifact{ds\_mfg\_qaoa\_juliqaoa\_angle\_search/juliqaoa\_angle\_summary.csv};
 angles transferred beta-then-gamma to \texttt{QiskitOpt.QAOA}. &
