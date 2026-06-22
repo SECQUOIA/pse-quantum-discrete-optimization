@@ -46,8 +46,8 @@ $p=5$ QAOA on a reduced quadratic surrogate---sampled the reference optimum
 Gurobi-reported solution, the exact repaired-QUBO minimizer over all $2^{19}$
 projected flows, and the optimum in a local Gurobi 13.0.2 rerun with zero
 MIPGap. An oracle-aided top-10 diagnostic, using the enumerated repaired
-ranking, sampled it 1007 times. A historical selected VQE follow-up sampled the
-same reference optimum 20 times in 524288 reads, while an IBM hardware pilot
+ranking, sampled it 1007 times. A historical selected-seed VQE follow-up
+sampled the same reference optimum 20 times in 524288 reads, while an IBM hardware pilot
 found one top-10 stored Gurobi-pool flow and no
 reference-optimum read. The evidence supports a workflow-feasibility claim,
 not a speedup or hardware-superiority claim.
@@ -142,15 +142,16 @@ classes, not a literal listing. The exact Gurobi pool, QUBO coefficients, and
 repair artifacts are retained in the supplied QUBO archive and the case-study
 artifact bundle. In the Gurobi export the model is named \texttt{capex}; it has
 19 binary flow variables, 20 constraints, 58 nonzeros, and a minimization
-objective. The retained Gurobi metadata report \texttt{PoolSearchMode=2},
+objective. The original retained Gurobi export reports \texttt{PoolSearchMode=2},
 \texttt{PoolSolutions=36}, solve time 0.073 s, and 36 solutions found
-\cite{gurobi}. Solver version, final status code, MIPGap, PoolGap, and whether
-the pool was intended as complete or diverse were not retained in the original
-export. A local Gurobi 13.0.2 rerun with \texttt{PoolSearchMode=2} and
-\texttt{PoolSolutions=100} returned \texttt{OPTIMAL} status, \texttt{MIPGap=0.0},
-36 solutions, and exact agreement with the retained pool. We therefore use the
-stored optimum as a Gurobi-reported reference and verify below that the same
-flow is the exact repaired-QUBO minimizer over all $2^{19}$ projected flows. We
+\cite{gurobi}; it did not retain solver version, final status, MIPGap, PoolGap,
+or pool intent. A local Gurobi 13.0.2 rerun of the same IP with
+\texttt{PoolSearchMode=2} and \texttt{PoolSolutions=100} returned
+\texttt{OPTIMAL}, \texttt{MIPGap=0.0}, objective 11.7095, flow
+\texttt{1001110100111100011} in $(f_{00},\ldots,f_{18})$ order, 36 solutions,
+and exact retained-pool agreement. We use this flow as the Gurobi-certified IP
+reference and verify below that it is also the exact repaired-QUBO minimizer
+over all $2^{19}$ projected flows. We
 report whether a sampled flow matches a stored Gurobi-pool solution; this is a
 pool-membership metric, not a certificate that all other sampled flows are
 infeasible.
@@ -193,8 +194,9 @@ one or two auxiliary variables.
 
 This repair gives a valid bridge back to the IP objective. The exact repaired
 minimizer over all $2^{19}$ flow assignments is the retained Gurobi-reported
-reference flow \texttt{1001110100111100011} with objective 11.7095. Across all
-36 stored Gurobi-pool flows, repaired QUBO scores match the IP objective within
+reference flow \texttt{1001110100111100011}, ordered as
+$(f_{00},\ldots,f_{18})$, with objective 11.7095. Across all 36 stored
+Gurobi-pool flows, repaired QUBO scores match the IP objective within
 $3.1\times 10^{-13}$. Fourteen of the top 50 repaired flows are not in the
 stored Gurobi pool, so these non-pool flows are not certified feasible or
 infeasible by the pool alone.
@@ -279,10 +281,11 @@ top-10 objective is oracle-aided because the repaired ranking is known for this
 small enumerated instance; it is not claimed as a scalable parameter-setting
 strategy. Reduced-surrogate VQE used \texttt{EfficientSU2}, 152 initial
 parameters on the 19-flow surrogate, 128 optimizer reads, 25 COBYLA
-iterations, and final-read sweeps up to 524288 reads. The historical high-read
-VQE distribution remains the reported sampled result, while current metadata
-reruns retain optimized VQE parameter vectors for selected fixed-circuit replay
-without replacing the historical hit counts.
+iterations, and final-read sweeps up to 524288 reads. The main VQE row is a
+historical cached selected-seed follow-up: seed 74018 produced 20
+reference-optimum hits in 524288 reads. A later metadata rerun produced 4
+reference-optimum hits in 1572864 reads and documents provenance without
+replacing the historical distribution.
 
 Classical baselines sampled the repaired 19-flow objective by uniform random
 sampling and by steepest-descent single-bit-flip hill climbing with random
@@ -396,8 +399,8 @@ after projection to the 19 original flow variables and exact auxiliary repair.
 Solid bars are observed probabilities with Wilson 95\% intervals; open
 triangles are Wilson upper bounds for zero-hit rows, not observed hits. Short
 labels denote uniform random sampling, hill-climb restarts, energy-targeted
-transferred QAOA, oracle-aided top-10-targeted QAOA, selected reduced-surrogate
-VQE, and the \texttt{ibm\_fez} hardware pilot.}
+transferred QAOA, oracle-aided top-10-targeted QAOA, historical selected-seed
+VQE follow-up, and the \texttt{ibm\_fez} hardware pilot.}
 \label{fig:ds-mfg-repair-pipeline}
 \end{figure*}
 
@@ -449,8 +452,8 @@ with objective 11.8105 in a five-seed sweep and sampled the reference optimum
 three times in a larger 20-seed sweep. Seed 74018 was selected for the final
 high-read follow-up because the preceding 262144-read selected-seed run had the
 largest top-50, top-10, and reference-hit counts among the selected seeds. The
-final 524288-read follow-up for seed 74018 produced 20 reference-optimum reads,
-152 top-10 reads, and 391 top-50 reads.
+historical final 524288-read follow-up for seed 74018 produced 20
+reference-optimum reads, 152 top-10 reads, and 391 top-50 reads.
 
 The classical baselines prevent overclaiming. Uniform random repaired-flow
 sampling did not find the reference optimum in either 262144 or 524288 samples,
@@ -493,9 +496,10 @@ Top-10-targeted transferred QAOA & 262144 Aer reads &
 $3.84{\times}10^{-3}$ & 14326 / 62597 & Oracle-aided diagnostic using the
 enumerated repaired ranking; 1007 reference reads. \\
 \hline
-Reduced-surrogate VQE, seed 74018 & 524288 Aer reads &
+Historical reduced-surrogate VQE, seed 74018 & 524288 Aer reads &
 $3.81{\times}10^{-5}$ & 152 / 391 & Reached the optimum, but with lower
-concentration than transferred QAOA. \\
+concentration than transferred QAOA; not replaced by the current metadata
+rerun. \\
 \hline
 IBM \texttt{ibm\_fez} QAOA pilot & 36864 hardware reads & 0 & 1 / 6 &
 Executed the fixed-circuit handoff; best sampled flow was rank 2 with objective
@@ -552,8 +556,8 @@ VQE workflow should also persist optimized ansatz parameters so that any future
 hardware experiment can separate classical optimization from fixed-parameter
 hardware sampling. The artifact package supports inspection and rescoring of
 retained samples and summaries; fully rerunning every stochastic campaign would
-require regenerating some missing optimization and hardware-provenance
-metadata.
+require optimizer-state, simulator-log, and submitted-job hardware metadata
+that are incomplete for some historical runs.
 
 \section{Conclusion}
 \label{sec:ds-mfg-conclusion}

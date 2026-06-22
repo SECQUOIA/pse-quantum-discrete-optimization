@@ -111,7 +111,9 @@ hardware-handoff workflows, subject to stochastic variation and credential
 availability. &
 Partially supported. QAOA fixed-angle parameters and sampled outputs are
 retained; selected VQE metadata reruns now retain optimized ansatz vectors for
-seed 74018 and for the final-budget selected seeds 74018, 74007, and 74001. \\
+seed 74018 and for the final-budget selected seeds 74018, 74007, and 74001.
+Those metadata reruns are provenance artifacts, not replacements for the
+historical sampled VQE distributions. \\
 \hline
 Full campaign replay &
 Every stochastic campaign can be reproduced byte-for-byte from retained
@@ -180,7 +182,7 @@ Check & Retained value & Anchor \\
 \hline
 Exact repaired optimum &
 $F(y^\star)=11.7095$ at flow
-\codeid{1001110100111100011}. &
+\codeid{1001110100111100011}, ordered as $(f_{00},\ldots,f_{18})$. &
 \artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_flow\_summary.csv};
 \artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_exact\_top\_flows.csv}. \\
 \hline
@@ -190,15 +192,21 @@ $3.1\times 10^{-13}$. &
 \artifact{MANUSCRIPT\_FINDINGS.tex};
 \artifact{Fw\_ DS mfg case qubo information.zip}. \\
 \hline
-Retained Gurobi metadata &
+Original Gurobi export metadata &
 Model \texttt{capex}: 19 binary variables, 20 constraints, 58 nonzeros;
 \texttt{PoolSearchMode=2}, \texttt{PoolSolutions=36}, solve time 0.073 s,
 36 solutions found. Solver version, status code, MIPGap, PoolGap, and pool
-completeness/diversity intent were not retained in the original export. A
-local Gurobi 13.0.2 rerun with \texttt{PoolSearchMode=2} and
-\texttt{PoolSolutions=100} returned \texttt{OPTIMAL}, \texttt{MIPGap=0.0}, 36
-solutions, and exact retained-pool agreement. &
+completeness/diversity intent were not retained in the original export. &
 \artifact{Fw\_ DS mfg case qubo information.zip/gurobi\_pool\_solutions\_n36\_20260126\_105706.json}. \\
+\hline
+Local Gurobi rerun validation &
+Gurobi 13.0.2 rerun of the same IP with \texttt{PoolSearchMode=2} and
+\texttt{PoolSolutions=100}: \texttt{OPTIMAL}, \texttt{MIPGap=0.0}, best
+objective 11.7095, objective bound 11.7095, 36 solutions, local solve time
+0.0077 s, and exact retained-pool agreement. PoolGap is null in the rerun
+summary and pool completeness/diversity is not claimed. &
+\artifact{ds\_mfg\_gurobi\_provenance/gurobi\_local\_pool\_rerun\_summary.json};
+\artifact{ds\_mfg\_gurobi\_provenance/gurobi\_local\_pool\_rerun\_solutions.csv}. \\
 \hline
 Quadratic surrogate weakness &
 Global fit $R^2 \approx 0.999$, but the surrogate optimum repairs to 14.5505.
@@ -235,14 +243,15 @@ $[2.35,2.73]\times10^{-3}$. MPS truncation logs were not retained. &
 \hline
 Missing value & Affects main claim? & Affects full rerun? & Current mitigation \\
 \hline
-Historical Gurobi final status and MIPGap &
+Original-export Gurobi final status and MIPGap &
 No for the current claim after rerun; the original export still lacks these
 fields, but the model/pool behavior has been rerun locally. &
 Partly; exact historical solver state is unavailable, but current solver
 provenance is retained. &
 The same flow is certified by exact enumeration over all $2^{19}$ flows and by
 a local Gurobi 13.0.2 rerun with \texttt{OPTIMAL} status, \texttt{MIPGap=0.0},
-36 solutions, and exact retained-pool agreement. \\
+36 solutions, and exact retained-pool agreement. PoolGap and original
+pool-generation intent remain unclaimed. \\
 \hline
 MPS truncation logs &
 No for the central QAOA sampling claim. &
@@ -258,7 +267,8 @@ optimizer replay is not claimed. &
 Metadata reruns retain optimized \texttt{EfficientSU2} vectors for seed 74018
 and for seeds 74018, 74007, and 74001 at the final sampling budget. The current
 metadata rerun produced 4 reference hits total and is provenance, not a
-replacement for the historical 28-hit final follow-up. \\
+replacement for the historical sampled VQE distributions reported in the
+manuscript. \\
 \hline
 Submitted hardware layout, depth, and two-qubit count &
 No, because the hardware row is a submission-and-scoring handoff only. &
@@ -353,17 +363,26 @@ local 1007-hit diagnostic CSV was not retained. &
 1007 reference hits / 262144 reads in the retained manuscript summary; hardware
 handoff used this circuit. \\
 \hline
-Reduced-surrogate VQE &
+Historical cached reduced-surrogate VQE &
 \texttt{EfficientSU2}; 152 initial parameters on the 19-flow surrogate. &
 COBYLA through \texttt{QiskitOpt.VQE}; 128 optimizer reads; 25 iterations;
 seeds 74001, 74007, and 74018 in the final follow-up. &
-Historical sampled distributions retained; current metadata reruns persist
-optimized ansatz vectors in
-\artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_seed74018\_metadata/} and
+Historical sampled distributions retained in
+\artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_final/vqe\_reduced\_top50\_sampling\_summary.csv};
+historical optimized ansatz vectors were not retained. &
+Seed 74018 had 20 reference hits / 524288 reads, 152 top-10 reads, and 391
+top-50 reads. The same historical three-seed final-follow-up artifact sums to
+28 reference hits / 1572864 reads. \\
+\hline
+Current VQE metadata/provenance rerun &
+\texttt{EfficientSU2}; 152 initial parameters on the 19-flow surrogate. &
+COBYLA through \texttt{QiskitOpt.VQE}; 128 optimizer reads; 25 iterations;
+seeds 74001, 74007, and 74018 at the final sampling budget. &
+Current metadata rerun persists optimized ansatz vectors in
 \artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_selected\_metadata/}. &
-Historical final follow-up: seed 74018 had 20 reference hits / 524288 reads;
-three seeds had 28 reference hits / 1572864 reads. Current metadata rerun:
-4 reference hits / 1572864 reads. \\
+4 reference hits / 1572864 reads; used for provenance only and not to replace
+the historical VQE bar in the main manuscript figure or primary-outcomes
+table. \\
 \hline
 \end{tabular}
 \end{table*}
