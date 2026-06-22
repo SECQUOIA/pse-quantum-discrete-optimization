@@ -49,8 +49,8 @@ MIPGap. An oracle-aided top-10 diagnostic, using the enumerated repaired
 ranking, sampled it 1007 times. A historical selected-seed VQE follow-up
 sampled the same reference optimum 20 times in 524288 reads, while an IBM hardware pilot
 found one top-10 stored Gurobi-pool flow and no
-reference-optimum read. The evidence supports a workflow-feasibility claim,
-not a speedup or hardware-superiority claim.
+reference-optimum read. The evidence supports repair-aware workflow
+feasibility, not speedup, hardware superiority, or Gurobi replacement.
 }
 \renewcommand{\PaperKeywords}{%
 quantum computing, process design, decomposition, optimization}
@@ -257,7 +257,7 @@ $[2.35,2.73]\times 10^{-3}$.
 Several workflows were evaluated. Direct full-QUBO QAOA and VQE used the
 36-variable formulation. Reduced-surrogate QAOA and VQE used the 19-flow
 surrogate and were scored by exact repair. The highest-concentration QAOA
-workflow added an offline angle-search step:
+workflow in this audit added an offline angle-search step:
 \pkg{JuliQAOA.jl}{https://github.com/lanl/JuliQAOA.jl} was used to optimize
 QAOA angles over the reduced surrogate
 \cite{Golden2023JuliQAOA}, and those fixed angles were then transferred back to
@@ -390,7 +390,7 @@ repair-cache construction.
 \node[anchor=north, align=center] at (2.44,0.49) {hill};
 \node[anchor=north, align=center] at (3.39,0.49) {energy};
 \node[anchor=north, align=center] at (4.34,0.49) {top-10};
-\node[anchor=north, align=center] at (5.29,0.49) {VQE};
+\node[anchor=north, align=center] at (5.29,0.49) {hist.\\VQE};
 \node[anchor=north, align=center] at (6.24,0.49) {IBM};
 
 \end{tikzpicture}%
@@ -594,12 +594,10 @@ repository is
 archival DOI will be added before camera-ready submission; the review artifact
 is identified by the repository snapshot that contains this manuscript and by
 the checksums in the supplement. Checksums and validation anchors are listed in
-\artifact{case-studies/ds-mfg-qubo-qiskitopt/supplement_standalone.tex}. The
-main manuscript keeps only the narrative-critical values; the supplementary
-audit material is intended for reproducibility and provenance. The artifact
-bundle supports recomputing scores from retained samples and summaries; it does
-not fully reproduce every stochastic campaign without rerunning the
-corresponding scripts.
+\artifact{case-studies/ds-mfg-qubo-qiskitopt/supplement_standalone.tex}. The bundle
+supports rescoring retained samples, summaries, repair tables, and validation
+outputs; byte-for-byte replay is not claimed because some optimizer states,
+MPS logs, and submitted-job metadata are incomplete.
 
 \pseprintreferences
 
