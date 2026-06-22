@@ -871,7 +871,7 @@ Uniform random, seed 81001 & 0 / 262144 & $\infty$ &
 Uniform random sampling provides a useful lower baseline for concentration. At
 262144 samples it found 24 top-50 flows, 5 top-10 flows, and no reference optimum
 read; at 524288 samples it found 49 top-50 flows, 11 top-10 flows, and again no
-reference optimum read. Both reduced-surrogate QAOA and the selected VQE follow-up
+reference optimum read. Both reduced-surrogate QAOA and the historical selected-seed VQE follow-up
 therefore show much stronger concentration on low repaired-objective flows than
 uniform random sampling at comparable sample counts.
 
@@ -1012,7 +1012,7 @@ Table~\ref{tab:ds-mfg-qaoa-results} and
 Table~\ref{tab:ds-mfg-vqe-results}, and by the smoke test
 \texttt{scripts/smoke\_test.jl}. The direct full-QUBO evidence is stored in
 \texttt{ds\_mfg\_direct\_full\_qubo\_audit/} and
-\texttt{ds\_mfg\_direct\_full\_qubo\_qaoa\_highread/}. The selected VQE
+\texttt{ds\_mfg\_direct\_full\_qubo\_qaoa\_highread/}. The selected-seed VQE
 optimized-parameter metadata reruns are stored in
 \texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_seed74018\_metadata/} and
 \texttt{ds\_mfg\_vqe\_reduced\_flow\_objective\_selected\_metadata/}.
@@ -1072,7 +1072,7 @@ reference reads in 262144 samples.
 
 The classical baselines add sampling context to this conclusion. Uniform random
 sampling almost never reaches the reference optimum at the budgets used here, so
-both the QAOA transfer result and the selected VQE follow-up are meaningfully
+both the QAOA transfer result and the historical selected-seed VQE follow-up are meaningfully
 more concentrated than random repaired-flow sampling. A simple hill-climbing
 baseline can also reach the reference optimum using the repaired objective, which
 underscores that exact repair and objective access are powerful classical tools

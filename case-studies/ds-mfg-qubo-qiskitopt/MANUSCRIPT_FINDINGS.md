@@ -192,7 +192,7 @@ The cached baselines are:
 Against these baselines, top-10-targeted transferred p=5 QAOA remains much more
 concentrated than uniform random sampling and the simple hill-climb baseline at
 the same 262144 count: 62597 top-50 reads, 14326 top-10 reads, and 1007 reference
-reads. The selected VQE follow-up seed 74018 is also stronger than uniform
+reads. The historical selected-seed VQE follow-up seed 74018 is also stronger than uniform
 random sampling at 524288 reads, with 391 top-50 reads, 152 top-10 reads, and
 20 reference reads.
 
@@ -330,7 +330,7 @@ uncommitted reruns. The principal evidence paths are:
 - direct full-QUBO audit and high-read QAOA evidence:
   `ds_mfg_direct_full_qubo_audit/` and
   `ds_mfg_direct_full_qubo_qaoa_highread/`,
-- selected VQE optimized-parameter metadata:
+- selected-seed VQE optimized-parameter metadata:
   `ds_mfg_vqe_reduced_flow_objective_seed74018_metadata/` and
   `ds_mfg_vqe_reduced_flow_objective_selected_metadata/`,
 - classical context: `ds_mfg_classical_baselines/` and
@@ -374,7 +374,7 @@ the fixed-parameter circuit used for the hardware pilot.
 
 The classical baselines add sampling context. Uniform random repaired-flow
 sampling almost never reaches the reference optimum at these budgets, so both the
-QAOA transfer result and the selected VQE follow-up are meaningfully more
+QAOA transfer result and the historical selected-seed VQE follow-up are meaningfully more
 concentrated than random sampling. A simple hill-climb baseline can also reach
 the reference optimum once it has direct access to the repaired objective, which
 underscores that exact repair is a strong classical tool as well as a scoring
