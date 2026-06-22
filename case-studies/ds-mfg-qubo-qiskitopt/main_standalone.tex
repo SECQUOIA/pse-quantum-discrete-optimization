@@ -120,8 +120,9 @@ over classical simulation.
 The original DS-MFG instance is a binary integer-programming model for a
 capital-expenditure selection problem. The 19 binary variables encode
 candidate material-flow arcs or unit-operation selections in a manufacturing
-superstructure, and the objective is a normalized capital-cost score. The best
-retained Gurobi-reported value is 11.7095. Schematically, the discrete
+superstructure, and the objective is a normalized capital-cost score. The
+reference value is 11.7095; it is the best retained Gurobi-reported value and
+is certified by the local Gurobi 13.0.2 rerun described below. Schematically, the discrete
 subproblem has the form
 \begin{equation}
 \begin{aligned}
@@ -205,11 +206,11 @@ infeasible by the pool alone.
 The exact repaired objective is not generally quadratic in $y$. To use QAOA and
 VQE interfaces that expect a QUBO, we fit a 19-variable quadratic surrogate,
 \begin{equation}
-    \hat F(y)
+    \text{quadratic surrogate } \hat{F}(y)
     =
-    \hat b
-    + \hat\ell^{\top} y
-    + y^{\top} \hat Q y,
+    \hat{b}
+    + \hat{\ell}^{\top} y
+    + y^{\top} \hat{Q} y,
     \label{eq:ds-mfg-quadratic-surrogate}
 \end{equation}
 by least squares over all $2^{19}$ repaired flow assignments. Although the
@@ -219,9 +220,9 @@ as a minimizer: the surrogate optimum repairs to 14.5505 rather than the true
 among the exact top-50 repaired flows the median and maximum absolute surrogate
 errors are 18.7 and 29.4, respectively. In the lowest 1\% of repaired flows,
 the exact-rank versus surrogate-rank Spearman correlation is 0.901. The
-surrogate $\hat F$ is used only to generate variational samples; all
+surrogate $\hat{F}$ is used only to generate variational samples; all
 reported sample-quality metrics are evaluated using the exact repaired
-objective $F$, not $\hat F$.
+objective $F$, not $\hat{F}$.
 
 \subsection{Quantum, Classical, and Hardware Workflows}
 \label{subsec:ds-mfg-workflows}
@@ -268,7 +269,9 @@ minimizing the expected surrogate energy
 \begin{equation}
     \mathcal{J}_{\mathrm{energy}}(\theta)
     =
-    \mathbb{E}_{y\sim p_{\theta}}\!\left[\hat F(y)\right].
+    \mathbb{E}_{y\sim p_{\theta}}\!\left[
+      \text{quadratic surrogate } \hat{F}(y)
+    \right].
     \label{eq:ds-mfg-energy-target}
 \end{equation}
 The top-10-targeted diagnostic maximized

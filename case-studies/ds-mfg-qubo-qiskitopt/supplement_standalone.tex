@@ -339,7 +339,7 @@ Workflow & Circuit / ansatz & Objective and optimizer & Parameter source & Valid
 \hline
 Energy-targeted QAOA &
 $p=5$ QAOA on the 19-flow surrogate. &
-Minimize $\mathbb{E}_{y\sim p_\theta}[\hat F(y)]$ with JuliQAOA
+Minimize surrogate $\mathbb{E}_{y\sim p_\theta}[\hat{F}(y)]$ with JuliQAOA
 \texttt{find\_angles\_bh}; seed 91001; 5 basin-hopping iterations. &
 \artifact{ds\_mfg\_qaoa\_juliqaoa\_angle\_search/juliqaoa\_angle\_summary.csv};
 angles transferred beta-then-gamma to \texttt{QiskitOpt.QAOA}. &
