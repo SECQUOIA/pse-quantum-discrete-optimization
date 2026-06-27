@@ -9,10 +9,11 @@ compact companion summary.
 ## Purpose
 
 This case study evaluates local classical emulations of QAOA and VQE, accessed
-through `QiskitOpt.jl`, on a DS-MFG discrete integer-programming QUBO instance.
-The analysis compares sampled quantum-optimization distributions against a
-Gurobi solution pool and uses the original IP variables to interpret the sampled
-QUBO bitstrings.
+through `QiskitOpt.jl`, on a drug-substance manufacturing (DS-MFG) discrete
+integer-programming QUBO instance from the source study arXiv:2603.19520. The
+analysis compares sampled quantum-optimization distributions against a Gurobi
+solution pool and uses the original IP variables to interpret the sampled QUBO
+bitstrings.
 
 The central claim is a practical audit claim. Current QAOA/VQE tooling can be
 made to sample meaningful DS-MFG process-design candidates, but only after
