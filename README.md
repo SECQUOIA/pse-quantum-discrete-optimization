@@ -3,7 +3,7 @@
 This repository collects process systems engineering case studies that audit
 quantum and quantum-inspired algorithms for discrete optimization models.
 
-The initial case study is a demand-side manufacturing (DS-MFG) QUBO workflow
+The initial case study is a drug-substance manufacturing (DS-MFG) QUBO workflow
 using local Qiskit Aer emulations of QAOA and VQE through `QiskitOpt.jl`.
 It is framed as a practical workflow audit: Gurobi provides the 19-flow-variable
 ground truth, local Aer emulation provides the current QAOA/VQE evidence,

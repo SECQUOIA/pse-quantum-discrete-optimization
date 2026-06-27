@@ -956,7 +956,9 @@ compiled physical circuit: the ideal Aer row is an ideal local reference, the
 \texttt{ibm\_fez} row is real hardware execution. The model-based noisy row
 sampled the reference optimum 12 times in 36864 reads, retaining about 8.5\% of
 the ideal reference-optimum hit rate. The hardware row observed no reference-optimum
-reads and only one top-10 repaired-flow read in the same 36864-read budget.
+reads and only one top-10 repaired-flow read in the same 36864-read budget. With
+zero reference-optimum hits, the two-sided 95\% Wilson upper bound on the
+hardware reference-optimum hit rate is $1.04\times 10^{-4}$.
 Relative to the ideal Aer rates, the hardware pilot retained approximately
 0.068\% of the top-50 hit rate and 0.050\% of the top-10 hit rate. The cached
 tables are
