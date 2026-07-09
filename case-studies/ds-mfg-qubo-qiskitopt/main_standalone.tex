@@ -271,7 +271,7 @@ Energy-targeted QAOA, $p{=}5$ & 53.9 & $2.53\,[2.35,\,2.73]{\times}10^{-3}$ & $0
 \hline
 Reduced-surrogate VQE, seed 74018 & 30.1 & $3.8\,[2.5,\,5.9]{\times}10^{-5}$ & $7.4\,[6.7,\,8.2]{\times}10^{-4}$ & 6.93 & 0.36 \\
 \hline
-IBM \texttt{ibm\_fez} pilot & 73.5 & $<\!1.0{\times}10^{-4}$ & $1.1\,[0.42,\,2.8]{\times}10^{-4}$ & $\infty$ & 84.6 \\
+IBM \texttt{ibm\_fez} pilot & 73.5 & $<\!1.1{\times}10^{-4}$ & $1.1\,[0.42,\,2.8]{\times}10^{-4}$ & $\infty$ & 84.6 \\
 \hline
 \end{tabular}
 \end{table*}
@@ -281,7 +281,7 @@ IBM \texttt{ibm\_fez} pilot & 73.5 & $<\!1.0{\times}10^{-4}$ & $1.1\,[0.42,\,2.8
 
 The highest-concentration fixed-angle QAOA circuit ran on the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001--92003), with 4096 measurement shots per repeat, for 36864 total hardware reads (9 jobs, 73.5 s elapsed including cloud queue).
 The run produced 4 feasible-design reads and no reference-optimum read; the best hardware sample was the second-cheapest feasible flowsheet (objective 11.8105).
-The resulting TTS99-feas is 84.6 s---roughly 14000$\times$ slower than the hill climber's 0.006 s and 1000$\times$ slower than Gurobi's 0.073 s, primarily because most elapsed time is cloud overhead rather than circuit execution ($\approx$2 ms per shot).
+The resulting TTS99-feas is 84.6 s---roughly 14000$\times$ slower than the hill climber's 0.006 s and 1200$\times$ slower than Gurobi's 0.073 s, primarily because most elapsed time is cloud overhead rather than circuit execution ($\approx$2 ms per shot).
 With zero optimum hits, the Wilson 95\% upper bound on the hardware optimum-hit rate is about $1.04\times 10^{-4}$.
 Because calibration and full transpilation metadata were not retained, this run confirms only that the submission-and-scoring path executes end to end on hardware.
 
