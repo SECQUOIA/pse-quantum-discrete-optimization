@@ -327,6 +327,87 @@ exact repaired objective $F$, not the surrogate $\widehat F$.}
 
 \clearpage
 
+\section{Exact Auxiliary Repair: Component Decomposition}
+\label{sec:supp-aux-repair}
+
+The QUBO objective $E_{\mathrm{QUBO}}(y,z)$ acts on 36 binary variables: the 19 flow (design) variables $y=(y_1,\ldots,y_{19})$ and 17 binary auxiliary (slack) variables $z=(z_1,\ldots,z_{17})$ introduced by the penalty reformulation.
+A sampled 36-bit string is not directly interpretable as a flowsheet because the auxiliary bits are bookkeeping for the inequality constraints of the original design problem, not design decisions.
+After projecting a sample onto the 19 flow bits $y$, the repair step finds the auxiliary assignment that minimizes the QUBO energy for that flow:
+\begin{equation}
+z^\star(y) = \arg\min_{z \in \{0,1\}^{17}} E_{\mathrm{QUBO}}(y, z).
+\label{eq:supp-repair}
+\end{equation}
+
+Brute-force enumeration over all $2^{17} = 131{,}072$ auxiliary assignments is tractable for a single call but unnecessarily costly when repair is applied to every sampled state across all workflows.
+Once $y$ is fixed, every term in $E_{\mathrm{QUBO}}$ that involves an auxiliary variable $z_k$ is either (i)~a linear term $c_k z_k$, (ii)~an auxiliary-auxiliary coupling $c_{k\ell}\,z_k z_\ell$, or (iii)~a flow-auxiliary coupling $c_{ik}\,y_i z_k$ (a constant given~$y$).
+Consider the \emph{auxiliary coupling graph}: nodes are the 17 auxiliary variables, and an edge connects $z_k$ and $z_\ell$ whenever their quadratic coefficient $c_{k\ell}\neq 0$.
+For this QUBO the graph has 13 connected components: 9 isolated nodes (one auxiliary bit each) and 4 edges (two auxiliary bits each).
+Because there are no edges between components, fixing~$y$ makes the components conditionally independent, and \eqref{eq:supp-repair} decomposes as
+\begin{equation}
+\min_{z} E_{\mathrm{QUBO}}(y, z) = \mathrm{const}(y) + \sum_{c=1}^{13} \min_{z^{(c)}} E^{(c)}(y, z^{(c)}),
+\end{equation}
+where $z^{(c)}$ are the auxiliary bits in component~$c$ and $E^{(c)}$ contains only the terms that involve those bits (with fixed~$y$ values substituted as constants).
+Each sub-problem is solved by enumerating $2^1=2$ or $2^2=4$ assignments and selecting the minimum energy; the total work is at most $9{\times}2 + 4{\times}4 = 34$ comparisons per repair, a factor of $\sim\!3{,}800\times$ smaller than the brute-force bound.
+This procedure is implemented in \artifact{scripts/run\_classical\_baselines.jl}; the component structure is read from \artifact{ds\_mfg\_reduced\_flow\_objective/auxiliary\_components.csv}.
+
+\smallskip
+\noindent\textbf{Physical meaning of the components.}
+Table~\ref{tab:supp-aux-components} lists all 13 components with their auxiliary variable indices, the flow variables whose fixed values enter each local energy, and a brief description.
+Singleton components (1--5, 10--13) correspond to individual inequality constraints in the penalty QUBO: the single binary slack takes the value ($0$ or $1$) that satisfies the inequality, which for feasible flow assignments is the constraint residual.
+Pair components (6--9) each arise from the product-linearization of the Route~B activation rule ($f_{06}=1$ iff Reactor~1 is PFR or CSTR \emph{and} Reactor~2 is Batch).
+Linearizing a product of two binary variables requires up to three inequality constraints; the slack for such a constraint can take values in $\{0,1,2\}$, needing two binary bits.
+The four pair components together represent the complete linearization of this one coupling rule across all Reactor~1/Reactor~2 type combinations.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Independent auxiliary components for the DS-MFG QUBO repair
+         (source: \artifact{ds\_mfg\_reduced\_flow\_objective/auxiliary\_components.csv}).
+         Variable indices 1--19 are the 19 flow variables~$y$; indices 20--36 are the 17
+         binary auxiliary (slack) variables~$z$.
+         \emph{Flow neighbors} are the $y$-indices that appear in the local energy $E^{(c)}$.
+         No coupling term links auxiliaries across components, so each
+         sub-problem is solved independently by enumeration.}
+\label{tab:supp-aux-components}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.04\linewidth}L{0.08\linewidth}L{0.05\linewidth}L{0.47\linewidth}L{0.05\linewidth}L{0.18\linewidth}}
+\hline
+\# & Aux.\ idx. & $n_{\mathrm{aux}}$ & Flow neighbors ($y$ idx.\ and $f$-arc) & $2^{n_{\mathrm{aux}}}$ & Role \\
+\hline
+1  & 20      & 1 & 17~($f_{16}$, Batch\,U/S),\enspace 18~($f_{17}$, cont.\ exit)
+   & 2 & Batch/cont.\ downstream exclusion \\
+2  & 21      & 1 & 2~($f_{01}$, PFR\,Rxn\,1),\enspace 3~($f_{02}$, CSTR\,Rxn\,1),\enspace 4~($f_{03}$, Batch\,Rxn\,1)
+   & 2 & Reactor\,1 at-most-one \\
+3  & 22      & 1 & 6~($f_{05}$, Route\,A),\enspace 7~($f_{06}$, Route\,B)
+   & 2 & Route at-most-one \\
+4  & 23      & 1 & 9~($f_{08}$, PFR\,Rxn\,2),\enspace 10~($f_{09}$, CSTR\,Rxn\,2),\enspace 11~($f_{10}$, Batch\,Rxn\,2)
+   & 2 & Reactor\,2 at-most-one \\
+5  & 24      & 1 & 14~($f_{13}$, Cont.\,I),\enspace 15~($f_{14}$, Cont.\,II),\enspace 16~($f_{15}$, Cont.\,III),\enspace 17~($f_{16}$, Batch\,U/S)
+   & 2 & Downstream at-most-one \\
+6  & 25,\,26 & 2 & 2~($f_{01}$, PFR\,Rxn\,1),\enspace 7~($f_{06}$, Route\,B),\enspace 11~($f_{10}$, Batch\,Rxn\,2)
+   & 4 & Route\,B linearization (PFR\,Rxn\,1 case) \\
+7  & 27,\,28 & 2 & 3~($f_{02}$, CSTR\,Rxn\,1),\enspace 7~($f_{06}$, Route\,B),\enspace 11~($f_{10}$, Batch\,Rxn\,2)
+   & 4 & Route\,B linearization (CSTR\,Rxn\,1 case) \\
+8  & 29,\,30 & 2 & 4~($f_{03}$, Batch\,Rxn\,1),\enspace 7~($f_{06}$, Route\,B),\enspace 11~($f_{10}$, Batch\,Rxn\,2)
+   & 4 & Route\,B linearization (Batch\,Rxn\,1 case) \\
+9  & 31,\,32 & 2 & 2~($f_{01}$, PFR\,Rxn\,1),\enspace 3~($f_{02}$, CSTR\,Rxn\,1),\enspace 6~($f_{05}$, Route\,A)
+   & 4 & Route\,B linearization (Route\,A side) \\
+10 & 33      & 1 & 6~($f_{05}$, Route\,A),\enspace 11~($f_{10}$, Batch\,Rxn\,2)
+   & 2 & Route\,A\,/\,Rxn\,2 coupling \\
+11 & 34      & 1 & 14~($f_{13}$, Cont.\,I),\enspace 18~($f_{17}$, cont.\ exit)
+   & 2 & Cont.\,I flow balance \\
+12 & 35      & 1 & 15~($f_{14}$, Cont.\,II),\enspace 18~($f_{17}$, cont.\ exit)
+   & 2 & Cont.\,II flow balance \\
+13 & 36      & 1 & 16~($f_{15}$, Cont.\,III),\enspace 18~($f_{17}$, cont.\ exit)
+   & 2 & Cont.\,III flow balance \\
+\hline
+\multicolumn{6}{l}{$9{\times}2 + 4{\times}4 = 34$ comparisons per repair vs.\ $2^{17}=131{,}072$ brute force (${\sim}3{,}800{\times}$ reduction).} \\
+\hline
+\end{tabular}
+\end{table*}
+
+\clearpage
+
 \section{Variational and Hardware Provenance}
 \label{sec:supp-variational}
 
