@@ -253,8 +253,8 @@ TTS99 accounts for time per sample and hit probability, but excludes offline pre
 \footnotesize
 \caption{Primary outcomes, all scored after exact auxiliary repair.
 Reference-hit rate is the empirical probability of sampling the certified optimal flowsheet.
-TTS99-opt and TTS99-feas are empirical 99\% time-to-solution for the reference optimum and any feasible flow, computed as $\tau\lceil\log(0.01)/\log(1{-}\hat{p})\rceil$ where $\tau$ is measured wall time per sample or Aer circuit call; rows with zero hits show $\infty$.
-TTS excludes offline preprocessing (surrogate fitting, angle search); Gurobi TTS is its deterministic local solve time.}
+TTS99-opt and TTS99-feas are empirical 99\% time-to-solution for the reference optimum and any feasible flow, computed as $\tau\lceil\log(0.01)/\log(1{-}\hat{p})\rceil$ where $\tau$ is wall time per sample; rows with zero hits show $\infty$.
+TTS for local methods uses per-sample Aer or script wall time and excludes offline preprocessing (surrogate fitting, angle search). TTS for IBM uses total elapsed time including cloud job queue (73.5 s for 36864 shots, 9 jobs). Gurobi TTS is its deterministic local solve time.}
 \label{tab:ds-mfg-primary-outcomes}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{L{0.20\linewidth}L{0.07\linewidth}L{0.14\linewidth}L{0.11\linewidth}L{0.11\linewidth}L{0.21\linewidth}}
@@ -271,7 +271,7 @@ Energy-targeted QAOA, $p{=}5$ & 262 k & $2.53{\times}10^{-3}$ & 0.37 & 0.007 & P
 \hline
 Reduced-surrogate VQE, seed 74018 & 524 k & $3.81{\times}10^{-5}$ & 6.93 & 0.36 & Reaches the optimum but much flatter distribution than QAOA. \\
 \hline
-IBM \texttt{ibm\_fez} pilot & 36.9 k & 0 & $\infty$ & --- & Implementation feasibility check; 4 feasible reads; shot time unavailable for TTS. \\
+IBM \texttt{ibm\_fez} pilot & 36.9 k & 0 & $\infty$ & 84.6$^\dagger$ & Implementation feasibility check; 4 feasible reads; TTS includes cloud queue time. \\
 \hline
 \end{tabular}
 \end{table*}
@@ -279,11 +279,11 @@ IBM \texttt{ibm\_fez} pilot & 36.9 k & 0 & $\infty$ & --- & Implementation feasi
 \subsection{Hardware Execution Is an Implementation Feasibility Check}
 \label{subsec:ds-mfg-hardware-main}
 
-The highest-concentration fixed-angle QAOA circuit ran on the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001--92003), with 4096 measurement shots per repeat, for a total of 36864 hardware reads.
+The highest-concentration fixed-angle QAOA circuit ran on the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001--92003), with 4096 measurement shots per repeat, for 36864 total hardware reads (9 jobs, 73.5 s elapsed including cloud queue).
 The run produced 4 feasible-design reads and no reference-optimum read; the best hardware sample was the second-cheapest feasible flowsheet (objective 11.8105).
+The resulting TTS99-feas is 84.6 s---roughly 14000$\times$ slower than the hill climber's 0.006 s and 10000$\times$ slower than Gurobi's 0.008 s, primarily because most elapsed time is cloud overhead rather than circuit execution ($\approx$2 ms per shot).
 With zero optimum hits, the Wilson 95\% upper bound on the hardware optimum-hit rate is about $1.04\times 10^{-4}$.
-Because calibration and full transpilation metadata were not retained, we use this run only to confirm that the submission-and-scoring path executes end to end on hardware.
-The result is a feasibility check for hardware implementation, not evidence of a hardware advantage.
+Because calibration and full transpilation metadata were not retained, this run confirms only that the submission-and-scoring path executes end to end on hardware.
 
 \section{Discussion and Limitations}
 \label{sec:ds-mfg-discussion}
