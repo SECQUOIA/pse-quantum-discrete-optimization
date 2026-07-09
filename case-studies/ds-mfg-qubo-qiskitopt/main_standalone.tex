@@ -197,7 +197,8 @@ An independent state-vector calculation predicts the central QAOA reference-opti
 For each sampled state $x=(y,z)$ we record the raw QUBO energy $E_{\mathrm{QUBO}}(y,z)$, the repaired objective $F(y)$, and the auxiliary gap.
 A \emph{reference-optimum hit} means the repaired flow equals the certified optimal flowsheet (the unique minimum-cost feasible design).
 A \emph{feasible-design hit} means the repaired flow matches any of the 36 feasible flows.
-We report both hit rates with two-sided Wilson 95\% confidence intervals (score-based intervals for proportions that remain valid near zero).
+We report both hit rates with two-sided Wilson 95\% confidence intervals (score-based intervals for proportions that remain valid near zero); rows with no observed hits report the one-sided upper bound.
+The empirical 99\% time-to-solution $\mathrm{TTS}_{99}=\tau\lceil\log(0.01)/\log(1-\hat{p})\rceil$ normalizes each hit rate by the measured wall time per sample $\tau$, enabling wall-clock comparison across methods with different per-sample costs; rows with zero hits report $\infty$.
 
 \begin{figure}[t]
 \centering
@@ -236,40 +237,41 @@ Without projection and exact repair, a raw QUBO sample cannot be read as a flows
 \label{subsec:ds-mfg-qaoa-main}
 
 Once the pipeline is in place, reduction to the surrogate and transferred-parameter search are what make QAOA samples concentrate on feasible, optimal flowsheets.
-The energy-targeted $p=5$ transferred workflow sampled the certified optimum 664 times in 262144 ideal reads (reference-optimum rate $2.53\times 10^{-3}$, Wilson 95\% interval $[2.35,2.73]\times 10^{-3}$; TTS99-opt 0.37 s, TTS99-feas 0.007 s).
+The energy-targeted $p=5$ transferred workflow sampled the certified optimum 664 times in 262144 ideal reads and matched a feasible flowsheet 32502 times (12.4\%, CI [12.3, 12.5]\%), the highest feasible-design rate of any workflow; see Table~\ref{tab:ds-mfg-primary-outcomes} for TTS99 values.
 
 \subsection{VQE and Classical Baselines Bound the Claim}
 \label{subsec:ds-mfg-vqe-classical-main}
 
 VQE benefits from the same reduction but produces a flatter distribution.
-Full-QUBO VQE found no optimum in a five-seed sweep; a selected-seed reduced-surrogate VQE found the optimum 20 times in 524288 reads (TTS99-opt 6.93 s, TTS99-feas 0.36 s).
-Hill climbing found the optimum 19 times in 262144 evaluations (TTS99-opt 0.23 s, TTS99-feas 0.006 s); random sampling never found the optimum (TTS99-feas 0.46 s).
-TTS99 accounts for time per sample and hit probability, but excludes offline preprocessing that dominates the real QAOA cost.
+Full-QUBO VQE found no optimum in a five-seed sweep; a selected-seed reduced-surrogate VQE found the optimum 20 times in 524288 reads.
+Hill climbing found the optimum 19 times in 262144 evaluations; despite a lower hit rate than QAOA, its much smaller per-sample cost gives a better TTS99-opt (0.23 s vs.\ 0.37 s).
+Random sampling never found the optimum.
 
 \begin{table*}[t]
 \centering
 \footnotesize
 \caption{Primary outcomes, all scored after exact auxiliary repair.
-Reference-hit rate is the empirical probability of sampling the certified optimal flowsheet.
-TTS99-opt and TTS99-feas are empirical 99\% time-to-solution for the reference optimum and any feasible flow, computed as $\tau\lceil\log(0.01)/\log(1{-}\hat{p})\rceil$ where $\tau$ is wall time per sample; rows with zero hits show $\infty$.
-TTS for local methods uses per-sample Aer or script wall time and excludes offline preprocessing (surrogate fitting, angle search). TTS for IBM uses total elapsed time including cloud job queue (73.5 s for 36864 shots, 9 jobs). Gurobi TTS is its deterministic solve time.}
+Ref-opt rate: empirical probability of sampling the certified optimal flowsheet; feas rate: any feasible-design match among the 36 feasible flows.
+Wilson 95\% CIs are shown as [lo,\,hi] in the same units as the point estimate; zero-hit rows report only the one-sided upper bound.
+Total time: aggregate wall time for all samples (Aer simulation only for local quantum methods, excludes offline preprocessing; total elapsed including cloud job queue for IBM hardware).
+TTS99-opt and TTS99-feas are empirical 99\% time-to-solution (see Methods); $\infty$ if no hits observed.}
 \label{tab:ds-mfg-primary-outcomes}
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{L{0.20\linewidth}L{0.07\linewidth}L{0.14\linewidth}L{0.11\linewidth}L{0.11\linewidth}L{0.21\linewidth}}
+\begin{tabular}{L{0.19\linewidth}L{0.07\linewidth}L{0.19\linewidth}L{0.18\linewidth}L{0.09\linewidth}L{0.09\linewidth}}
 \hline
-Workflow & Reads & Reference-hit rate & TTS99-opt (s) & TTS99-feas (s) & What it shows \\
+Workflow & Total time (s) & Ref-opt rate [95\% CI] & Feas rate [95\% CI] & TTS99-opt (s) & TTS99-feas (s) \\
 \hline
-Gurobi solution pool & --- & Deterministic & 0.073 & 0.073 & Certified optimum 11.7095; \texttt{PoolSearchMode=2} retains all 36 feasible flows in one shot. \\
+Gurobi solution pool & 0.073 & Deterministic & 36/36 (exhaustive) & 0.073 & 0.073 \\
 \hline
-Uniform random sampling & 262 k & 0 & $\infty$ & 0.46 & Weakest baseline; never finds the optimum; best sampled flow is feasible (11.8105). \\
+Uniform random sampling & 2.08 & $<\!1.5{\times}10^{-5}$ & $8.0\,[5.2,\,12.2]{\times}10^{-5}$ & $\infty$ & 0.46 \\
 \hline
-Hill-climb random restarts & 262 k & $7.25{\times}10^{-5}$ & 0.23 & 0.006 & Fastest probabilistic path to both targets. \\
+Hill-climb restarts & 0.93 & $7.2\,[4.6,\,11.3]{\times}10^{-5}$ & $2.75\,[2.56,\,2.96]{\times}10^{-3}$ & 0.23 & 0.006 \\
 \hline
-Energy-targeted QAOA, $p{=}5$ & 262 k & $2.53{\times}10^{-3}$ & 0.37 & 0.007 & Primary quantum result; highest hit rate but TTS99-opt worse than hill climb. \\
+Energy-targeted QAOA, $p{=}5$ & 53.9 & $2.53\,[2.35,\,2.73]{\times}10^{-3}$ & $0.124\,[0.123,\,0.125]$ & 0.37 & 0.007 \\
 \hline
-Reduced-surrogate VQE, seed 74018 & 524 k & $3.81{\times}10^{-5}$ & 6.93 & 0.36 & Reaches the optimum but much flatter distribution than QAOA. \\
+Reduced-surrogate VQE, seed 74018 & 30.1 & $3.8\,[2.5,\,5.9]{\times}10^{-5}$ & $7.4\,[6.7,\,8.2]{\times}10^{-4}$ & 6.93 & 0.36 \\
 \hline
-IBM \texttt{ibm\_fez} pilot & 36.9 k & 0 & $\infty$ & 84.6 & Implementation feasibility check; 4 feasible reads; TTS includes cloud queue time. \\
+IBM \texttt{ibm\_fez} pilot & 73.5 & $<\!1.0{\times}10^{-4}$ & $1.1\,[0.42,\,2.8]{\times}10^{-4}$ & $\infty$ & 84.6 \\
 \hline
 \end{tabular}
 \end{table*}
