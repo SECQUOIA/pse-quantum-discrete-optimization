@@ -17,7 +17,7 @@
 \setlist{nosep,leftmargin=*}
 \emergencystretch=3em
 
-\renewcommand{\PaperTitle}{Supplementary Material: Challenges of Gate-Based Quantum Optimization for a Discrete Pharmaceutical Process-Design Problem}
+\renewcommand{\PaperTitle}{Supplementary Material: Challenges of Gate-Based Quantum Optimization for a Discrete Process-Design Problem}
 \renewcommand{\PaperAuthors}{%
 Yirang ~Park\textsuperscript{a}
 and David E. ~Bernal Neira\textsuperscript{a}}
@@ -209,9 +209,11 @@ repaired rank 6. &
 Figure~\ref{fig:supp-surrogate-rank}. \\
 \hline
 Low-energy surrogate audit &
-The exact top-50 repaired flows include 14 non-pool flows. In the lowest
-1\% repaired-flow set, exact-rank versus surrogate-rank Spearman correlation
-is 0.901. Exact enumeration wall time was not retained. &
+Exact enumeration finds 36 feasible flows (the complete pool). The 50
+lowest-cost repaired flows include 14 infeasible flows — the penalty weights
+are insufficient to push all infeasible flows above all feasible ones. In the
+lowest 1\% repaired-flow set, exact-rank versus surrogate-rank Spearman
+correlation is 0.901. Exact enumeration wall time was not retained. &
 \artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_exact\_top\_flows.csv};
 \artifact{MANUSCRIPT\_FINDINGS.tex}. \\
 \hline
@@ -288,7 +290,7 @@ tracks recording wall time if the enumeration script is rerun. \\
 \begin{axis}[
     width=0.82\linewidth,
     height=0.42\linewidth,
-    xlabel={Exact repaired rank among the top 50},
+    xlabel={Exact repaired rank (50 lowest-cost flows; circles 37--50 are infeasible)},
     ylabel={Rank under quadratic surrogate},
     xmin=0, xmax=51,
     ymin=0, ymax=120,
@@ -304,7 +306,7 @@ tracks recording wall time if the enumeration script is rerun. \\
 (38,38) (39,39) (40,40) (41,41) (42,42) (43,107) (44,108) (45,109)
 (46,110) (47,111) (48,112) (49,113) (50,114)
 };
-\addlegendentry{exact top-50 flows}
+\addlegendentry{50 lowest-cost repaired flows (ranks 37--50 are infeasible)}
 \addplot[blue!70!black, only marks, mark=*, mark size=2.5pt] coordinates {(1,33)};
 \addlegendentry{true optimum}
 \addplot[red!70!black, only marks, mark=triangle*, mark size=3pt] coordinates {(6,1)};
@@ -312,12 +314,14 @@ tracks recording wall time if the enumeration script is rerun. \\
 \addplot[black, dashed, domain=1:50, samples=2] {x};
 \end{axis}
 \end{tikzpicture}
-\caption{Surrogate rank audit for the exact top-50 repaired flows. The
-quadratic surrogate has high global $R^2$ but imperfect low-energy ordering:
-the exact optimum is only rank 33 under the surrogate, while the surrogate
-minimum repairs to the sixth-best exact flow. Quantum-sampling outcomes are
-therefore scored using the exact repaired objective $F$, not the surrogate
-$\widehat F$.}
+\caption{Surrogate rank audit for the 50 lowest-cost repaired flows. Exact
+enumeration confirms there are exactly 36 feasible flows (ranks 1--36); the
+remaining 14 shown here are infeasible flows whose penalty values are
+insufficient to place them above all feasible ones. The surrogate has high
+global $R^2$ but imperfect low-energy ordering: the exact optimum is only
+rank 33 under the surrogate, while the surrogate minimum repairs to the
+sixth-best exact flow. Quantum-sampling outcomes are therefore scored using the
+exact repaired objective $F$, not the surrogate $\widehat F$.}
 \label{fig:supp-surrogate-rank}
 \end{figure*}
 
