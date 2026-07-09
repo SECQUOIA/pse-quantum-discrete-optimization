@@ -33,9 +33,9 @@ and David~E. Bernal~Neira\textsuperscript{a}}
 \renewcommand{\PaperAbstract}{%
 Discrete decisions, such as selecting routes, units, and operating modes, are an early and combinatorially hard step in process design.
 Gate-based quantum optimization algorithms, namely the quantum approximate optimization algorithm
-(QAOA) and the variational quantum eigensolver (VQE), are increasingly proposed for such problems, which raises a practical question for the process systems engineering community.
+(QAOA) and the variational quantum eigensolver (VQE) are increasingly proposed for such problems, raising a practical question for the process systems engineering community.
 Once a discrete-design model is mapped to the quadratic unconstrained binary optimization (QUBO) form required by these methods, do the resulting samples actually correspond to process-design decisions, and how do they compare with classical methods?
-We study this question on a small but fully enumerable drug-substance manufacturing instance with 19 binary flow decisions.
+We study this question on a small but fully enumerable instance of drug-substance manufacturing with 19 binary flow decisions.
 The penalty reformulation needed to obtain a QUBO adds 17 auxiliary variables, so a sampled 36-bit state is not itself a design decision: it becomes one only after projection onto the 19 flow variables and exact repair of the auxiliaries.
 After this preprocessing, energy-targeted transferred-angle QAOA concentrates probability on the optimal flowsheet (664 of 262144 ideal reads), but does not outperform a simple classical hill climber, an exact solver, or exhaustive enumeration.
 A small IBM hardware run completes the same pipeline without adding an advantage.
@@ -70,8 +70,8 @@ The resulting models are combinatorial, and even modestly sized superstructures
 generate large discrete search spaces.
 
 Gate-based quantum optimization is one of the emerging tools proposed for this setting.
-A gate-based quantum computer operates on quantum bits (qubits) by applying sequences of parameterized gate operations that form a quantum circuit; measuring the circuit returns a binary string, and the circuit parameters---called angles---are tuned so that low-energy strings appear with high probability.
-The quantum approximate optimization algorithm (QAOA) \cite{Farhi2014} and the variational quantum eigensolver (VQE) \cite{Peruzzo2014, Cerezo2021} follow this variational paradigm: QAOA uses $p$ alternating cost and mixer layers, and VQE uses a hardware-efficient parameterized ansatz; in both cases, a classical optimizer adjusts the angles.
+A gate-based quantum computer operates on quantum bits (qubits) by applying sequences of parameterized gate operations that form a quantum circuit; measuring the circuit returns a binary string, and the circuit parameters, called angles, are tuned so that low-energy strings appear with high probability.
+The quantum approximate optimization algorithm (QAOA) \cite{Farhi2014} and the variational quantum eigensolver (VQE) \cite{Peruzzo2014, Cerezo2021} follow this variational paradigm: QAOA uses $p$ alternating cost and mixer layers, and VQE uses a parameterized circuit with structure similar to the quantum device, also known as a hardware-efficient ansatz; in both cases, a classical optimizer adjusts the angles.
 Current hardware is noisy and of intermediate scale \cite{Preskill2018}, and benchmarking surveys stress that a practical quantum advantage for optimization has not yet been established \cite{Abbas2024}; the relevant question is what is required to use these methods today and how their output compares with classical baselines.
 
 Within process systems engineering, quantum computing has been reviewed as an emerging capability \cite{BernalAIChE2022}, and hybrid quantum-classical strategies have been proposed for discrete optimization in process and energy systems \cite{AjagekarYou2019}.
@@ -123,7 +123,7 @@ Equation~\eqref{eq:ds-mfg-ip-formulation} lists the relevant constraint classes:
 flow balance at each node $n \in N$, fixed source and sink selections, and
 additional logical constraints $g(f) \leq 0$ that enforce a valid flowsheet.
 
-Solved with \texttt{Gurobi} \cite{gurobi}, the model (19 binary variables, 20 constraints) returns an optimal capital-cost score of 11.7095; with pool enumeration enabled (\texttt{PoolSearchMode=2}), all 36 feasible flows are retained in a single deterministic solve (0.073 s).
+Solved with \texttt{Gurobi} \cite{gurobi}, the model (19 binary variables, 20 constraints) returns an optimal capital-cost score of 11.7095; with feasible solutions enumeration enabled (\texttt{PoolSearchMode=2}), all 36 feasible flows are retained in a single deterministic solve (0.073 s).
 We treat 11.7095 as the certified global optimum and use it as the reference throughout.
 
 \subsection{From Integer Program to QUBO and Back}
@@ -156,7 +156,11 @@ We make it interpretable by projecting onto $y$ and repairing the auxiliaries, c
     \label{eq:ds-mfg-repaired-objective}
 \end{equation}
 The repair is exact and cheap here because, once $y$ is fixed, the
-auxiliary-auxiliary coupling graph splits into 13 small connected components solved by enumeration.
+auxiliary-auxiliary coupling graph splits into 13 independent connected components:
+9 singletons (one auxiliary bit each) and 4 pairs (two auxiliary bits each).
+The singletons correspond to the at-most-one inequality constraints for each decision group and to the downstream flow-balance conditions; the pairs arise from product-linearization inequalities for the Route~B activation rule ($f_{06}=1$ iff Reactor~1 is continuous and Reactor~2 is batch).
+Each component is solved by exhaustive enumeration over its 2 or 4 possible assignments; the $9\!\times\!2+4\!\times\!4=34$ total comparisons replace $2^{17}=131{,}072$ brute-force evaluations.
+The full component table with auxiliary indices, flow neighbors, and constraint roles appears in the Supplement (Sect.~3).
 For a general QUBO, the auxiliary repair is itself
 NP-hard, a limitation we return to in the Discussion.
 
@@ -292,7 +296,7 @@ The empirical 99\% time-to-solution $\mathrm{TTS}_{99}=\tau\lceil\log(0.01)/\log
 \node[box, below=of sample]  (project) {project to 19 flow bits $y$};
 \node[box, below=of project] (repair)  {exact auxiliary repair\\$z^\star(y)=\arg\min_z E(y,z)$};
 \node[box, below=of repair]  (score)   {score: $F(y)=E(y,z^\star(y))$};
-\node[box, below=of score]   (compare) {compare: ref-opt \& pool};
+\node[box, below=of score]   (compare) {compare: optimality \& feasibility};
 \draw[arr] (sample)  -- (project);
 \draw[arr] (project) -- (repair);
 \draw[arr] (repair)  -- (score);
@@ -309,7 +313,7 @@ dashed arrows mark the non-optimal alternatives;
 the backbone arcs $f_{00},f_{04},f_{07},f_{11},f_{18}$ carry every feasible flow.
 Route~B ($f_{06}$) is activated only when a continuous Reactor~1 feeds a batch Reactor~2;
 Cont.\,I/II/III share entry arc $f_{12}$ and exit arc $f_{17}$ (optimal uses $f_{13}$).
-\textbf{(b)} Every sampled 36-bit QUBO string is projected to the 19 flow variables, repaired exactly by solving 13 independent sub-problems, and scored against the certified optimum and the 36-member feasible-design pool; hit rates appear in Table~\ref{tab:ds-mfg-primary-outcomes}.}
+\textbf{(b)} Every sampled 36-bit QUBO string is projected to the 19 flow variables, repaired exactly via the 13-component auxiliary decomposition (Supplement, Sect.~3), and scored against the certified optimum and the 36-member feasible-design pool; hit rates appear in Table~\ref{tab:ds-mfg-primary-outcomes}.}
 \label{fig:ds-mfg-overview}
 \end{figure*}
 
@@ -321,7 +325,7 @@ Cont.\,I/II/III share entry arc $f_{12}$ and exit arc $f_{17}$ (optimal uses $f_
 
 Sampling the 36-variable QUBO directly does not yield an interpretable design result.
 A $p=2$ full-QUBO QAOA found no optimum in 512 samples; a 32768-read run returned it only 4 times after repair, and never as a fully optimal 36-bit string without projection.
-Without projection and exact repair, a raw QUBO sample cannot be read as a flowsheet. Figure~\ref{fig:ds-mfg-overview}(b) summarizes the scoring pipeline applied throughout.
+Without projection and exact repair, a raw QUBO sample cannot be read as a flowsheet; Figure~\ref{fig:ds-mfg-overview}(b) summarizes the scoring pipeline, and the repair decomposition is detailed in the Supplement (Sect.~3).
 
 \subsection{Reduction and Parameter Transfer Concentrate QAOA Samples}
 \label{subsec:ds-mfg-qaoa-main}
@@ -341,7 +345,7 @@ Random sampling never found the optimum.
 \centering
 \footnotesize
 \caption{Primary outcomes, all scored after exact auxiliary repair.
-Ref-opt rate: empirical probability of sampling the certified optimal flowsheet; feas rate: any feasible-design match among the 36 feasible flows.
+Opt rate: empirical probability of sampling the certified optimal flowsheet; feas rate: any feasible-design match among the 36 feasible flows.
 Wilson 95\% CIs are shown as [lo,\,hi] in the same units as the point estimate; zero-hit rows report only the one-sided upper bound.
 Total time: aggregate wall time for all samples (Aer simulation only for local quantum methods, excludes offline preprocessing; total elapsed including cloud job queue for IBM hardware).
 TTS99-opt and TTS99-feas are empirical 99\% time-to-solution (see Methods); $\infty$ if no hits observed.}
@@ -349,7 +353,7 @@ TTS99-opt and TTS99-feas are empirical 99\% time-to-solution (see Methods); $\in
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{L{0.19\linewidth}L{0.07\linewidth}L{0.19\linewidth}L{0.18\linewidth}L{0.09\linewidth}L{0.09\linewidth}}
 \hline
-Workflow & Total time (s) & Ref-opt rate [95\% CI] & Feas rate [95\% CI] & TTS99-opt (s) & TTS99-feas (s) \\
+Workflow & Total time (s) & Opt rate [95\% CI] & Feas rate [95\% CI] & TTS99-opt (s) & TTS99-feas (s) \\
 \hline
 Gurobi solution pool & 0.073 & Deterministic & 36/36 (exhaustive) & 0.073 & 0.073 \\
 \hline
@@ -369,9 +373,9 @@ IBM \texttt{ibm\_fez} pilot & 73.5 & $<\!1.1{\times}10^{-4}$ & $1.1\,[0.42,\,2.8
 \subsection{Hardware Execution Is an Implementation Feasibility Check}
 \label{subsec:ds-mfg-hardware-main}
 
-The highest-concentration fixed-angle QAOA circuit ran on the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001--92003), with 4096 measurement shots per repeat, for 36864 total hardware reads (9 jobs, 73.5 s elapsed including cloud queue).
+The highest-concentration fixed-angle QAOA circuit ran on the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001-92003), with 4096 measurement shots per repeat, for 36864 total hardware reads (9 jobs, 73.5 s elapsed including cloud queue).
 The run produced 4 feasible-design reads and no reference-optimum read; the best hardware sample was the second-cheapest feasible flowsheet (objective 11.8105).
-The resulting TTS99-feas is 84.6 s---roughly 14000$\times$ slower than the hill climber's 0.006 s and 1200$\times$ slower than Gurobi's 0.073 s, primarily because most elapsed time is cloud overhead rather than circuit execution ($\approx$2 ms per shot).
+The resulting TTS99-feas is 84.6 s, roughly 14000$\times$ slower than the hill climber's 0.006 s and 1200$\times$ slower than Gurobi's 0.073 s, primarily because most elapsed time is cloud overhead rather than circuit execution ($\approx$2 ms per shot).
 With zero optimum hits, the Wilson 95\% upper bound on the hardware optimum-hit rate is about $1.04\times 10^{-4}$.
 Because calibration and full transpilation metadata were not retained, this run confirms only that the submission-and-scoring path executes end to end on hardware.
 
@@ -383,7 +387,7 @@ That engineering path requires variable separation, exact auxiliary repair, a su
 The repaired distribution does concentrate on good flowsheets; it does not translate into a runtime advantage over classical methods for this instance.
 
 The main limitations follow directly.
-Exact auxiliary repair is tractable here only because the conditioned auxiliary graph decomposes; in general, it is NP-hard, and an approximate repair would change the meaning of every reported metric.
+Exact auxiliary repair is tractable here only because the conditioned auxiliary graph decomposes into 13 independent components (Supplement, Sect.~3); in general, it is NP-hard, and an approximate repair would change the meaning of every reported metric.
 Read counts exclude the offline preprocessing that dominates the real cost, and meaningful comparison with classical optimization requires accounting for that total cost
 \cite{Abbas2024,Bernal2024-benchmarking}.
 
