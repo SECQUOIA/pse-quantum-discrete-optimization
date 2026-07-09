@@ -25,8 +25,8 @@
 % Standalone PSE Press-style wrapper for the DS-MFG manuscript.
 \renewcommand{\PaperTitle}{Challenges of Gate-Based Quantum Optimization for a Discrete Process-Design Problem}
 \renewcommand{\PaperAuthors}{%
-Yirang ~Park\textsuperscript{a}
-and David E. ~Bernal Neira\textsuperscript{a}}
+Yirang~Park\textsuperscript{a}
+and David~E. Bernal~Neira\textsuperscript{a}}
 \renewcommand{\PaperAffiliations}{%
 \textsuperscript{a} Davidson School of Chemical Engineering, Purdue University, West Lafayette, IN 47907, USA\\
 }
@@ -123,7 +123,7 @@ Equation~\eqref{eq:ds-mfg-ip-formulation} lists the relevant constraint classes:
 flow balance at each node $n \in N$, fixed source and sink selections, and
 additional logical constraints $g(f) \leq 0$ that enforce a valid flowsheet.
 
-Solved with commercial mixed-integer solver \texttt{Gurobi v13.0} \cite{gurobi}, the model (19 binary variables, 20 constraints) returns an optimal capital-cost score of 11.7095; with pool enumeration enabled (\texttt{PoolSearchMode=2}), all 36 feasible flows are retained in a single deterministic solve (0.008 s on Gurobi 13.0.2; the original archive records 0.073 s on a different machine).
+Solved with \texttt{Gurobi} \cite{gurobi}, the model (19 binary variables, 20 constraints) returns an optimal capital-cost score of 11.7095; with pool enumeration enabled (\texttt{PoolSearchMode=2}), all 36 feasible flows are retained in a single deterministic solve (0.008 s, Gurobi~13.0.2 local rerun; original archive: 0.073 s on a different machine).
 We treat 11.7095 as the certified global optimum and use it as the reference throughout.
 
 \subsection{From Integer Program to QUBO and Back}
@@ -158,8 +158,7 @@ We make it interpretable by projecting onto $y$ and repairing the auxiliaries, c
 The repair is exact and cheap here because, once $y$ is fixed, the
 auxiliary-auxiliary coupling graph splits into 13 small connected components solved by enumeration.
 For a general QUBO, the auxiliary repair is itself
-NP-hard, a limitation we return to in the Discussion Section.
-% ~\ref{sec:ds-mfg-discussion}.
+NP-hard, a limitation we return to in the Discussion.
 
 The repaired minimizer over all $2^{19}$ flows recovers the optimum, and the repaired QUBO scores match the integer-program objective to within $3.1\times 10^{-13}$, confirming they encode the same objective.
 Exact enumeration finds exactly 36 feasible flows, as does the solution pool option of \texttt{Gurobi}.
@@ -189,8 +188,7 @@ Both algorithms have a number of other parameters, also called angles, that are 
 Direct full-QUBO QAOA and VQE operate on the 36-variable formulation; reduced-surrogate QAOA and VQE operate on the 19-variable surrogate and are scored by exact repair.
 The best-performing quantum workflow adds an offline parameter-search step: QAOA parameters are optimized on the surrogate with JuliQAOA \cite{Golden2023JuliQAOA} by minimizing the expected surrogate energy $\mathbb{E}_{y \sim p_\theta}[\widehat{F}(y)]$, then transferred to a Qiskit circuit for sampling (energy-targeted, non-oracle).
 The fixed, pre-optimized parameters with the highest local solution concentration are also submitted to the hardware for a feasibility test.
-Reduced-surrogate VQE uses an  \texttt{EfficientSU2} ansatz optimized with COBYLA.
-
+Reduced-surrogate VQE uses an \texttt{EfficientSU2} ansatz optimized with COBYLA.
 
 As classical baselines, we sample the repaired 19-flow objective by uniform random sampling and by single-bit-flip hill climbing with random restarts.
 As a hardware feasibility test, we run the highest-concentration fixed-parameter QAOA circuit on the IBM \texttt{ibm\_fez} quantum computer.
@@ -271,7 +269,7 @@ Energy-targeted QAOA, $p{=}5$ & 262 k & $2.53{\times}10^{-3}$ & 0.37 & 0.007 & P
 \hline
 Reduced-surrogate VQE, seed 74018 & 524 k & $3.81{\times}10^{-5}$ & 6.93 & 0.36 & Reaches the optimum but much flatter distribution than QAOA. \\
 \hline
-IBM \texttt{ibm\_fez} pilot & 36.9 k & 0 & $\infty$ & 84.6$^\dagger$ & Implementation feasibility check; 4 feasible reads; TTS includes cloud queue time. \\
+IBM \texttt{ibm\_fez} pilot & 36.9 k & 0 & $\infty$ & 84.6 & Implementation feasibility check; 4 feasible reads; TTS includes cloud queue time. \\
 \hline
 \end{tabular}
 \end{table*}
@@ -322,5 +320,6 @@ Bernal Neira: 0000-0002-8308-5016
 
 
 \pseprintreferences
+\pseprintcopyright
 
 \end{document}
