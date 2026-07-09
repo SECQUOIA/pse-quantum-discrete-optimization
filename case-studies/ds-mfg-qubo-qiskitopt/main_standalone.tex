@@ -123,7 +123,7 @@ Equation~\eqref{eq:ds-mfg-ip-formulation} lists the relevant constraint classes:
 flow balance at each node $n \in N$, fixed source and sink selections, and
 additional logical constraints $g(f) \leq 0$ that enforce a valid flowsheet.
 
-Solved with commercial mixed-integer solver \texttt{Gurobi v13.0} \cite{gurobi}, the model (19 binary variables, 20 constraints) returns an optimal capital-cost score of 11.7095; with pool enumeration enabled (\texttt{PoolSearchMode=2}), all 36 feasible flows are retained and the total solve time including pool search is 0.073 s.
+Solved with commercial mixed-integer solver \texttt{Gurobi v13.0} \cite{gurobi}, the model (19 binary variables, 20 constraints) returns an optimal capital-cost score of 11.7095; with pool enumeration enabled (\texttt{PoolSearchMode=2}), all 36 feasible flows are retained in a single deterministic solve (0.008 s on Gurobi 13.0.2; the original archive records 0.073 s on a different machine).
 We treat 11.7095 as the certified global optimum and use it as the reference throughout.
 
 \subsection{From Integer Program to QUBO and Back}
@@ -238,47 +238,40 @@ Without projection and exact repair, a raw QUBO sample cannot be read as a flows
 \label{subsec:ds-mfg-qaoa-main}
 
 Once the pipeline is in place, reduction to the surrogate and transferred-parameter search are what make QAOA samples concentrate on feasible, optimal flowsheets.
-The energy-targeted $p=5$ transferred workflow sampled the certified optimum 664 times and returned a feasible flowsheet 32502 times in 262144 ideal reads (reference-optimum rate $2.53\times 10^{-3}$, Wilson 95\% interval $[2.35,2.73]\times 10^{-3}$).
+The energy-targeted $p=5$ transferred workflow sampled the certified optimum 664 times in 262144 ideal reads (reference-optimum rate $2.53\times 10^{-3}$, Wilson 95\% interval $[2.35,2.73]\times 10^{-3}$; TTS99-opt 0.37 s, TTS99-feas 0.007 s).
 
 \subsection{VQE and Classical Baselines Bound the Claim}
 \label{subsec:ds-mfg-vqe-classical-main}
 
 VQE benefits from the same reduction but produces a flatter distribution.
-Full-QUBO VQE found no optimum in a five-seed sweep; a selected-seed reduced-surrogate VQE reached the optimum 20 times and 389 feasible flows in 524288 reads.
-Classical baselines: random sampling found 21 feasible flows in 262144 draws; hill climbing found the optimum 19 times and 721 feasible flows in the same draw count.
-QAOA concentrates more probability on optimal and feasible flowsheets at matched nominal counts, but these counts exclude preprocessing, angle search, and solver overhead.
+Full-QUBO VQE found no optimum in a five-seed sweep; a selected-seed reduced-surrogate VQE found the optimum 20 times in 524288 reads (TTS99-opt 6.93 s, TTS99-feas 0.36 s).
+Hill climbing found the optimum 19 times in 262144 evaluations (TTS99-opt 0.23 s, TTS99-feas 0.006 s); random sampling never found the optimum (TTS99-feas 0.46 s).
+TTS99 accounts for time per sample and hit probability, but excludes offline preprocessing that dominates the real QAOA cost.
 
 \begin{table*}[t]
 \centering
 \footnotesize
-\caption{Primary outcomes, all scored after exact auxiliary repair. Reference-hit
-rate is the empirical probability of sampling the optimal flowsheet.
-Feasible-design hits: for Gurobi, the count of distinct feasible flows found by pool search; for all other rows, the count of reads landing on any feasible flow.
-The reads/evals column counts sampling effort only and excludes offline preprocessing.}
+\caption{Primary outcomes, all scored after exact auxiliary repair.
+Reference-hit rate is the empirical probability of sampling the certified optimal flowsheet.
+TTS99-opt and TTS99-feas are empirical 99\% time-to-solution for the reference optimum and any feasible flow, computed as $\tau\lceil\log(0.01)/\log(1{-}\hat{p})\rceil$ where $\tau$ is measured wall time per sample or Aer circuit call; rows with zero hits show $\infty$.
+TTS excludes offline preprocessing (surrogate fitting, angle search); Gurobi TTS is its deterministic local solve time.}
 \label{tab:ds-mfg-primary-outcomes}
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{L{0.22\linewidth}L{0.15\linewidth}L{0.15\linewidth}L{0.16\linewidth}L{0.24\linewidth}}
+\begin{tabular}{L{0.20\linewidth}L{0.07\linewidth}L{0.14\linewidth}L{0.11\linewidth}L{0.11\linewidth}L{0.21\linewidth}}
 \hline
-Workflow & Reads / evals & Reference-hit rate & Feasible-design hits & What it shows \\
+Workflow & Reads & Reference-hit rate & TTS99-opt (s) & TTS99-feas (s) & What it shows \\
 \hline
-Gurobi solution pool & Pool-exhaustive solve, 0.073 s & Reference & 36 of 36 flows & Certified optimum
-11.7095; \texttt{PoolSearchMode=2} retains all 36 feasible flows. \\
+Gurobi solution pool & --- & Deterministic & 0.008 & 0.008 & Certified optimum 11.7095; \texttt{PoolSearchMode=2} retains all 36 feasible flows in one shot. \\
 \hline
-Uniform random repaired-flow sampling & 262144 samples & 0 & 21 & Weakest
-baseline; best sampled flow is feasible (objective 11.8105). \\
+Uniform random sampling & 262 k & 0 & $\infty$ & 0.46 & Weakest baseline; never finds the optimum; best sampled flow is feasible (11.8105). \\
 \hline
-Hill-climb random restarts & 262144 evals & $7.25{\times}10^{-5}$ & 721 &
-Strong classical baseline once exact repair is available. \\
+Hill-climb random restarts & 262 k & $7.25{\times}10^{-5}$ & 0.23 & 0.006 & Fastest probabilistic path to both targets. \\
 \hline
-Energy-targeted transferred QAOA & 262144 reads &
-$2.53{\times}10^{-3}$ & 32502 & Primary quantum result; 664 optimal and 32502
-feasible-design reads. \\
+Energy-targeted QAOA, $p{=}5$ & 262 k & $2.53{\times}10^{-3}$ & 0.37 & 0.007 & Primary quantum result; highest hit rate but TTS99-opt worse than hill climb. \\
 \hline
-Reduced-surrogate VQE, seed 74018 & 524288 reads & $3.81{\times}10^{-5}$ &
-389 & Reaches the optimum, but flatter than transferred QAOA. \\
+Reduced-surrogate VQE, seed 74018 & 524 k & $3.81{\times}10^{-5}$ & 6.93 & 0.36 & Reaches the optimum but much flatter distribution than QAOA. \\
 \hline
-IBM \texttt{ibm\_fez} QAOA pilot & 36864 reads & 0 & 4 & Implementation
-feasibility check; best sampled flow is feasible (objective 11.8105). \\
+IBM \texttt{ibm\_fez} pilot & 36.9 k & 0 & $\infty$ & --- & Implementation feasibility check; 4 feasible reads; shot time unavailable for TTS. \\
 \hline
 \end{tabular}
 \end{table*}
