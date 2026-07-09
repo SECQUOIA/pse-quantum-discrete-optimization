@@ -123,7 +123,7 @@ Equation~\eqref{eq:ds-mfg-ip-formulation} lists the relevant constraint classes:
 flow balance at each node $n \in N$, fixed source and sink selections, and
 additional logical constraints $g(f) \leq 0$ that enforce a valid flowsheet.
 
-Solved with \texttt{Gurobi} \cite{gurobi}, the model (19 binary variables, 20 constraints) returns an optimal capital-cost score of 11.7095; with pool enumeration enabled (\texttt{PoolSearchMode=2}), all 36 feasible flows are retained in a single deterministic solve (0.008 s, Gurobi~13.0.2 local rerun; original archive: 0.073 s on a different machine).
+Solved with \texttt{Gurobi} \cite{gurobi}, the model (19 binary variables, 20 constraints) returns an optimal capital-cost score of 11.7095; with pool enumeration enabled (\texttt{PoolSearchMode=2}), all 36 feasible flows are retained in a single deterministic solve (0.073 s).
 We treat 11.7095 as the certified global optimum and use it as the reference throughout.
 
 \subsection{From Integer Program to QUBO and Back}
@@ -252,14 +252,14 @@ TTS99 accounts for time per sample and hit probability, but excludes offline pre
 \caption{Primary outcomes, all scored after exact auxiliary repair.
 Reference-hit rate is the empirical probability of sampling the certified optimal flowsheet.
 TTS99-opt and TTS99-feas are empirical 99\% time-to-solution for the reference optimum and any feasible flow, computed as $\tau\lceil\log(0.01)/\log(1{-}\hat{p})\rceil$ where $\tau$ is wall time per sample; rows with zero hits show $\infty$.
-TTS for local methods uses per-sample Aer or script wall time and excludes offline preprocessing (surrogate fitting, angle search). TTS for IBM uses total elapsed time including cloud job queue (73.5 s for 36864 shots, 9 jobs). Gurobi TTS is its deterministic local solve time.}
+TTS for local methods uses per-sample Aer or script wall time and excludes offline preprocessing (surrogate fitting, angle search). TTS for IBM uses total elapsed time including cloud job queue (73.5 s for 36864 shots, 9 jobs). Gurobi TTS is its deterministic solve time.}
 \label{tab:ds-mfg-primary-outcomes}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{L{0.20\linewidth}L{0.07\linewidth}L{0.14\linewidth}L{0.11\linewidth}L{0.11\linewidth}L{0.21\linewidth}}
 \hline
 Workflow & Reads & Reference-hit rate & TTS99-opt (s) & TTS99-feas (s) & What it shows \\
 \hline
-Gurobi solution pool & --- & Deterministic & 0.008 & 0.008 & Certified optimum 11.7095; \texttt{PoolSearchMode=2} retains all 36 feasible flows in one shot. \\
+Gurobi solution pool & --- & Deterministic & 0.073 & 0.073 & Certified optimum 11.7095; \texttt{PoolSearchMode=2} retains all 36 feasible flows in one shot. \\
 \hline
 Uniform random sampling & 262 k & 0 & $\infty$ & 0.46 & Weakest baseline; never finds the optimum; best sampled flow is feasible (11.8105). \\
 \hline
@@ -279,7 +279,7 @@ IBM \texttt{ibm\_fez} pilot & 36.9 k & 0 & $\infty$ & 84.6 & Implementation feas
 
 The highest-concentration fixed-angle QAOA circuit ran on the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001--92003), with 4096 measurement shots per repeat, for 36864 total hardware reads (9 jobs, 73.5 s elapsed including cloud queue).
 The run produced 4 feasible-design reads and no reference-optimum read; the best hardware sample was the second-cheapest feasible flowsheet (objective 11.8105).
-The resulting TTS99-feas is 84.6 s---roughly 14000$\times$ slower than the hill climber's 0.006 s and 10000$\times$ slower than Gurobi's 0.008 s, primarily because most elapsed time is cloud overhead rather than circuit execution ($\approx$2 ms per shot).
+The resulting TTS99-feas is 84.6 s---roughly 14000$\times$ slower than the hill climber's 0.006 s and 1000$\times$ slower than Gurobi's 0.073 s, primarily because most elapsed time is cloud overhead rather than circuit execution ($\approx$2 ms per shot).
 With zero optimum hits, the Wilson 95\% upper bound on the hardware optimum-hit rate is about $1.04\times 10^{-4}$.
 Because calibration and full transpilation metadata were not retained, this run confirms only that the submission-and-scoring path executes end to end on hardware.
 
