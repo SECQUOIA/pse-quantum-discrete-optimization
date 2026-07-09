@@ -200,28 +200,118 @@ A \emph{feasible-design hit} means the repaired flow matches any of the 36 feasi
 We report both hit rates with two-sided Wilson 95\% confidence intervals (score-based intervals for proportions that remain valid near zero); rows with no observed hits report the one-sided upper bound.
 The empirical 99\% time-to-solution $\mathrm{TTS}_{99}=\tau\lceil\log(0.01)/\log(1-\hat{p})\rceil$ normalizes each hit rate by the measured wall time per sample $\tau$, enabling wall-clock comparison across methods with different per-sample costs; rows with zero hits report $\infty$.
 
-\begin{figure}[t]
+\begin{figure*}[t]
+\centering
+\begin{minipage}[t]{0.61\linewidth}
+\centering
+\begin{tikzpicture}[
+    x=0.84cm, y=0.55cm,
+    opt/.style={-Latex, thick},
+    alt/.style={-Latex, thin, dashed, draw=gray!55},
+    bbk/.style={-Latex, thick},
+    unit/.style={draw, rounded corners=1pt, align=center, inner sep=1.5pt,
+        minimum width=1.0cm, minimum height=0.27cm, font=\tiny},
+    optunit/.style={draw, very thick, rounded corners=1pt, align=center, inner sep=1.5pt,
+        minimum width=1.0cm, minimum height=0.27cm, font=\tiny},
+    lbl/.style={font=\tiny, inner sep=1pt}
+]
+% Source
+\node[circle, draw, inner sep=1.5pt, font=\tiny] (DS) at (-0.4, 0) {DS};
+% f00 (backbone)
+\coordinate (sp1) at (0.4, 0);
+\draw[bbk] (DS) -- node[above, lbl] {$f_{00}$} (sp1);
+% Reactor 1
+\node[unit]    (pfr1)  at (1.5,  1.0) {PFR};
+\node[optunit] (bat1)  at (1.5,  0.0) {Batch};
+\node[unit]    (cstr1) at (1.5, -1.0) {CSTR};
+\node[lbl, font=\scriptsize, above=2pt] at (1.5, 1.3) {Reactor\,1};
+\draw[alt] (sp1) |- node[above, lbl, pos=0.72] {$f_{01}$} (pfr1);
+\draw[opt] (sp1) -- node[above, lbl]           {$f_{03}$} (bat1);
+\draw[alt] (sp1) |- node[below, lbl, pos=0.72] {$f_{02}$} (cstr1);
+\coordinate (mg1) at (2.5, 0);
+\draw[alt] (pfr1)  -| (mg1);
+\draw[opt] (bat1)  -- (mg1);
+\draw[alt] (cstr1) -| (mg1);
+% f04 (backbone)
+\coordinate (sp2) at (3.1, 0);
+\draw[bbk] (mg1) -- node[above, lbl] {$f_{04}$} (sp2);
+% Routing f05 / f06
+\coordinate (mg2) at (3.8, 0);
+\draw[opt] (sp2) to[bend left=22]  node[above, lbl] {$f_{05}$} (mg2);
+\draw[alt] (sp2) to[bend right=22] node[below, lbl] {$f_{06}$} (mg2);
+% f07 (backbone)
+\coordinate (sp3) at (4.5, 0);
+\draw[bbk] (mg2) -- node[above, lbl] {$f_{07}$} (sp3);
+% Reactor 2
+\node[unit]    (pfr2)  at (5.5,  1.0) {PFR};
+\node[unit]    (cstr2) at (5.5,  0.0) {CSTR};
+\node[optunit] (bat2)  at (5.5, -1.0) {Batch};
+\node[lbl, font=\scriptsize, above=2pt] at (5.5, 1.3) {Reactor\,2};
+\draw[alt] (sp3) |- node[above, lbl, pos=0.72] {$f_{08}$} (pfr2);
+\draw[alt] (sp3) -- node[above, lbl]           {$f_{09}$} (cstr2);
+\draw[opt] (sp3) |- node[below, lbl, pos=0.72] {$f_{10}$} (bat2);
+\coordinate (mg3) at (6.5, 0);
+\draw[alt] (pfr2)  -| (mg3);
+\draw[alt] (cstr2) -- (mg3);
+\draw[opt] (bat2)  -| (mg3);
+% Crystallisation (always active)
+\node[optunit, minimum width=1.1cm] (cryst) at (7.4, 0) {Cryst.};
+\node[lbl, font=\scriptsize, above=2pt] at (7.4, 0.45) {Stage\,3};
+\draw[bbk] (mg3) -- node[above, lbl] {$f_{11}$} (cryst);
+% Downstream split
+\coordinate (sp4) at (8.25, 0);
+\draw[opt] (cryst) -- (sp4);
+% Continuous downstream (optimal via Cont. I = f13)
+\node[optunit, minimum width=1.2cm] (cont) at (9.3,  0.65) {Cont.\,I/II/III};
+\node[unit,    minimum width=1.2cm] (bus)  at (9.3, -0.65) {Batch\,U/S};
+\node[lbl, font=\scriptsize, above=2pt] at (9.3, 1.0) {Downstream};
+\draw[opt] (sp4) |- node[above, lbl, pos=0.75] {$f_{12}$} (cont);
+\draw[alt] (sp4) |- node[below, lbl, pos=0.75] {$f_{16}$} (bus);
+\coordinate (mg4) at (10.2, 0);
+\draw[opt] (cont) -| node[above, lbl, pos=0.25] {$f_{17}$} (mg4);
+\draw[alt] (bus)  -| (mg4);
+% f18 (backbone) → FP
+\node[circle, draw, inner sep=1.5pt, font=\tiny] (FP) at (10.85, 0) {FP};
+\draw[bbk] (mg4) -- node[above, lbl] {$f_{18}$} (FP);
+\end{tikzpicture}
+
+\smallskip
+\textbf{(a)} DS-MFG manufacturing superstructure (19 binary arcs)
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.37\linewidth}
 \centering
 \scriptsize
 \begin{tikzpicture}[
-    node distance=0.45cm,
+    node distance=0.42cm,
     box/.style={draw, rounded corners=1.5pt, align=center, inner sep=3pt,
-        minimum width=0.72\linewidth},
+        minimum width=0.88\linewidth},
     arr/.style={-Latex, thick}
 ]
-\node[box] (sample) {sampled QUBO state\\$x=(y,z)\in\{0,1\}^{36}$};
-\node[box, below=of sample] (project) {project to original\\19 flow bits $y$};
-\node[box, below=of project] (repair) {exact auxiliary repair\\$z^\star(y)=\arg\min_z E_{\mathrm{QUBO}}(y,z)$};
-\node[box, below=of repair] (score) {score repaired candidate\\$F(y)=E_{\mathrm{QUBO}}(y,z^\star(y))$};
-\node[box, below=of score] (compare) {compare with reference optimum\\and feasible-design pool};
-\draw[arr] (sample) -- (project);
+\node[box] (sample)  {sampled QUBO state\\$x=(y,z)\in\{0,1\}^{36}$};
+\node[box, below=of sample]  (project) {project to 19 flow bits $y$};
+\node[box, below=of project] (repair)  {exact auxiliary repair\\$z^\star(y)=\arg\min_z E(y,z)$};
+\node[box, below=of repair]  (score)   {score: $F(y)=E(y,z^\star(y))$};
+\node[box, below=of score]   (compare) {compare: ref-opt \& pool};
+\draw[arr] (sample)  -- (project);
 \draw[arr] (project) -- (repair);
-\draw[arr] (repair) -- (score);
-\draw[arr] (score) -- (compare);
+\draw[arr] (repair)  -- (score);
+\draw[arr] (score)   -- (compare);
 \end{tikzpicture}
-\caption{Repair-aware scoring pipeline applied to every sampled QUBO state: raw 36-bit strings are projected to the 19 flow variables, repaired exactly, and scored against the certified optimum and the feasible-design pool. Hit rates for all workflows appear in Table~\ref{tab:ds-mfg-primary-outcomes}.}
-\label{fig:ds-mfg-repair-pipeline}
-\end{figure}
+
+\smallskip
+\textbf{(b)} Repair-aware scoring pipeline
+\end{minipage}
+\caption{Overview of the DS-MFG case study.
+\textbf{(a)} Manufacturing superstructure: thick arrows trace the optimal flowsheet
+(Batch\,Rxn\,1\,$\to$\,Route\,A\,($f_{05}$)\,$\to$\,Batch\,Rxn\,2\,$\to$\,Cryst.\,$\to$\,Cont.\,I\,($f_{13}$));
+dashed arrows mark the non-optimal alternatives;
+the backbone arcs $f_{00},f_{04},f_{07},f_{11},f_{18}$ carry every feasible flow.
+Route~B ($f_{06}$) is activated only when a continuous Reactor~1 feeds a batch Reactor~2;
+Cont.\,I/II/III share entry arc $f_{12}$ and exit arc $f_{17}$ (optimal uses $f_{13}$).
+\textbf{(b)} Every sampled 36-bit QUBO string is projected to the 19 flow variables, repaired exactly by solving 13 independent sub-problems, and scored against the certified optimum and the 36-member feasible-design pool; hit rates appear in Table~\ref{tab:ds-mfg-primary-outcomes}.}
+\label{fig:ds-mfg-overview}
+\end{figure*}
 
 \section{Results}
 \label{sec:ds-mfg-results}
@@ -231,7 +321,7 @@ The empirical 99\% time-to-solution $\mathrm{TTS}_{99}=\tau\lceil\log(0.01)/\log
 
 Sampling the 36-variable QUBO directly does not yield an interpretable design result.
 A $p=2$ full-QUBO QAOA found no optimum in 512 samples; a 32768-read run returned it only 4 times after repair, and never as a fully optimal 36-bit string without projection.
-Without projection and exact repair, a raw QUBO sample cannot be read as a flowsheet. Figure~\ref{fig:ds-mfg-repair-pipeline} summarizes the scoring pipeline the remaining results apply.
+Without projection and exact repair, a raw QUBO sample cannot be read as a flowsheet. Figure~\ref{fig:ds-mfg-overview}(b) summarizes the scoring pipeline applied throughout.
 
 \subsection{Reduction and Parameter Transfer Concentrate QAOA Samples}
 \label{subsec:ds-mfg-qaoa-main}
