@@ -19,7 +19,8 @@ This manuscript studies that promise through a practical audit rather than a
 speedup claim. The case study evaluates local classical emulations of the
 quantum approximate optimization algorithm (QAOA) and variational quantum
 eigensolver (VQE) on a drug-substance manufacturing (DS-MFG) discrete design
-QUBO instance using \texttt{QiskitOpt.jl}. It also includes a small
+QUBO instance from the source study by Park and Bernal Neira
+(arXiv:2603.19520), using \texttt{QiskitOpt.jl}. It also includes a small
 fixed-parameter IBM hardware pilot for the highest-concentration QAOA handoff. The input
 data are the exported \texttt{scalars.csv}, \texttt{L\_vector.csv}, and
 \texttt{Q\_matrix.csv} files from the DS-MFG archive, with the Gurobi solution
@@ -956,7 +957,9 @@ compiled physical circuit: the ideal Aer row is an ideal local reference, the
 \texttt{ibm\_fez} row is real hardware execution. The model-based noisy row
 sampled the reference optimum 12 times in 36864 reads, retaining about 8.5\% of
 the ideal reference-optimum hit rate. The hardware row observed no reference-optimum
-reads and only one top-10 repaired-flow read in the same 36864-read budget.
+reads and only one top-10 repaired-flow read in the same 36864-read budget. With
+zero reference-optimum hits, the two-sided 95\% Wilson upper bound on the
+hardware reference-optimum hit rate is $1.04\times 10^{-4}$.
 Relative to the ideal Aer rates, the hardware pilot retained approximately
 0.068\% of the top-50 hit rate and 0.050\% of the top-10 hit rate. The cached
 tables are

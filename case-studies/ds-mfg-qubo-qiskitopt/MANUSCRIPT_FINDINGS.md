@@ -9,10 +9,11 @@ compact companion summary.
 ## Purpose
 
 This case study evaluates local classical emulations of QAOA and VQE, accessed
-through `QiskitOpt.jl`, on a DS-MFG discrete integer-programming QUBO instance.
-The analysis compares sampled quantum-optimization distributions against a
-Gurobi solution pool and uses the original IP variables to interpret the sampled
-QUBO bitstrings.
+through `QiskitOpt.jl`, on a drug-substance manufacturing (DS-MFG) discrete
+integer-programming QUBO instance from the source study arXiv:2603.19520. The
+analysis compares sampled quantum-optimization distributions against a Gurobi
+solution pool and uses the original IP variables to interpret the sampled QUBO
+bitstrings.
 
 The central claim is a practical audit claim. Current QAOA/VQE tooling can be
 made to sample meaningful DS-MFG process-design candidates, but only after
@@ -277,7 +278,9 @@ The hardware run returned 34573 unique flow assignments. Exact auxiliary repair
 scored 6 top-50 repaired-flow hits, 1 top-10 hit, 0 reference-optimum hits, and 4
 stored-Gurobi-pool hits. The best repaired flow was rank 2 with objective
 `11.8105` and flow bitstring `1001110100111010011`. The hardware artifacts are
-stored in `ds_mfg_ibm_qaoa_pilot_fez_4096x3/`.
+stored in `ds_mfg_ibm_qaoa_pilot_fez_4096x3/`. With zero reference-optimum hits
+in 36864 hardware reads, the two-sided 95% Wilson upper bound on the
+reference-optimum hit rate is `1.04e-4`.
 
 The cached simulator-to-hardware comparison is stored in
 `ds_mfg_simulator_hardware_comparison/`.

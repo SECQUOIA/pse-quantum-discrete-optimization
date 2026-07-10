@@ -17,7 +17,7 @@
 \setlist{nosep,leftmargin=*}
 \emergencystretch=3em
 
-\renewcommand{\PaperTitle}{Supplementary Material: Repair-Aware Quantum Sampling for a Discrete Process-Design QUBO}
+\renewcommand{\PaperTitle}{Supplementary Material: Challenges of Gate-Based Quantum Optimization for a Discrete Process-Design Problem}
 \renewcommand{\PaperAuthors}{%
 Yirang ~Park\textsuperscript{a}
 and David E. ~Bernal Neira\textsuperscript{a}}
@@ -26,9 +26,10 @@ and David E. ~Bernal Neira\textsuperscript{a}}
 }
 \renewcommand{\PaperAbstract}{%
 This supplement records provenance, validation, and artifact anchors for the
-DS-MFG repair-aware quantum-sampling manuscript. It is intended to be compiled
-and submitted separately from the main conference paper if appendices are not
-counted as article body material in the submission workflow.
+main manuscript on gate-based quantum optimization of a drug-substance
+manufacturing (DS-MFG) discrete process-design problem. It is intended to be
+compiled and submitted separately from the main conference paper if appendices
+are not counted as article body material in the submission workflow.
 }
 \renewcommand{\PaperKeywords}{%
 supplementary material, quantum optimization, process design, reproducibility}
@@ -110,10 +111,8 @@ The scripts and pinned environment can rerun selected QAOA/VQE, classical, and
 hardware-handoff workflows, subject to stochastic variation and credential
 availability. &
 Partially supported. QAOA fixed-angle parameters and sampled outputs are
-retained; selected-seed VQE metadata reruns now retain optimized ansatz vectors for
-seed 74018 and for the final-budget selected seeds 74018, 74007, and 74001.
-Those metadata reruns are provenance artifacts, not replacements for the
-historical sampled VQE distributions. \\
+retained; selected VQE metadata reruns now retain optimized ansatz vectors for
+seed 74018 and for the final-budget selected seeds 74018, 74007, and 74001. \\
 \hline
 Full campaign replay &
 Every stochastic campaign can be reproduced byte-for-byte from retained
@@ -139,10 +138,10 @@ Artifact & SHA-256 checksum \\
 \codeid{aa20d793fc45c25c2bd7cc0a231877f71b225bf80daee11531cef6eb6cac5af2} \\
 \hline
 \artifact{ds\_mfg\_ibm\_qaoa\_pilot\_fez\_4096x3.zip} &
-\codeid{88af6f74b0fc10dcece69e783c37782649d1082e3220a88c61f389274665dff9} \\
+\codeid{a3f5441d81a107ff99e7df3a1ab4b0e1ef4df6de813ed3416d4997d1d6262b83} \\
 \hline
 \artifact{ds\_mfg\_direct\_full\_qubo\_hardware\_pilot.zip} &
-\codeid{fe7a60bd6576e66da9059d8aa6831424ef6fcbbf47bd934e60850b7933558091} \\
+\codeid{25a39b061f588523eeb609c397abc3b2afd8dd4f15c4f9d6d8037772532c6515} \\
 \hline
 \artifact{case-studies/ds-mfg-qubo-qiskitopt/ds\_mfg\_qaoa\_juliqaoa\_transfer\_highread/qaoa\_juliqaoa\_transfer\_summary.csv} &
 \codeid{10bb3bc9b746fb12a87eadc1fd2b819c1a3cacbc84025c9bd54797c1088c34b7} \\
@@ -165,6 +164,11 @@ Artifact & SHA-256 checksum \\
 \end{tabular}
 \end{table*}
 
+\clearpage
+
+\section{Validation Facts}
+\label{sec:supp-validation}
+
 \begin{table*}[t]
 \centering
 \footnotesize
@@ -177,32 +181,25 @@ Check & Retained value & Anchor \\
 \hline
 Exact repaired optimum &
 $F(y^\star)=11.7095$ at flow
-\codeid{1001110100111100011}, ordered as $(f_{00},\ldots,f_{18})$. &
+\codeid{1001110100111100011}. &
 \artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_flow\_summary.csv};
 \artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_exact\_top\_flows.csv}. \\
 \hline
 Gurobi pool bridge &
 All 36 stored Gurobi-pool flows match the repaired QUBO score within
 $3.1\times 10^{-13}$. &
-\artifact{MANUSCRIPT\_FINDINGS.tex};
-\artifact{Fw\_ DS mfg case qubo information.zip}. \\
+\artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_exact\_top\_flows.csv};
+\artifact{ds\_mfg\_gurobi\_provenance/gurobi\_local\_pool\_rerun\_solutions.csv}. \\
 \hline
-Original Gurobi export metadata &
+Retained Gurobi metadata &
 Model \texttt{capex}: 19 binary variables, 20 constraints, 58 nonzeros;
 \texttt{PoolSearchMode=2}, \texttt{PoolSolutions=36}, solve time 0.073 s,
 36 solutions found. Solver version, status code, MIPGap, PoolGap, and pool
-completeness/diversity intent were not retained in the original export. &
+completeness/diversity intent were not retained in the original export. A
+local Gurobi 13.0.2 rerun with \texttt{PoolSearchMode=2} and
+\texttt{PoolSolutions=100} returned \texttt{OPTIMAL}, \texttt{MIPGap=0.0}, 36
+solutions, and exact retained-pool agreement. &
 \artifact{Fw\_ DS mfg case qubo information.zip/gurobi\_pool\_solutions\_n36\_20260126\_105706.json}. \\
-\hline
-Local Gurobi rerun validation &
-Gurobi 13.0.2 rerun of the same IP with \texttt{PoolSearchMode=2} and
-\texttt{PoolSolutions=100}: \texttt{OPTIMAL}, \texttt{MIPGap=0.0}, best
-objective 11.7095, objective bound 11.7095, 36 solutions, local solve time
-0.0077 s, and exact retained-pool agreement. PoolGap is null in the rerun
-summary and pool completeness/diversity is not claimed. This is a classical
-provenance validation and did not involve quantum hardware. &
-\artifact{ds\_mfg\_gurobi\_provenance/gurobi\_local\_pool\_rerun\_summary.json};
-\artifact{ds\_mfg\_gurobi\_provenance/gurobi\_local\_pool\_rerun\_solutions.csv}. \\
 \hline
 Quadratic surrogate weakness &
 Global fit $R^2 \approx 0.999$, but the surrogate optimum repairs to 14.5505.
@@ -212,9 +209,11 @@ repaired rank 6. &
 Figure~\ref{fig:supp-surrogate-rank}. \\
 \hline
 Low-energy surrogate audit &
-The exact top-50 repaired flows include 14 non-pool flows. In the lowest
-1\% repaired-flow set, exact-rank versus surrogate-rank Spearman correlation
-is 0.901. Exact enumeration wall time was not retained. &
+Exact enumeration finds 36 feasible flows (the complete pool). The 50
+lowest-cost repaired flows include 14 infeasible flows — the penalty weights
+are insufficient to push all infeasible flows above all feasible ones. In the
+lowest 1\% repaired-flow set, exact-rank versus surrogate-rank Spearman
+correlation is 0.901. Exact enumeration wall time was not retained. &
 \artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_exact\_top\_flows.csv};
 \artifact{MANUSCRIPT\_FINDINGS.tex}. \\
 \hline
@@ -239,15 +238,14 @@ $[2.35,2.73]\times10^{-3}$. MPS truncation logs were not retained. &
 \hline
 Missing value & Affects main claim? & Affects full rerun? & Current mitigation \\
 \hline
-Original-export Gurobi final status and MIPGap &
+Historical Gurobi final status and MIPGap &
 No for the current claim after rerun; the original export still lacks these
 fields, but the model/pool behavior has been rerun locally. &
 Partly; exact historical solver state is unavailable, but current solver
 provenance is retained. &
 The same flow is certified by exact enumeration over all $2^{19}$ flows and by
 a local Gurobi 13.0.2 rerun with \texttt{OPTIMAL} status, \texttt{MIPGap=0.0},
-36 solutions, and exact retained-pool agreement. PoolGap and original
-pool-generation intent remain unclaimed. \\
+36 solutions, and exact retained-pool agreement. \\
 \hline
 MPS truncation logs &
 No for the central QAOA sampling claim. &
@@ -263,8 +261,7 @@ optimizer replay is not claimed. &
 Metadata reruns retain optimized \texttt{EfficientSU2} vectors for seed 74018
 and for seeds 74018, 74007, and 74001 at the final sampling budget. The current
 metadata rerun produced 4 reference hits total and is provenance, not a
-replacement for the historical sampled VQE distributions reported in the
-manuscript. \\
+replacement for the historical 28-hit final follow-up. \\
 \hline
 Submitted hardware layout, depth, and two-qubit count &
 No, because the hardware row is a submission-and-scoring handoff only. &
@@ -281,9 +278,8 @@ the retained metadata cannot diagnose a specific noise source. \\
 Exact enumeration wall time &
 No. &
 Partly, for cost accounting. &
-The enumeration is documented as exact over all $2^{19}$ flows. Wall time was
-not retained; because no runtime or speedup claim is made, this omission does
-not affect the main claim. \\
+The enumeration is documented as exact over all $2^{19}$ flows; issue 24
+tracks recording wall time if the enumeration script is rerun. \\
 \hline
 \end{tabular}
 \end{table*}
@@ -294,7 +290,7 @@ not affect the main claim. \\
 \begin{axis}[
     width=0.82\linewidth,
     height=0.42\linewidth,
-    xlabel={Exact repaired rank among the top 50},
+    xlabel={Exact repaired rank (50 lowest-cost flows; circles 37--50 are infeasible)},
     ylabel={Rank under quadratic surrogate},
     xmin=0, xmax=51,
     ymin=0, ymax=120,
@@ -310,7 +306,7 @@ not affect the main claim. \\
 (38,38) (39,39) (40,40) (41,41) (42,42) (43,107) (44,108) (45,109)
 (46,110) (47,111) (48,112) (49,113) (50,114)
 };
-\addlegendentry{exact top-50 flows}
+\addlegendentry{50 lowest-cost repaired flows (ranks 37--50 are infeasible)}
 \addplot[blue!70!black, only marks, mark=*, mark size=2.5pt] coordinates {(1,33)};
 \addlegendentry{true optimum}
 \addplot[red!70!black, only marks, mark=triangle*, mark size=3pt] coordinates {(6,1)};
@@ -318,14 +314,102 @@ not affect the main claim. \\
 \addplot[black, dashed, domain=1:50, samples=2] {x};
 \end{axis}
 \end{tikzpicture}
-\caption{Surrogate rank audit for the exact top-50 repaired flows. The
-quadratic surrogate has high global $R^2$ but imperfect low-energy ordering:
-the exact optimum is only rank 33 under the surrogate, while the surrogate
-minimum repairs to the sixth-best exact flow. Quantum-sampling outcomes are
-therefore scored using the exact repaired objective $F$, not the surrogate
-$S$.}
+\caption{Surrogate rank audit for the 50 lowest-cost repaired flows. Exact
+enumeration confirms there are exactly 36 feasible flows (ranks 1--36); the
+remaining 14 shown here are infeasible flows whose penalty values are
+insufficient to place them above all feasible ones. The surrogate has high
+global $R^2$ but imperfect low-energy ordering: the exact optimum is only
+rank 33 under the surrogate, while the surrogate minimum repairs to the
+sixth-best exact flow. Quantum-sampling outcomes are therefore scored using the
+exact repaired objective $F$, not the surrogate $\widehat F$.}
 \label{fig:supp-surrogate-rank}
 \end{figure*}
+
+\clearpage
+
+\section{Exact Auxiliary Repair: Component Decomposition}
+\label{sec:supp-aux-repair}
+
+The QUBO objective $E_{\mathrm{QUBO}}(y,z)$ acts on 36 binary variables: the 19 flow (design) variables $y=(y_1,\ldots,y_{19})$ and 17 binary auxiliary (slack) variables $z=(z_1,\ldots,z_{17})$ introduced by the penalty reformulation.
+A sampled 36-bit string is not directly interpretable as a flowsheet because the auxiliary bits are bookkeeping for the inequality constraints of the original design problem, not design decisions.
+After projecting a sample onto the 19 flow bits $y$, the repair step finds the auxiliary assignment that minimizes the QUBO energy for that flow:
+\begin{equation}
+z^\star(y) = \arg\min_{z \in \{0,1\}^{17}} E_{\mathrm{QUBO}}(y, z).
+\label{eq:supp-repair}
+\end{equation}
+
+Brute-force enumeration over all $2^{17} = 131{,}072$ auxiliary assignments is tractable for a single call but unnecessarily costly when repair is applied to every sampled state across all workflows.
+Once $y$ is fixed, every term in $E_{\mathrm{QUBO}}$ that involves an auxiliary variable $z_k$ is either (i)~a linear term $c_k z_k$, (ii)~an auxiliary-auxiliary coupling $c_{k\ell}\,z_k z_\ell$, or (iii)~a flow-auxiliary coupling $c_{ik}\,y_i z_k$ (a constant given~$y$).
+Consider the \emph{auxiliary coupling graph}: nodes are the 17 auxiliary variables, and an edge connects $z_k$ and $z_\ell$ whenever their quadratic coefficient $c_{k\ell}\neq 0$.
+For this QUBO the graph has 13 connected components: 9 isolated nodes (one auxiliary bit each) and 4 edges (two auxiliary bits each).
+Because there are no edges between components, fixing~$y$ makes the components conditionally independent, and \eqref{eq:supp-repair} decomposes as
+\begin{equation}
+\min_{z} E_{\mathrm{QUBO}}(y, z) = \mathrm{const}(y) + \sum_{c=1}^{13} \min_{z^{(c)}} E^{(c)}(y, z^{(c)}),
+\end{equation}
+where $z^{(c)}$ are the auxiliary bits in component~$c$ and $E^{(c)}$ contains only the terms that involve those bits (with fixed~$y$ values substituted as constants).
+Each sub-problem is solved by enumerating $2^1=2$ or $2^2=4$ assignments and selecting the minimum energy; the total work is at most $9{\times}2 + 4{\times}4 = 34$ comparisons per repair, a factor of $\sim\!3{,}800\times$ smaller than the brute-force bound.
+This procedure is implemented in \artifact{scripts/run\_classical\_baselines.jl}; the component structure is read from \artifact{ds\_mfg\_reduced\_flow\_objective/auxiliary\_components.csv}.
+
+\smallskip
+\noindent\textbf{Physical meaning of the components.}
+Table~\ref{tab:supp-aux-components} lists all 13 components with their auxiliary variable indices, the flow variables whose fixed values enter each local energy, and a brief description.
+Singleton components (1--5, 10--13) correspond to individual inequality constraints in the penalty QUBO: the single binary slack takes the value ($0$ or $1$) that satisfies the inequality, which for feasible flow assignments is the constraint residual.
+Pair components (6--9) each arise from the product-linearization of the Route~B activation rule ($f_{06}=1$ iff Reactor~1 is PFR or CSTR \emph{and} Reactor~2 is Batch).
+Linearizing a product of two binary variables requires up to three inequality constraints; the slack for such a constraint can take values in $\{0,1,2\}$, needing two binary bits.
+The four pair components together represent the complete linearization of this one coupling rule across all Reactor~1/Reactor~2 type combinations.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Independent auxiliary components for the DS-MFG QUBO repair
+         (source: \artifact{ds\_mfg\_reduced\_flow\_objective/auxiliary\_components.csv}).
+         Variable indices 1--19 are the 19 flow variables~$y$; indices 20--36 are the 17
+         binary auxiliary (slack) variables~$z$.
+         \emph{Flow neighbors} are the $y$-indices that appear in the local energy $E^{(c)}$.
+         No coupling term links auxiliaries across components, so each
+         sub-problem is solved independently by enumeration.}
+\label{tab:supp-aux-components}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.04\linewidth}L{0.08\linewidth}L{0.05\linewidth}L{0.47\linewidth}L{0.05\linewidth}L{0.18\linewidth}}
+\hline
+\# & Aux.\ idx. & $n_{\mathrm{aux}}$ & Flow neighbors ($y$ idx.\ and $f$-arc) & $2^{n_{\mathrm{aux}}}$ & Role \\
+\hline
+1  & 20      & 1 & 17~($f_{16}$, Batch\,U/S),\enspace 18~($f_{17}$, cont.\ exit)
+   & 2 & Batch/cont.\ downstream exclusion \\
+2  & 21      & 1 & 2~($f_{01}$, PFR\,Rxn\,1),\enspace 3~($f_{02}$, CSTR\,Rxn\,1),\enspace 4~($f_{03}$, Batch\,Rxn\,1)
+   & 2 & Reactor\,1 at-most-one \\
+3  & 22      & 1 & 6~($f_{05}$, Route\,A),\enspace 7~($f_{06}$, Route\,B)
+   & 2 & Route at-most-one \\
+4  & 23      & 1 & 9~($f_{08}$, PFR\,Rxn\,2),\enspace 10~($f_{09}$, CSTR\,Rxn\,2),\enspace 11~($f_{10}$, Batch\,Rxn\,2)
+   & 2 & Reactor\,2 at-most-one \\
+5  & 24      & 1 & 14~($f_{13}$, Cont.\,I),\enspace 15~($f_{14}$, Cont.\,II),\enspace 16~($f_{15}$, Cont.\,III),\enspace 17~($f_{16}$, Batch\,U/S)
+   & 2 & Downstream at-most-one \\
+6  & 25,\,26 & 2 & 2~($f_{01}$, PFR\,Rxn\,1),\enspace 7~($f_{06}$, Route\,B),\enspace 11~($f_{10}$, Batch\,Rxn\,2)
+   & 4 & Route\,B linearization (PFR\,Rxn\,1 case) \\
+7  & 27,\,28 & 2 & 3~($f_{02}$, CSTR\,Rxn\,1),\enspace 7~($f_{06}$, Route\,B),\enspace 11~($f_{10}$, Batch\,Rxn\,2)
+   & 4 & Route\,B linearization (CSTR\,Rxn\,1 case) \\
+8  & 29,\,30 & 2 & 4~($f_{03}$, Batch\,Rxn\,1),\enspace 7~($f_{06}$, Route\,B),\enspace 11~($f_{10}$, Batch\,Rxn\,2)
+   & 4 & Route\,B linearization (Batch\,Rxn\,1 case) \\
+9  & 31,\,32 & 2 & 2~($f_{01}$, PFR\,Rxn\,1),\enspace 3~($f_{02}$, CSTR\,Rxn\,1),\enspace 6~($f_{05}$, Route\,A)
+   & 4 & Route\,B linearization (Route\,A side) \\
+10 & 33      & 1 & 6~($f_{05}$, Route\,A),\enspace 11~($f_{10}$, Batch\,Rxn\,2)
+   & 2 & Route\,A\,/\,Rxn\,2 coupling \\
+11 & 34      & 1 & 14~($f_{13}$, Cont.\,I),\enspace 18~($f_{17}$, cont.\ exit)
+   & 2 & Cont.\,I flow balance \\
+12 & 35      & 1 & 15~($f_{14}$, Cont.\,II),\enspace 18~($f_{17}$, cont.\ exit)
+   & 2 & Cont.\,II flow balance \\
+13 & 36      & 1 & 16~($f_{15}$, Cont.\,III),\enspace 18~($f_{17}$, cont.\ exit)
+   & 2 & Cont.\,III flow balance \\
+\hline
+\multicolumn{6}{l}{$9{\times}2 + 4{\times}4 = 34$ comparisons per repair vs.\ $2^{17}=131{,}072$ brute force (${\sim}3{,}800{\times}$ reduction).} \\
+\hline
+\end{tabular}
+\end{table*}
+
+\clearpage
+
+\section{Variational and Hardware Provenance}
+\label{sec:supp-variational}
 
 \begin{table*}[t]
 \centering
@@ -339,7 +423,7 @@ Workflow & Circuit / ansatz & Objective and optimizer & Parameter source & Valid
 \hline
 Energy-targeted QAOA &
 $p=5$ QAOA on the 19-flow surrogate. &
-Minimize $\mathbb{E}_{y\sim p_\theta}[S(y)]$ (fitted quadratic surrogate) with JuliQAOA
+Minimize $\mathbb{E}_{p_\theta}[\widehat F(y)]$ with JuliQAOA
 \texttt{find\_angles\_bh}; seed 91001; 5 basin-hopping iterations. &
 \artifact{ds\_mfg\_qaoa\_juliqaoa\_angle\_search/juliqaoa\_angle\_summary.csv};
 angles transferred beta-then-gamma to \texttt{QiskitOpt.QAOA}. &
@@ -351,31 +435,21 @@ Maximize probability on the enumerated exact top-10 set; oracle-aided because
 the repaired ranking is known. &
 Top-10 angle vector retained in
 \artifact{ds\_mfg\_ibm\_qaoa\_pilot\_fez\_4096x3.zip/job\_manifest.json};
-the local diagnostic sampled-distribution CSV was not retained, so this row is
-supported by the retained angle vector and aggregate manuscript summary. &
-1007 reference hits / 262144 reads in the retained manuscript summary;
-oracle-aided diagnostic only; hardware handoff used this circuit. \\
+local 1007-hit diagnostic CSV was not retained. &
+1007 reference hits / 262144 reads in the retained manuscript summary; hardware
+handoff used this circuit. \\
 \hline
-Historical cached reduced-surrogate VQE &
+Reduced-surrogate VQE &
 \texttt{EfficientSU2}; 152 initial parameters on the 19-flow surrogate. &
 COBYLA through \texttt{QiskitOpt.VQE}; 128 optimizer reads; 25 iterations;
 seeds 74001, 74007, and 74018 in the final follow-up. &
-Historical sampled distributions retained in
-\artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_final/vqe\_reduced\_top50\_sampling\_summary.csv};
-historical optimized ansatz vectors were not retained. &
-Seed 74018 had 20 reference hits / 524288 reads, 152 top-10 reads, and 391
-top-50 reads. The same historical three-seed final-follow-up artifact sums to
-28 reference hits / 1572864 reads. \\
-\hline
-Current VQE metadata/provenance rerun &
-\texttt{EfficientSU2}; 152 initial parameters on the 19-flow surrogate. &
-COBYLA through \texttt{QiskitOpt.VQE}; 128 optimizer reads; 25 iterations;
-seeds 74001, 74007, and 74018 at the final sampling budget. &
-Current metadata rerun persists optimized ansatz vectors in
+Historical sampled distributions retained; current metadata reruns persist
+optimized ansatz vectors in
+\artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_seed74018\_metadata/} and
 \artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_selected\_metadata/}. &
-4 reference hits / 1572864 reads; used for provenance only and not to replace
-the historical VQE bar in the main manuscript figure or primary-outcomes
-table. \\
+Historical final follow-up: seed 74018 had 20 reference hits / 524288 reads;
+three seeds had 28 reference hits / 1572864 reads. Current metadata rerun:
+4 reference hits / 1572864 reads. \\
 \hline
 \end{tabular}
 \end{table*}
@@ -406,7 +480,9 @@ measurement map were not retained. \\
 \hline
 Hardware outcome &
 36864 total reads; 6 top-50 reads; 1 top-10 read; 4 stored Gurobi-pool reads;
-0 reference-optimum reads; best repaired flow rank 2 with objective 11.8105. &
+0 reference-optimum reads; best repaired flow rank 2 with objective 11.8105.
+With zero reference hits, the two-sided 95\% Wilson upper bound on the
+reference-optimum rate is $1.04\times 10^{-4}$. &
 The pilot validates submission and scoring only; it cannot diagnose a specific
 noise mechanism. \\
 \hline

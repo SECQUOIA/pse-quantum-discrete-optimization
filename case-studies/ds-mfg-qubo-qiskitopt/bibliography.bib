@@ -125,21 +125,6 @@
 	numpages     = 22,
 	keywords     = {Optimization software, blackbox optimization, derivative-free optimization, mesh adaptive direct search}
 }
-@article{Laky2022,
-	title        = {{Simulation-Optimization Framework for the Digital Design of Pharmaceutical Processes Using Pyomo and PharmaPy}},
-	author       = {Daniel J. Laky and Daniel Casas-Orozco and Carl D. Laird and Gintaras V. Reklaitis and Zoltan K. Nagy},
-	year         = 2022,
-	month        = 11,
-	journal      = {Industrial and Engineering Chemistry Research},
-	publisher    = {American Chemical Society},
-	volume       = 61,
-	pages        = {16128--16140},
-	doi          = {10.1021/ACS.IECR.2C01636/ASSET/IMAGES/MEDIUM/IE2C01636_0007.GIF},
-	issn         = 15205045,
-	url          = {https://pubs.acs.org/doi/abs/10.1021/acs.iecr.2c01636},
-	abstract     = {The problem of performing model-based process design and optimization in the pharmaceutical industry is an important and challenging one both computationally and in the choice of solution implementation. In this work, a framework is presented to directly utilize a process simulator via callbacks during derivative-based optimization. The framework allows users with little experience in translating mechanistic ordinary differential equations and partial differential equations to robust and fully discretized algebraic formulations, required for executing simultaneous equation-oriented optimization and to obtain mathematically guaranteed optima at a competitive solution time when compared with the existing derivative-free and derivative-based frameworks. The effectiveness of the framework in the accuracy of the optimal solution as well as the computational efficiency is analyzed in two case studies: (i) an integrated 2-unit reaction synthesis train used for the synthesis of an anti-cancer active pharmaceutical ingredient and (ii) a more complex flowsheet representing a common synthesis-purification-isolation train of a pharmaceutical manufacturing process.},
-	issue        = 43
-}
 @article{Casas-Orozco2021,
 	title        = {{PharmaPy: An object-oriented tool for the development of hybrid pharmaceutical flowsheets}},
 	author       = {Daniel Casas-Orozco and Daniel Laky and Vivian Wang and Mesfin Abdi and X. Feng and E. Wood and Carl Laird and Gintaras V. Reklaitis and Zoltan K. Nagy},
@@ -340,11 +325,13 @@
 	abstract     = {This paper discusses techniques for solving discrete optimization problems using quantum annealing. Practical issues likely to affect the computation include precision limitations, finite temperature, bounded energy range, sparse connectivity, and small numbers of qubits. To address these concerns we propose a way of finding energy representations with large classical gaps between ground and first excited states, efficient algorithms for mapping non-compatible Ising models into the hardware, and the use of decomposition methods for problems that are too large to fit in hardware. We validate the approach by describing experiments with D-Wave quantum hardware for low density parity check decoding with up to 1000 variables.},
 	keywords     = {Discrete optimization,Penalty functions,Quantum annealing,Sparse Ising model}
 }
-@article{Farhi2000,
+@misc{Farhi2000,
 	title        = {{Quantum Computation by Adiabatic Evolution}},
 	author       = {Edward Farhi and Jeffrey Goldstone and Sam Gutmann and Michael Sipser},
 	year         = 2000,
-	abstract     = {We give a quantum algorithm for solving instances of the satisfiability problem, based on adiabatic evolution. The evolution of the quantum state is governed by a time-dependent Hamiltonian that interpolates between an initial Hamiltonian, whose ground state is easy to construct, and a final Hamiltonian, whose ground state encodes the satisfying assignment. To ensure that the system evolves to the desired final ground state, the evolution time must be big enough. The time required depends on the minimum energy difference between the two lowest states of the interpolating Hamiltonian. We are unable to estimate this gap in general. We give some special symmetric cases of the satisfiability problem where the symmetry allows us to estimate the gap and we show that, in these cases, our algorithm runs in polynomial time.}
+	eprint       = {quant-ph/0001106},
+	archivePrefix = {arXiv},
+	url          = {https://arxiv.org/abs/quant-ph/0001106}
 }
 @article{Kochenberger2014,
 	title        = {{The unconstrained binary quadratic programming problem: A survey}},
@@ -672,7 +659,6 @@ keywords = {supply chains, mixed-integer programming, inventory control, Lagrang
 doi = {https://doi.org/10.1002/aic.12010},
 url = {https://aiche.onlinelibrary.wiley.com/doi/abs/10.1002/aic.12010},
 eprint = {https://aiche.onlinelibrary.wiley.com/doi/pdf/10.1002/aic.12010},
-abstract = {Abstract We address in this article a problem that is of significance to the chemical industry, namely, the optimal design of a multi-echelon supply chain and the associated inventory systems in the presence of uncertain customer demands. By using the guaranteed service approach to model the multi-echelon stochastic inventory system, we develop an optimization model to simultaneously determine the transportation, inventory, and network structure of a multi-echelon supply chain. The model is an MINLP with a nonconvex objective function including bilinear, trilinear, and square root terms. By exploiting the properties of the basic model, we reformulate this problem as a separable concave minimization program. A spatial decomposition algorithm based on the integration of Lagrangean relaxation and piecewise linear approximation is proposed to obtain near global optimal solutions with reasonable computational expense. Examples for specialty chemicals and industrial gas supply chains with up to 15 plants, 100 potential distribution centers, and 200 markets are presented. © 2009 American Institute of Chemical Engineers AIChE J, 2010},
 year = {2010}
 }
 
@@ -814,4 +800,118 @@ year = {2010}
   version = {0.7.0},
   url = {https://github.com/JuliaQUBO/QiskitOpt.jl},
   note = {Unofficial Julia wrapper around Qiskit Optimization and Aer; version 0.7.0, git-tree-sha1 a601dccdd43fd0a8b18e63f3b771273817af49eb}
+}
+@article{CasasOrozco2021,
+  author  = {Casas-Orozco, Daniel and Laky, Daniel and Wang, Vivian and Abdi, Mesfin and Feng, X. and Wood, E. and Laird, Carl and Reklaitis, Gintaras V. and Nagy, Zoltan K.},
+  title   = {{PharmaPy}: An object-oriented tool for the development of hybrid pharmaceutical flowsheets},
+  journal = {Computers \& Chemical Engineering},
+  volume  = {153},
+  pages   = {107408},
+  year    = {2021},
+  doi     = {10.1016/j.compchemeng.2021.107408}
+}
+
+@article{Laky2022,
+  author  = {Laky, Daniel and Casas-Orozco, Daniel and Laird, Carl D. and Reklaitis, Gintaras V. and Nagy, Zoltan K.},
+  title   = {Simulation-Optimization Framework for the Digital Design of Pharmaceutical Processes Using {Pyomo} and {PharmaPy}},
+  journal = {Industrial \& Engineering Chemistry Research},
+  volume  = {61},
+  number  = {43},
+  pages   = {16128--16140},
+  year    = {2022},
+  doi     = {10.1021/acs.iecr.2c01636}
+}
+
+@article{Quintero2022,
+  author  = {Quintero, Rodolfo and Bernal, David and Terlaky, Tam\'{a}s and Zuluaga, Luis F.},
+  title   = {Characterization of {QUBO} reformulations for the maximum $k$-colorable subgraph problem},
+  journal = {Quantum Information Processing},
+  volume  = {21},
+  number  = {3},
+  pages   = {89},
+  year    = {2022},
+  doi     = {10.1007/s11128-022-03421-z}
+}
+
+@article{Preskill2018,
+  author  = {Preskill, John},
+  title   = {Quantum Computing in the {NISQ} era and beyond},
+  journal = {Quantum},
+  volume  = {2},
+  pages   = {79},
+  year    = {2018},
+  doi     = {10.22331/q-2018-08-06-79}
+}
+
+@article{AjagekarYou2019,
+  author  = {Ajagekar, Akshay and You, Fengqi},
+  title   = {Quantum computing for energy systems optimization: Challenges and opportunities},
+  journal = {Energy},
+  volume  = {179},
+  pages   = {76--89},
+  year    = {2019},
+  doi     = {10.1016/j.energy.2019.04.186}
+}
+
+@article{Ajagekar2020,
+  author  = {Ajagekar, Akshay and Humble, Travis and You, Fengqi},
+  title   = {Quantum computing based hybrid solution strategies for large-scale discrete-continuous optimization problems},
+  journal = {Computers \& Chemical Engineering},
+  volume  = {132},
+  pages   = {106630},
+  year    = {2020},
+  doi     = {10.1016/j.compchemeng.2019.106630}
+}
+
+@article{BernalAIChE2022,
+  author  = {Bernal, David E. and Ajagekar, Akshay and Harwood, Stuart M. and Stober, Spencer T. and Trenev, Dimitar and You, Fengqi},
+  title   = {Perspectives of quantum computing for chemical engineering},
+  journal = {AIChE Journal},
+  volume  = {68},
+  number  = {6},
+  pages   = {e17651},
+  year    = {2022},
+  doi     = {10.1002/aic.17651}
+}
+
+@article{Abbas2024,
+  author  = {Abbas, Amira and Ambainis, Andris and Augustino, Brandon and others},
+  title   = {Challenges and opportunities in quantum optimization},
+  journal = {Nature Reviews Physics},
+  volume  = {6},
+  number  = {12},
+  pages   = {718--735},
+  year    = {2024},
+  doi     = {10.1038/s42254-024-00770-9}
+}
+
+@article{Hadfield2019,
+  author  = {Hadfield, Stuart and Wang, Zhihui and O'Gorman, Bryan and Rieffel, Eleanor G. and Venturelli, Davide and Biswas, Rupak},
+  title   = {From the Quantum Approximate Optimization Algorithm to a Quantum Alternating Operator Ansatz},
+  journal = {Algorithms},
+  volume  = {12},
+  number  = {2},
+  pages   = {34},
+  year    = {2019},
+  doi     = {10.3390/a12020034}
+}
+
+@article{Brown2024,
+  author  = {Brown, Robin and Bernal Neira, David E. and Venturelli, Davide and Pavone, Marco},
+  title   = {A copositive framework for analysis of hybrid {Ising}-classical algorithms},
+  journal = {SIAM Journal on Optimization},
+  volume  = {34},
+  number  = {2},
+  pages   = {1455--1489},
+  year    = {2024}
+}
+
+@article{Glover2022,
+  author  = {Glover, Fred and Kochenberger, Gary and Hennig, Rick and Du, Yu},
+  title   = {Quantum bridge analytics {I}: a tutorial on formulating and using {QUBO} models},
+  journal = {Annals of Operations Research},
+  volume  = {314},
+  number  = {1},
+  pages   = {141--183},
+  year    = {2022}
 }

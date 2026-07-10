@@ -2,6 +2,7 @@
 
 \usepackage{psepress}
 \usepackage{enumitem}
+\usepackage{placeins}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
 
@@ -21,39 +22,26 @@
 \renewcommand{\dbltopfraction}{0.9}
 \renewcommand{\textfraction}{0.05}
 \addbibresource{bibliography.bib}
-\newif\ifincludeauditappendix
-% Submission builds should keep audit details in supplement_standalone.tex.
-\includeauditappendixfalse
 
 % Standalone PSE Press-style wrapper for the DS-MFG manuscript.
-\renewcommand{\PaperTitle}{Repair-Aware Quantum Sampling for a Discrete Process-Design QUBO}
+\renewcommand{\PaperTitle}{Gate-Based Quantum Optimization for Discrete Process Design: A Repair-Aware Benchmark}
 \renewcommand{\PaperAuthors}{%
-Yirang ~Park\textsuperscript{a}
-and David E. ~Bernal Neira\textsuperscript{a}}
+Yirang~Park\textsuperscript{a}
+and David~E. Bernal~Neira\textsuperscript{a}}
 \renewcommand{\PaperAffiliations}{%
 \textsuperscript{a} Davidson School of Chemical Engineering, Purdue University, West Lafayette, IN 47907, USA\\
 }
 \renewcommand{\PaperAbstract}{%
-This paper evaluates what is required to interpret gate-based quantum
-optimization samples for a drug-substance manufacturing discrete-design
-problem. The exported integer program has 19 binary flow variables, while the
-QUBO used by the quantum workflows has 36 variables after adding auxiliaries.
-We show that QAOA and VQE samples become process-design candidates only after
-projection to the original flow variables and exact auxiliary repair. After
-projection and repair, the primary non-oracle workflow---energy-targeted
-$p=5$ QAOA on a reduced quadratic surrogate---sampled the reference optimum
-664 times in 262144 ideal Aer reads. This reference flow is the best retained
-Gurobi-reported solution, the exact repaired-QUBO minimizer over all $2^{19}$
-projected flows, and the optimum in a local Gurobi 13.0.2 rerun with zero
-MIPGap. An oracle-aided top-10 diagnostic, using the enumerated repaired
-ranking, sampled it 1007 times. A historical selected-seed VQE follow-up
-sampled the same reference optimum 20 times in 524288 reads, while an IBM hardware pilot
-found one top-10 stored Gurobi-pool flow and no
-reference-optimum read. The evidence supports repair-aware workflow
-feasibility, not speedup, hardware superiority, or Gurobi replacement.
+Discrete decisions—routes, units, and operating modes—form the first combinatorial barrier in process design.
+We audit what is required to turn gate-based quantum samples into interpretable design candidates on a fully enumerable drug-substance manufacturing instance with 19 binary flow variables.
+The penalty QUBO reformulation adds 17 auxiliary variables; a sampled 36-bit state becomes a design candidate only after projection onto the flow variables and exact auxiliary repair.
+Because the 19-variable surrogate and transferred QAOA angles are built using exhaustive repaired enumeration—feasible only for this small instance—this workflow is a diagnostic benchmark of sample interpretation, not a scalable optimization shortcut.
+After repair-aware preprocessing, energy-targeted transferred-angle QAOA concentrates probability on the optimal flowsheet (664 of 262144 ideal reads) but does not outperform a simple hill climber, an exact solver, or exhaustive enumeration.
+A small IBM hardware run verifies the pipeline without adding advantage.
+These results are a workflow-feasibility and interpretation study, not a claim of quantum speedup.
 }
 \renewcommand{\PaperKeywords}{%
-quantum computing, process design, decomposition, optimization}
+quantum computing, process design, discrete optimization, QUBO reformulation, pharmaceutical manufacturing}
 \renewcommand{\PaperCopyrightText}{%
 \textcopyright\ 2027 by the authors. Licensed to PSEcommunity.org and PSE Press. This is an open
 access article under the creative commons CC-BY-SA licensing terms. Credit must be given to creator
@@ -74,56 +62,44 @@ and adaptations must be shared under the same terms. See
 \section{Introduction}
 \label{sec:ds-mfg-introduction}
 
-Discrete choices are often the first barrier in process design. Before a
-flowsheet can be simulated or optimized continuously, the designer must choose
-among routes, units, operating modes, and other mutually exclusive
-configurations \cite{Turkay1996,Mencarelli_2020}. These choices make many
-process-design models combinatorial. Quantum optimization is attractive in
-this setting because QAOA and VQE are designed to sample low-energy binary
-states \cite{Farhi2014,Peruzzo2014,Cerezo2021}. For chemical engineering and
-process systems engineering, recent reviews and case studies frame quantum
-computing as a workflow question rather than a drop-in solver replacement
-\cite{Nourbakhsh2022,Iftakher,park2026arxiv}.
+Discrete choices are often the first barrier in process design.
+Before a flowsheet can be simulated or optimized over continuous variables, the designer must commit to a set of mutually exclusive options: which synthesis route to use, which unit operations to include, and which operating modes to run \cite{Mencarelli_2020}.
+In pharmaceutical manufacturing, these choices are particularly consequential because route and equipment selection shape cost, yield, and regulatory burden, and because digital design and optimization tools for this sector are comparatively recent \cite{CasasOrozco2021, Laky2022}.
+The resulting models are combinatorial, and even modestly sized superstructures
+generate large discrete search spaces.
 
-The practical question is not only whether a process-design model can be
-written as a QUBO \cite{glover2019,Lucas2014,toqubo:2023}, but whether the
-resulting samples remain interpretable after reformulation, auxiliary
-variables, parameter selection, backend configuration, and postprocessing are
-made explicit. The contribution is a repair-aware audit showing how QUBO
-samples must be mapped, repaired, and scored before comparison with
-process-design solutions.
+Gate-based quantum optimization is one of the emerging tools proposed for this setting.
+A gate-based quantum computer operates on quantum bits (qubits) by applying sequences of parameterized gate operations that form a quantum circuit; measuring the circuit returns a binary string, and the circuit parameters, called angles, are tuned so that low-energy strings appear with high probability.
+The quantum approximate optimization algorithm (QAOA) \cite{Farhi2014} and the variational quantum eigensolver (VQE) \cite{Peruzzo2014, Cerezo2021} follow this variational paradigm: QAOA uses $p$ alternating cost and mixer layers, and VQE uses a parameterized ansatz circuit (here, a hardware-efficient ansatz); in both cases, a classical optimizer adjusts the angles.
+Current hardware is noisy and of intermediate scale \cite{Preskill2018}, and benchmarking surveys stress that a practical quantum advantage for optimization has not yet been established \cite{Abbas2024}; the relevant question is what is required to use these methods today and how their output compares with classical baselines.
 
-We study a drug-substance manufacturing (DS-MFG) discrete-design instance. The
-original Gurobi model contains 19 binary flow variables and a retained solution
-pool. The QUBO artifact used by the quantum workflows contains 36 variables
-because it also contains 17 auxiliary variables. A sampled 36-bit QUBO state is
-therefore not, by itself, a process-design decision. It must first be projected
-onto the original 19 flow variables and then scored with the best auxiliary
-completion.
-This small but fully enumerable DS-MFG instance is used as a controlled
-testbed: it is large enough to expose reformulation and sampling issues, but
-small enough to audit every repaired flow assignment.
+Within process systems engineering, quantum computing has been reviewed as an emerging capability \cite{BernalAIChE2022}, and hybrid quantum-classical strategies have been proposed for discrete optimization in process and energy systems \cite{AjagekarYou2019}.
+Discrete-design instances have been mapped to the QUBO form \cite{glover2019} and solved with Ising-based annealing hardware \cite{AjagekarYou2019,park2026arxiv}.
+These works establish that the mapping is possible; few examine what happens to the samples after the reformulation, and the gate-based path is less explored than annealing.
+Casting a constrained problem as a QUBO introduces auxiliary variables \cite{toqubo:2023} that are bookkeeping rather than design decisions, so a raw quantum sample is not directly interpretable as a flowsheet.
+The question is: what does it take to turn gate-based quantum samples into process-design decisions, and how does this compare with classical methods?
 
-The conclusion is conservative. After reduction, exact auxiliary repair, and
-offline QAOA angle search, local Aer simulations place observable mass on the
-reference optimum, and a fixed-parameter IBM hardware pilot executes the
-handoff and scoring path. These results demonstrate feasibility and engineering
-burden, not a runtime advantage over Gurobi or a hardware-performance advantage
-over classical simulation.
+We answer this through an end-to-end audit on a single drug-substance manufacturing (DS-MFG) instance, chosen to be small enough to enumerate exactly yet large enough to expose the reformulation and interpretation issues that arise at scale.
+Our contribution is a repair-aware audit of the full path from a constrained process-design model to usable gate-based quantum samples.
+We find:
+(i) raw QUBO samples require projection and exact auxiliary repair before they are interpretable as design candidates; 
+(ii) a quadratic surrogate over the design variables fits the repaired landscape globally but fails as an optimizer;
+(iii) transferred-angle QAOA concentrates probability on good flowsheets but does not beat classical baselines; and
+(iv) a hardware run confirms pipeline feasibility without adding advantage.
+Because the 19-variable surrogate and transferred angles are built using exhaustive repair enumeration, feasible only for this small instance, this workflow serves as a diagnostic benchmark for sample interpretation, not a scalable optimization shortcut.
+
+For the process systems engineering community, this study is a concrete, reproducible measurement of the engineering burden between a discrete-design model and a usable quantum sample; the conclusions demonstrate feasibility and interpretation, not a runtime advantage over classical computation.
 
 \section{Methods}
 \label{sec:ds-mfg-methods}
 
-\subsection{Discrete Design Instance}
+\subsection{The Discrete Design Instance}
 \label{subsec:ds-mfg-instance}
 
-The original DS-MFG instance is a binary integer-programming model for a
-capital-expenditure selection problem. The 19 binary variables encode
-candidate material-flow arcs or unit-operation selections in a manufacturing
-superstructure, and the objective is a normalized capital-cost score. The
-reference value is 11.7095; it is the best retained Gurobi-reported value and
-is certified by the local Gurobi 13.0.2 rerun described below. Schematically, the discrete
-subproblem has the form
+The DS-MFG instance is the discrete subproblem of a drug-substance manufacturing case study introduced by Park and Bernal Neira~\cite{park2026arxiv}, where a mixed-integer nonlinear design problem is decomposed so that the discrete part is handled by combinatorial solvers and the nonlinear part by simulators.
+We keep the same discrete instance but ask what is required to run gate-based optimizers.
+The instance is a binary integer program for capital-expenditure selection in the manufacturing superstructure: the 19 binary variables encode candidate material-flow arcs and unit-operation selections, and the objective function is a normalized capital-cost score (lower values indicate lower capital expenditure; scaled as in \cite{park2026arxiv}).
+The discrete problem has the form
 \begin{equation}
 \begin{aligned}
 \min_{f} \quad & \sum_{i \in F} c_i f_i \\
@@ -138,472 +114,311 @@ subproblem has the form
 \end{aligned}
 \label{eq:ds-mfg-ip-formulation}
 \end{equation}
-Equation~\eqref{eq:ds-mfg-ip-formulation} records the relevant constraint
-classes, not a literal listing. The exact Gurobi pool, QUBO coefficients, and
-repair artifacts are retained in the supplied QUBO archive and the case-study
-artifact bundle. In the Gurobi export the model is named \texttt{capex}; it has
-19 binary flow variables, 20 constraints, 58 nonzeros, and a minimization
-objective. The original retained Gurobi export reports \texttt{PoolSearchMode=2},
-\texttt{PoolSolutions=36}, solve time 0.073 s, and 36 solutions found
-\cite{gurobi}; it did not retain solver version, final status, MIPGap, PoolGap,
-or pool intent. A local Gurobi 13.0.2 rerun of the same IP with
-\texttt{PoolSearchMode=2} and \texttt{PoolSolutions=100} returned
-\texttt{OPTIMAL}, \texttt{MIPGap=0.0}, objective 11.7095, flow
-\texttt{1001110100111100011} in $(f_{00},\ldots,f_{18})$ order, 36 solutions,
-and exact retained-pool agreement. This classical rerun did not involve quantum
-hardware; it validates the exported IP and supplies the Gurobi-certified
-reference. Exact enumeration below verifies the same flow is the repaired-QUBO
-minimizer over all $2^{19}$ projected flows. We
-report whether a sampled flow matches a stored Gurobi-pool solution; this is a
-pool-membership metric, not a certificate that all other sampled flows are
-infeasible.
+Equation~\eqref{eq:ds-mfg-ip-formulation} lists the relevant constraint classes:
+flow balance at each node $n \in N$, fixed source and sink selections, and
+additional logical constraints $g(f) \leq 0$ that enforce a valid flowsheet.
 
-\subsection{QUBO Representation, Repair, and Surrogate}
+Solved with \texttt{Gurobi} \cite{gurobi}, the model (19 binary variables, 20 constraints) returns an optimal capital-cost score of 11.7095; with feasible solutions enumeration enabled (\texttt{PoolSearchMode=2}), all 36 feasible flows are retained in a single deterministic solve (0.073 s).
+We treat 11.7095 as the certified global optimum and use it as the reference throughout.
+
+\subsection{From Integer Program to QUBO and Back}
 \label{subsec:ds-mfg-qubo-repair}
 
-The supplied QUBO archive provides a scalar file, a linear coefficient vector,
-and a quadratic coefficient matrix. For a full bitstring
-$x \in \{0,1\}^{36}$, the encoded objective is
+To run QAOA and VQE, the integer program must be expressed as a QUBO, in which all constraints are folded into a single quadratic objective over binary variables \cite{glover2019, toqubo:2023}.
+Inequality constraints require auxiliary (slack) variables; the penalty weights and auxiliary count are not unique, and both affect how faithfully the QUBO represents the original problem \cite{toqubo:2023}.
+For this instance, the penalty reformulation introduces 17 auxiliary variables, so the QUBO acts on 36 binary variables.
+For a bitstring $x \in \{0,1\}^{36}$, the encoded objective is
 \begin{equation}
     E_{\mathrm{QUBO}}(x)
     =
-    a\left(
-        \ell^\top x + x^\top Qx + b
-    \right),
+    \ell^\top x + x^\top Qx + b,
     \label{eq:ds-mfg-full-qubo}
 \end{equation}
-with $a=1.0$, $b \approx 601.476$, $\ell \in \mathbb{R}^{36}$, and
-$Q \in \mathbb{R}^{36 \times 36}$. The stored matrix is evaluated as exported:
-off-diagonal interactions are present in the upper-triangular part of $Q$ and
-are counted once in $x^\top Qx$.
+with linear coefficients $\ell$, quadratic coefficient matrix $Q$, and constant offset $b$.
 
-The QUBO variables separate into original flow variables and auxiliaries,
+The 36 variables are separated into the original flow variables and the auxiliaries,
 \[
     x = (y,z), \qquad
     y \in \{0,1\}^{19}, \quad z \in \{0,1\}^{17}.
 \]
-Every sampled state is scored after exact auxiliary repair:
+Only $y$ encodes a design decision; $z$ is bookkeeping.
+A sampled 36-bit string does not map directly to a flowsheet.
+We make it interpretable by projecting onto $y$ and repairing the auxiliaries, choosing the assignment that minimizes the QUBO energy for that flow,
 \begin{equation}
     F(y)
     =
     \min_{z \in \{0,1\}^{17}} E_{\mathrm{QUBO}}(y,z).
     \label{eq:ds-mfg-repaired-objective}
 \end{equation}
-Components are connected components of the auxiliary-auxiliary interaction
-graph after conditioning on $y$; each component is enumerated exactly. For this
-instance, fixing $y$ decomposes the repair into 13 components, each containing
-one or two auxiliary variables.
+The repair is exact and cheap here because, once $y$ is fixed, the
+auxiliary-auxiliary coupling graph splits into 13 independent connected components:
+9 singletons (one auxiliary bit each) and 4 pairs (two auxiliary bits each).
+The singletons correspond to the at-most-one inequality constraints for each decision group and to the downstream flow-balance conditions; the pairs arise from product-linearization inequalities for the Route~B activation rule ($f_{06}=1$ iff Reactor~1 is continuous and Reactor~2 is batch).
+Each component is solved by exhaustive enumeration over its 2 or 4 possible assignments; the $9\!\times\!2+4\!\times\!4=34$ total comparisons replace $2^{17}=131{,}072$ brute-force evaluations.
+The full component table with auxiliary indices, flow neighbors, and constraint roles appears in the Supplement (Sect.~3).
+This decomposition is instance-specific; for a general QUBO, auxiliary repair can itself be NP-hard, so the present repair step is an exact audit tool rather than a generally cheap postprocessor.
 
-This repair gives a valid bridge back to the IP objective. The exact repaired
-minimizer over all $2^{19}$ flow assignments is the retained Gurobi-reported
-reference flow \texttt{1001110100111100011}, ordered as
-$(f_{00},\ldots,f_{18})$, with objective 11.7095. Across all 36 stored
-Gurobi-pool flows, repaired QUBO scores match the IP objective within
-$3.1\times 10^{-13}$. Fourteen of the top 50 repaired flows are not in the
-stored Gurobi pool, so these non-pool flows are not certified feasible or
-infeasible by the pool alone.
+The repaired minimizer over all $2^{19}$ flows recovers the optimum, and the repaired QUBO scores match the integer-program objective to within $3.1\times 10^{-13}$, confirming they encode the same objective.
+Exact enumeration finds exactly 36 feasible flows, as does the solution pool option of \texttt{Gurobi}.
+Note that 14 of the 50 lowest-cost repaired flows are infeasible flows whose penalty values are insufficient to place them above all feasible ones.
 
-The exact repaired objective is not generally quadratic in $y$. To use QAOA and
-VQE interfaces that expect a QUBO, we fit a 19-variable quadratic surrogate,
+The repaired objective $F(y)$ is not a quadratic function of $y$, but QAOA and VQE require a QUBO input.
+Rather than using the full 36-variable QUBO (which mixes design variables with auxiliaries and requires 36-qubit circuits), we construct a reduced, 19-variable QUBO directly over the design space $y$ by fitting a quadratic surrogate to the repaired landscape:
 \begin{equation}
-    S(y)
+    \widehat{F}(y)
     =
-    b_S
-    + \ell_S^{\top} y
-    + y^{\top} Q_S y,
+    \widehat{b}
+    + \widehat{\ell}^{\top} y
+    + y^{\top} \widehat{Q} y
     \label{eq:ds-mfg-quadratic-surrogate}
 \end{equation}
-by least squares over all $2^{19}$ repaired flow assignments. Here $S$ denotes
-the fitted quadratic surrogate for the exact repaired objective $F$. Although
-the surrogate has high global fit quality ($R^2 \approx 0.999$), it is not
-reliable as a minimizer: the surrogate optimum repairs to 14.5505 rather than
-the true 11.7095 optimum. The true optimum is only rank 33 under the surrogate,
-and among the exact top-50 repaired flows the median and maximum absolute
-surrogate errors are 18.7 and 29.4, respectively. In the lowest 1\% of repaired
-flows, the exact-rank versus surrogate-rank Spearman correlation is 0.901. The
-surrogate $S$ is used only to generate variational samples; all reported
-sample-quality metrics are evaluated using the exact repaired objective $F$,
-not $S$.
+by least squares over all $2^{19}$ repaired flows.
+The surrogate fits the landscape almost perfectly in aggregate ($R^2 \approx 0.999$), but this global accuracy is misleading for optimization: the surrogate's own minimizer repairs to 14.5505 rather than the true 11.7095, the true optimum ranks only 33rd under the surrogate, and among the 50 lowest-cost repaired flows the surrogate's absolute errors reach 29.4.
+The surrogate is not used to certify solution quality; it serves only as a compact 19-qubit sampling Hamiltonian, and every reported metric is evaluated after exact repair under $F$.
 
 \subsection{Quantum, Classical, and Hardware Workflows}
 \label{subsec:ds-mfg-workflows}
 
-The local QAOA and VQE workflow is reproduced through
-\pkg{QiskitOpt.jl}{https://github.com/JuliaQUBO/QiskitOpt.jl}, an unofficial
-Julia wrapper around Qiskit Optimization and Aer, with
-\pkg{Qiskit Aer}{https://github.com/Qiskit/qiskit-aer}
-\cite{JavadiAbhari2024,QiskitAerSoftware,QiskitOptimizationSoftware,QiskitOptSoftware}. The current committed project and
-manifest pin
-\pkg{QiskitOpt.jl}{https://github.com/JuliaQUBO/QiskitOpt.jl} v0.7.0
-(git tree \codeid{a601dccdd43fd0a8b18e63f3b771273817af49eb}),
-\pkg{QUBODrivers.jl}{https://github.com/JuliaQUBO/QUBODrivers.jl} v0.6.1,
-\pkg{QUBOTools.jl}{https://github.com/JuliaQUBO/QUBOTools.jl} v0.13.0,
-\pkg{PythonCall.jl}{https://github.com/JuliaPy/PythonCall.jl} v0.9, and Julia
-1.10 compatibility. The Python environment pins Qiskit 2.3.1, Qiskit Aer
-0.17.2, Qiskit Optimization 0.7.0, and Qiskit IBM Runtime 0.46.1. The
-repository smoke test validates package imports and cached scoring summaries
-under these pins; it does not rerun the expensive stochastic campaigns. The
-most expensive local simulations use Aer's
-matrix-product-state method, a tensor-network statevector strategy whose cost
-is controlled by entanglement and bond dimension
-\cite{Vidal2003,Schollwoeck2011}. The reduced QAOA and VQE revisit scripts set
-truncation threshold $10^{-10}$, maximum MPS bond dimension 64,
-\texttt{mps\_heuristic} measurement sampling, single precision, and a thread
-cap of \texttt{min(Sys.CPU\_THREADS, 8)}. Whether truncation occurred was not
-persisted in the cached Aer outputs. The primary simulator-accuracy check for
-the central QAOA row is an independent JuliQAOA statevector calculation: it
-predicted reference-optimum probability $2.63\times 10^{-3}$, while the cached
-Aer MPS sampled rate was $2.53\times 10^{-3}$ with Wilson 95\% interval
-$[2.35,2.73]\times 10^{-3}$.
+We evaluate several workflows over this pipeline.
+The local QAOA and VQE workflows run through \texttt{QiskitOpt.jl}, a Julia wrapper for Qiskit \cite{JavadiAbhari2024}, with QUBO models constructed via the \texttt{QUBO.jl} ecosystem \cite{toqubo:2023}.
+Increasing $p$ makes QAOA more expressive and can be viewed as a finer discretization of an adiabatic path \cite{Farhi2000}, but deeper circuits are more sensitive to noise on current NISQ devices \cite{Preskill2018}.
+Both workflows contain variational circuit parameters optimized here with COBYLA \cite{Cerezo2021}.
+Direct full-QUBO QAOA and VQE operate on the 36-variable formulation; reduced-surrogate QAOA and VQE operate on the 19-variable surrogate and are scored by exact repair.
+The best-performing quantum workflow adds an offline parameter-search step: QAOA parameters are optimized on the surrogate with JuliQAOA \cite{Golden2023JuliQAOA} by minimizing the expected surrogate energy $\mathbb{E}_{y \sim p_\theta}[\widehat{F}(y)]$, then transferred to a Qiskit circuit for sampling (\emph{energy-targeted}: angles are optimized offline against the surrogate expected energy; this offline cost is excluded from the sampling times in Table~\ref{tab:ds-mfg-primary-outcomes}).
+The fixed, pre-optimized parameters with the highest local solution concentration are also submitted to the hardware for a feasibility test.
+Reduced-surrogate VQE uses an \texttt{EfficientSU2} ansatz optimized with COBYLA.
 
-Several workflows were evaluated. Direct full-QUBO QAOA and VQE used the
-36-variable formulation. Reduced-surrogate QAOA and VQE used the 19-flow
-surrogate and were scored by exact repair. The highest-concentration QAOA
-workflow in this audit added an offline angle-search step:
-\pkg{JuliQAOA.jl}{https://github.com/lanl/JuliQAOA.jl} was used to optimize
-QAOA angles over the reduced surrogate
-\cite{Golden2023JuliQAOA}, and those fixed angles were then transferred back to
-\texttt{QiskitOpt.QAOA} with \texttt{MaximumIterations() = 0}. The
-energy-targeted angle search used basin hopping through
-\texttt{find\_angles\_bh} with seed 91001 and five basin-hopping iterations,
-minimizing the expected surrogate energy
-\begin{equation}
-    \mathcal{J}_{\mathrm{energy}}(\theta)
-    =
-    \mathbb{E}_{y\sim p_{\theta}}\!\left[S(y)\right].
-    \label{eq:ds-mfg-energy-target}
-\end{equation}
-This objective uses the reduced surrogate, not the exact repaired top-$k$
-ranking.
-The top-10-targeted diagnostic maximized
-\begin{equation}
-    \mathcal{J}_{10}(\theta)
-    =
-    \sum_{y \in \mathcal{T}_{10}} p_{\theta}(y),
-    \label{eq:ds-mfg-top10-target}
-\end{equation}
-where $\mathcal{T}_{10}$ is the enumerated exact top-10 repaired-flow set. This
-top-10 objective is oracle-aided because the repaired ranking is known for this
-small enumerated instance; it is not claimed as a scalable parameter-setting
-strategy. Reduced-surrogate VQE used \texttt{EfficientSU2}, 152 initial
-parameters on the 19-flow surrogate, 128 optimizer reads, 25 COBYLA
-iterations, and final-read sweeps up to 524288 reads. The main VQE row is a
-historical cached selected-seed follow-up: seed 74018 produced 20
-reference-optimum hits in 524288 reads. A later metadata rerun produced 4
-reference-optimum hits in 1572864 reads and documents provenance without
-replacing the historical distribution.
+As classical baselines, we sample the repaired 19-flow objective by uniform random sampling and by single-bit-flip hill climbing with random restarts.
+As a hardware feasibility test, we run the highest-concentration fixed-parameter QAOA circuit on the IBM \texttt{ibm\_fez} quantum computer.
+An independent state-vector calculation predicts the central QAOA optimum probability at $2.63\times 10^{-3}$, consistent with the $2.53\times 10^{-3}$ sampled rate.
+% Software versions, random seeds, simulator settings, circuit depths, and job identifiers are recorded in the artifact bundle.
 
-Classical baselines sampled the repaired 19-flow objective by uniform random
-sampling and by steepest-descent single-bit-flip hill climbing with random
-restarts. The hardware pilot used the top-10-targeted $p=5$ fixed QAOA circuit
-as a handoff test on \texttt{ibm\_fez}. The hardware manifest records the
-backend query timestamp (2026-06-17 20:19 UTC), 156-qubit backend, basis gates,
-19-qubit logical circuit, pre-transpile depth 86, 255 \texttt{rzz}
-operations, 4096 shots per submitted job, three repeats, transpile seeds
-92001--92003, and nine completed job IDs. It does not record a calibration
-snapshot, queue time, readout mitigation, or error mitigation; no such
-mitigation is claimed.
-
-\subsection{Evaluation Metrics}
-\label{subsec:ds-mfg-metrics}
-
-For a sampled QUBO state $x=(y,z)$, we record the raw QUBO energy
-$E_{\mathrm{QUBO}}(y,z)$, the repaired objective $F(y)$, and the auxiliary gap
-$E_{\mathrm{QUBO}}(y,z)-F(y)$. A reference-optimum hit means that the projected
-$y$ equals the reference-optimal 19-bit flow after exact auxiliary repair; it
-does not require the sampled 36-bit string to contain the optimal auxiliary
-completion. The main events are reference-optimum hits, top-10 and top-50
-repaired-rank hits, and stored Gurobi-pool hits. Empirical hit rates are accompanied in
-the artifact tables by Wilson intervals and empirical 99\% time-to-target
-diagnostics \cite{Bernal2024-benchmarking}. These read-level or
-evaluation-level diagnostics exclude exact enumeration, surrogate fitting,
-QAOA angle search, transpilation, queueing, hardware calibration, and
-repair-cache construction.
+For each sampled state $x=(y,z)$ we record the raw QUBO energy $E_{\mathrm{QUBO}}(y,z)$, the repaired objective $F(y)$, and the auxiliary gap.
+A \emph{reference-optimum hit} means the repaired flow equals the certified optimal flowsheet (the unique minimum-cost feasible design).
+A \emph{feasible-design hit} means the repaired flow matches any of the 36 feasible flows.
+We report both hit rates with two-sided Wilson 95\% confidence intervals (score-based intervals for proportions that remain valid near zero); rows with no observed hits report the one-sided upper bound.
+The empirical 99\% time-to-solution $\mathrm{TTS}_{99}=\tau\lceil\log(0.01)/\log(1-\hat{p})\rceil$ normalizes each hit rate by the measured wall time per sample $\tau$, enabling wall-clock comparison across methods with different per-sample costs; rows with zero hits report $\infty$.
 
 \begin{figure*}[t]
 \centering
-\begin{minipage}{0.47\linewidth}
+\begin{minipage}[t]{0.61\linewidth}
+\centering
+\begin{tikzpicture}[
+    x=0.84cm, y=0.55cm,
+    opt/.style={-Latex, thick},
+    alt/.style={-Latex, thin, dashed, draw=gray!55},
+    bbk/.style={-Latex, thick},
+    unit/.style={draw, rounded corners=1pt, align=center, inner sep=1.5pt,
+        minimum width=1.0cm, minimum height=0.27cm, font=\tiny},
+    optunit/.style={draw, very thick, rounded corners=1pt, align=center, inner sep=1.5pt,
+        minimum width=1.0cm, minimum height=0.27cm, font=\tiny},
+    lbl/.style={font=\tiny, inner sep=1pt}
+]
+% Source
+\node[circle, draw, inner sep=1.5pt, font=\tiny] (DS) at (-0.4, 0) {DS};
+% f00 (backbone)
+\coordinate (sp1) at (0.4, 0);
+\draw[bbk] (DS) -- node[above, lbl] {$f_{00}$} (sp1);
+% Reactor 1
+\node[unit]    (pfr1)  at (1.5,  1.0) {PFR};
+\node[optunit] (bat1)  at (1.5,  0.0) {Batch};
+\node[unit]    (cstr1) at (1.5, -1.0) {CSTR};
+\node[lbl, font=\scriptsize, above=2pt] at (1.5, 1.3) {Reactor\,1};
+\draw[alt] (sp1) |- node[above, lbl, pos=0.72] {$f_{01}$} (pfr1);
+\draw[opt] (sp1) -- node[above, lbl]           {$f_{03}$} (bat1);
+\draw[alt] (sp1) |- node[below, lbl, pos=0.72] {$f_{02}$} (cstr1);
+\coordinate (mg1) at (2.5, 0);
+\draw[alt] (pfr1)  -| (mg1);
+\draw[opt] (bat1)  -- (mg1);
+\draw[alt] (cstr1) -| (mg1);
+% f04 (backbone)
+\coordinate (sp2) at (3.1, 0);
+\draw[bbk] (mg1) -- node[above, lbl] {$f_{04}$} (sp2);
+% Routing f05 / f06
+\coordinate (mg2) at (3.8, 0);
+\draw[opt] (sp2) to[bend left=22]  node[above, lbl] {$f_{05}$} (mg2);
+\draw[alt] (sp2) to[bend right=22] node[below, lbl] {$f_{06}$} (mg2);
+% f07 (backbone)
+\coordinate (sp3) at (4.5, 0);
+\draw[bbk] (mg2) -- node[above, lbl] {$f_{07}$} (sp3);
+% Reactor 2
+\node[unit]    (pfr2)  at (5.5,  1.0) {PFR};
+\node[unit]    (cstr2) at (5.5,  0.0) {CSTR};
+\node[optunit] (bat2)  at (5.5, -1.0) {Batch};
+\node[lbl, font=\scriptsize, above=2pt] at (5.5, 1.3) {Reactor\,2};
+\draw[alt] (sp3) |- node[above, lbl, pos=0.72] {$f_{08}$} (pfr2);
+\draw[alt] (sp3) -- node[above, lbl]           {$f_{09}$} (cstr2);
+\draw[opt] (sp3) |- node[below, lbl, pos=0.72] {$f_{10}$} (bat2);
+\coordinate (mg3) at (6.5, 0);
+\draw[alt] (pfr2)  -| (mg3);
+\draw[alt] (cstr2) -- (mg3);
+\draw[opt] (bat2)  -| (mg3);
+% Crystallisation (always active)
+\node[optunit, minimum width=1.1cm] (cryst) at (7.4, 0) {Cryst.};
+\node[lbl, font=\scriptsize, above=2pt] at (7.4, 0.45) {Stage\,3};
+\draw[bbk] (mg3) -- node[above, lbl] {$f_{11}$} (cryst);
+% Downstream split
+\coordinate (sp4) at (8.25, 0);
+\draw[opt] (cryst) -- (sp4);
+% Continuous downstream (optimal via Cont. I = f13)
+\node[optunit, minimum width=1.2cm] (cont) at (9.3,  0.65) {Cont.\,I/II/III};
+\node[unit,    minimum width=1.2cm] (bus)  at (9.3, -0.65) {Batch\,U/S};
+\node[lbl, font=\scriptsize, above=2pt] at (9.3, 1.0) {Downstream};
+\draw[opt] (sp4) |- node[above, lbl, pos=0.75] {$f_{12}$} (cont);
+\draw[alt] (sp4) |- node[below, lbl, pos=0.75] {$f_{16}$} (bus);
+\coordinate (mg4) at (10.2, 0);
+\draw[opt] (cont) -| node[above, lbl, pos=0.25] {$f_{17}$} (mg4);
+\draw[alt] (bus)  -| (mg4);
+% f18 (backbone) → FP
+\node[circle, draw, inner sep=1.5pt, font=\tiny] (FP) at (10.85, 0) {FP};
+\draw[bbk] (mg4) -- node[above, lbl] {$f_{18}$} (FP);
+\end{tikzpicture}
+
+\smallskip
+\textbf{(a)} DS-MFG manufacturing superstructure (19 binary arcs)
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.37\linewidth}
 \centering
 \scriptsize
 \begin{tikzpicture}[
-    node distance=0.45cm,
+    node distance=0.42cm,
     box/.style={draw, rounded corners=1.5pt, align=center, inner sep=3pt,
-        minimum width=0.9\linewidth},
+        minimum width=0.88\linewidth},
     arr/.style={-Latex, thick}
 ]
-\node[box] (sample) {sampled QUBO state\\$x=(y,z)\in\{0,1\}^{36}$};
-\node[box, below=of sample] (project) {project to original\\19 flow bits $y$};
-\node[box, below=of project] (repair) {exact auxiliary repair\\$z^\star(y)=\arg\min_z E_{\mathrm{QUBO}}(y,z)$};
-\node[box, below=of repair] (score) {score repaired candidate\\$F(y)=E_{\mathrm{QUBO}}(y,z^\star(y))$};
-\node[box, below=of score] (compare) {compare with reference optimum,\\stored pool, and repaired ranks};
-\draw[arr] (sample) -- (project);
+\node[box] (sample)  {sampled QUBO state\\$x=(y,z)\in\{0,1\}^{36}$};
+\node[box, below=of sample]  (project) {project to 19 flow bits $y$};
+\node[box, below=of project] (repair)  {exact auxiliary repair\\$z^\star(y)=\arg\min_z E(y,z)$};
+\node[box, below=of repair]  (score)   {score: $F(y)=E(y,z^\star(y))$};
+\node[box, below=of score]   (compare) {compare: opt.\ \& feasibility\\[-1pt]{\tiny (all table metrics use $F(y)$)}};
+\draw[arr] (sample)  -- (project);
 \draw[arr] (project) -- (repair);
-\draw[arr] (repair) -- (score);
-\draw[arr] (score) -- (compare);
+\draw[arr] (repair)  -- (score);
+\draw[arr] (score)   -- (compare);
 \end{tikzpicture}
-\end{minipage}\hfill
-\begin{minipage}{0.49\linewidth}
-\centering
-\scriptsize
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}[x=1cm,y=1cm]
-\node[anchor=west, font=\bfseries] at (1.00,4.78)
-    {Reference-optimum hit probability after repair};
-\foreach \y/\lab in {
-    0.70/{$10^{-5}$},
-    1.90/{$10^{-4}$},
-    3.10/{$10^{-3}$},
-    4.30/{$10^{-2}$}
-} {
-    \draw[gray!25] (0.95,\y) -- (7.25,\y);
-    \draw[gray!65] (0.90,\y) -- (0.95,\y);
-    \node[anchor=east] at (0.82,\y) {\lab};
-}
-\draw[->, thick] (0.95,0.70) -- (0.95,4.48);
-\draw[->, thick] (0.95,0.70) -- (7.35,0.70);
-\node[rotate=90, anchor=south, align=center] at (-0.02,2.50)
-    {Probability of sampling\\the reference optimum\\after repair};
 
-\draw[orange!90!black, densely dashed, thick] (1.49,0.70) -- (1.49,0.90);
-\draw[orange!90!black, thick, fill=white] (1.49,0.98) -- (1.39,0.84) -- (1.59,0.84) -- cycle;
-\fill[gray!70, draw=gray!90] (2.15,0.70) rectangle (2.73,1.73);
-\fill[blue!65!black, draw=blue!80!black] (3.10,0.70) rectangle (3.68,3.58);
-\fill[violet!70!black, draw=violet!85!black] (4.05,0.70) rectangle (4.63,3.80);
-\fill[green!60!black, draw=green!70!black] (5.00,0.70) rectangle (5.58,1.40);
-\draw[orange!90!black, densely dashed, thick] (6.24,0.70) -- (6.24,1.92);
-\draw[orange!90!black, thick, fill=white] (6.24,2.00) -- (6.14,1.86) -- (6.34,1.86) -- cycle;
-
-\foreach \x/\ylo/\yhi in {
-    2.44/1.50/1.96,
-    3.39/3.54/3.62,
-    4.34/3.77/3.83,
-    5.29/1.17/1.62
-} {
-    \draw[black, thick] (\x,\ylo) -- (\x,\yhi);
-    \draw[black, thick] (\x-0.09,\ylo) -- (\x+0.09,\ylo);
-    \draw[black, thick] (\x-0.09,\yhi) -- (\x+0.09,\yhi);
-}
-
-\node[anchor=south] at (1.49,1.03) {$0/262\mathrm{k}$};
-\node[anchor=south] at (2.44,1.79) {$19/262\mathrm{k}$};
-\node[anchor=south] at (3.39,3.64) {$664/262\mathrm{k}$};
-\node[anchor=south] at (4.34,3.86) {$1007/262\mathrm{k}$};
-\node[anchor=south] at (5.29,1.46) {$20/524\mathrm{k}$};
-\node[anchor=south] at (6.24,2.05) {$0/36.9\mathrm{k}$};
-
-\node[anchor=north, align=center] at (1.49,0.49) {random};
-\node[anchor=north, align=center] at (2.44,0.49) {hill};
-\node[anchor=north, align=center] at (3.39,0.49) {energy};
-\node[anchor=north, align=center] at (4.34,0.49) {top-10};
-\node[anchor=north, align=center] at (5.29,0.49) {hist.\\VQE};
-\node[anchor=north, align=center] at (6.24,0.49) {IBM};
-
-\end{tikzpicture}%
-}
+\smallskip
+\textbf{(b)} Repair-aware scoring pipeline
 \end{minipage}
-\caption{Repair-aware scoring pipeline and representative reference-optimum hit rates
-after projection to the 19 original flow variables and exact auxiliary repair.
-Solid bars are observed probabilities with Wilson 95\% intervals; open
-triangles are Wilson upper bounds for zero-hit rows, not observed hits. Short
-labels denote uniform random sampling, hill-climb restarts, energy-targeted
-transferred QAOA, oracle-aided top-10-targeted QAOA, historical selected-seed
-VQE follow-up, and the \texttt{ibm\_fez} hardware pilot.}
-\label{fig:ds-mfg-repair-pipeline}
+\caption{Overview of the DS-MFG case study.
+\textbf{(a)} Manufacturing superstructure: thick arrows trace the optimal flowsheet
+(Batch\,Rxn\,1\,$\to$\,Route\,A\,($f_{05}$)\,$\to$\,Batch\,Rxn\,2\,$\to$\,Cryst.\,$\to$\,Cont.\,I\,($f_{13}$));
+dashed arrows mark the non-optimal alternatives;
+the backbone arcs $f_{00},f_{04},f_{07},f_{11},f_{18}$ carry every feasible flow.
+Route~B ($f_{06}$) is activated only when a continuous Reactor~1 feeds a batch Reactor~2;
+Cont.\,I/II/III share entry arc $f_{12}$ and exit arc $f_{17}$ (optimal uses $f_{13}$).
+\textbf{(b)} Every sampled 36-bit QUBO string is projected to the 19 flow variables, repaired exactly via the 13-component auxiliary decomposition (Supplement, Sect.~3), and scored against the certified optimum and the 36-member feasible-design pool; hit rates appear in Table~\ref{tab:ds-mfg-primary-outcomes}.}
+\label{fig:ds-mfg-overview}
 \end{figure*}
 
 \section{Results}
 \label{sec:ds-mfg-results}
 
+Across all workflows, exact auxiliary repair is a prerequisite for interpretability; transferred-angle QAOA gives the highest stochastic feasible-design rate, but hill climbing and Gurobi remain faster on every wall-clock metric.
+
 \subsection{Repair Changes the Meaning of a Sample}
 \label{subsec:ds-mfg-repair-meaning}
 
-Directly sampling the 36-variable QUBO was not enough to obtain an interpretable
-process-design result. In an early full-QUBO QAOA final-sampling run, $p=2$
-QAOA produced no reference-optimum reads in 512 final samples, although exact
-repair recovered a best stored-pool flow with repaired objective 14.5505. A
-higher-read direct full-QUBO run later sampled the repaired reference optimum 4
-times in 32768 reads, but these were repaired-flow hits rather than encoded
-36-bit optimum completions. Figure~\ref{fig:ds-mfg-repair-pipeline} summarizes
-the resulting scoring path: the original flow variables define the
-process-design candidate, and auxiliary repair defines the score used for
-comparison.
-These direct 36-bit runs are not used as performance claims; they show that
-full-QUBO samples are difficult to interpret without projection and repair.
+Sampling the 36-variable QUBO directly does not yield an interpretable design result.
+A $p=2$ full-QUBO QAOA found no optimum in 512 samples; a 32768-read run returned it only 4 times after repair, and never as a fully optimal 36-bit string without projection.
+Without projection and exact repair, a raw QUBO sample cannot be read as a flowsheet; Figure~\ref{fig:ds-mfg-overview}(b) summarizes the scoring pipeline, and the repair decomposition is detailed in the Supplement (Sect.~3).
 
-\subsection{Reduction and Angle Transfer Concentrate QAOA Samples}
+\subsection{Reduction and Parameter Transfer Concentrate QAOA Samples}
 \label{subsec:ds-mfg-qaoa-main}
 
-The primary non-oracle QAOA result is the energy-targeted $p=5$ transferred
-workflow. Here energy-targeted means minimizing the expected reduced-surrogate
-energy in Eq.~\eqref{eq:ds-mfg-energy-target}, not using the exact repaired
-top-$k$ ranking. This workflow sampled the reference optimum 664 times in
-262144 ideal Aer reads, for an empirical reference-hit rate of
-$2.53\times 10^{-3}$ with Wilson 95\% interval
-$[2.35,2.73]\times 10^{-3}$. It also produced 39661 top-50 reads, 8964 top-10
-reads, and 32502 stored Gurobi-pool reads.
-
-The top-10-targeted $p=5$ angle objective improved the local diagnostic result
-to 1007 reference-optimum reads in the same 262144-read budget, together with
-62597 top-50 reads and 14326 top-10 reads. That result is useful for stress
-testing the circuit and hardware handoff, but it is oracle-aided because it
-uses the exact repaired ranking obtained by enumerating all $2^{19}$ flow
-assignments.
+Once the pipeline is in place, reduction to the surrogate and transferred-parameter search are what make QAOA samples concentrate on feasible, optimal flowsheets.
+The energy-targeted $p=5$ transferred workflow sampled the certified optimum 664 times in 262144 ideal reads and matched a feasible flowsheet 32502 times (12.4\%, CI [12.3, 12.5]\%), the highest feasible-design rate of any workflow; see Table~\ref{tab:ds-mfg-primary-outcomes} for TTS99 values.
+The surrogate's near-perfect global $R^2$ did not imply optimization fidelity: its own minimizer repaired to 14.5505, and the true optimum ranked only 33rd under the surrogate.
 
 \subsection{VQE and Classical Baselines Bound the Claim}
 \label{subsec:ds-mfg-vqe-classical-main}
 
-VQE also benefited from reduction, but it produced a less concentrated
-distribution. Full-QUBO VQE did not sample the reference optimum in the five-seed
-8192-read sweep. Reduced-surrogate VQE found a near-optimal stored-pool flow
-with objective 11.8105 in a five-seed sweep and sampled the reference optimum
-three times in a larger 20-seed sweep. Seed 74018 was selected for the final
-high-read follow-up because the preceding 262144-read selected-seed run had the
-largest top-50, top-10, and reference-hit counts among the selected seeds. The
-historical final 524288-read follow-up for seed 74018 produced 20
-reference-optimum reads, 152 top-10 reads, and 391 top-50 reads.
-
-The classical baselines prevent overclaiming. Uniform random repaired-flow
-sampling did not find the reference optimum in either 262144 or 524288 samples,
-but this is consistent with chance: with one optimum among $2^{19}$ flows, the
-expected count in 262144 uniform samples is 0.5. Hill climbing with random
-restarts was much stronger: with 262144 repaired-objective evaluations, it
-found the reference optimum 19 times and reached 883 top-50 evaluations. The
-comparison is distributional: at matched nominal counts, QAOA places more mass
-on repaired low-rank flows than these simple baselines, but the counts do not
-normalize preprocessing, angle search, simulation, or solver overhead.
+VQE benefits from the same reduction but produces a flatter distribution.
+Full-QUBO VQE found no optimum in a five-seed sweep; a selected-seed reduced-surrogate VQE found the optimum 20 times in 524288 reads.
+Hill climbing found the optimum 19 times in 262144 evaluations; despite a lower hit rate than QAOA, its much smaller per-sample cost gives a better TTS99-opt (0.23 s vs.\ 0.37 s for QAOA).
+Random sampling never found the optimum.
+Thus, QAOA gives the highest stochastic feasible-design rate but does not beat classical baselines on time-to-solution.
+% ; Gurobi remains the dominant exact reference.
 
 \begin{table*}[t]
 \centering
 \footnotesize
-\caption{Primary outcomes in the manuscript body. All stochastic rows are
-scored after exact auxiliary repair. The top-10-targeted QAOA row is an
-oracle-aided diagnostic, not the primary scalable parameter-setting claim.}
+\caption{Primary outcomes, all scored after exact auxiliary repair.
+Opt rate: empirical probability of sampling the certified optimal flowsheet; feas rate: any feasible-design match among the 36 feasible flows.
+Wilson 95\% CIs are shown as [lo,\,hi] in the same units as the point estimate; zero-hit rows report only the one-sided upper bound.
+Total time: aggregate wall time for all samples (Aer simulation only for local quantum methods, excludes offline preprocessing; total elapsed including cloud job queue for IBM hardware).
+TTS99-opt and TTS99-feas are empirical 99\% time-to-solution (see Methods); $\infty$ if no hits observed.
+The Gurobi row is a single deterministic solve; its TTS99 cells report the solve time as a reference point, not a sampling distribution.}
 \label{tab:ds-mfg-primary-outcomes}
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{L{0.22\linewidth}L{0.15\linewidth}L{0.15\linewidth}L{0.18\linewidth}L{0.22\linewidth}}
+\begin{tabular}{L{0.19\linewidth}L{0.07\linewidth}L{0.19\linewidth}L{0.18\linewidth}L{0.09\linewidth}L{0.09\linewidth}}
 \hline
-Workflow & Budget & Reference-hit rate & Top-10 / top-50 reads & Interpretation \\
+Workflow & Total time (s) & Opt rate [95\% CI] & Feas rate [95\% CI] & TTS99-opt (s) & TTS99-feas (s) \\
 \hline
-Gurobi solution pool & Deterministic IP solve; local rerun & Defines reference
-& -- & Objective 11.7095 and flow \texttt{1001110100111100011}; local Gurobi
-13.0.2 rerun returned \texttt{OPTIMAL} with \texttt{MIPGap=0.0}. \\
+Gurobi solution pool & 0.073 & Deterministic optimum & 36/36 (exhaustive) & 0.073 & 0.073 \\
 \hline
-Uniform random repaired-flow sampling & 262144 samples & 0 & 5 / 24 &
-Lower concentration baseline; best sampled rank 2 with objective 11.8105. \\
+Uniform random sampling & 2.08 & $<\!1.5{\times}10^{-5}$ & $8.0\,[5.2,\,12.2]{\times}10^{-5}$ & $\infty$ & 0.46 \\
 \hline
-Hill-climb random restarts & 262144 evaluations &
-$7.25{\times}10^{-5}$ & 177 / 883 & Strong simple classical baseline once
-exact repair is available. \\
+Hill-climb restarts & 0.93 & $7.2\,[4.6,\,11.3]{\times}10^{-5}$ & $2.75\,[2.56,\,2.96]{\times}10^{-3}$ & 0.23 & 0.006 \\
 \hline
-Energy-targeted transferred QAOA & 262144 Aer reads &
-$2.53{\times}10^{-3}$ & 8964 / 39661 & Primary non-oracle QAOA result; 664
-reference reads. \\
+Energy-targeted QAOA, $p{=}5$ & 53.9 & $2.53\,[2.35,\,2.73]{\times}10^{-3}$ & $0.124\,[0.123,\,0.125]$ & 0.37 & 0.007 \\
 \hline
-Top-10-targeted transferred QAOA & 262144 Aer reads &
-$3.84{\times}10^{-3}$ & 14326 / 62597 & Oracle-aided diagnostic using the
-enumerated repaired ranking; 1007 reference reads. \\
+Reduced-surrogate VQE, seed 74018 & 30.1 & $3.8\,[2.5,\,5.9]{\times}10^{-5}$ & $7.4\,[6.7,\,8.2]{\times}10^{-4}$ & 6.93 & 0.36 \\
 \hline
-Historical reduced-surrogate VQE, seed 74018 & 524288 Aer reads &
-$3.81{\times}10^{-5}$ & 152 / 391 & Reached the optimum, but with lower
-concentration than transferred QAOA; not replaced by the current metadata
-rerun. \\
+IBM \texttt{ibm\_fez} pilot & 73.5 & $<\!1.1{\times}10^{-4}$ & $1.1\,[0.42,\,2.8]{\times}10^{-4}$ & $\infty$ & 84.6 \\
 \hline
-IBM \texttt{ibm\_fez} QAOA pilot & 36864 hardware reads & 0 & 1 / 6 &
-Executed the fixed-circuit handoff; best sampled flow was rank 2 with objective
-11.8105. \\
-\hline
+\multicolumn{6}{@{}p{0.99\linewidth}@{}}{\footnotesize\itshape Key counts: QAOA $p{=}5$: 664 opt.\ hits and 32502 feas.\ hits in 262144 reads. IBM \texttt{ibm\_fez}: 0 opt.\ hits and 4 feas.\ hits in 36864 reads.} \\
 \end{tabular}
 \end{table*}
 
-\subsection{Hardware Execution Is a Feasibility Handoff}
+\subsection{Hardware Execution Is an Implementation Feasibility Check}
 \label{subsec:ds-mfg-hardware-main}
 
-The fixed-parameter top-10-targeted QAOA circuit was submitted to
-\texttt{ibm\_fez} using three repeats and transpile seeds 92001--92003, with
-4096 shots per repeat/seed pair. All 9 submitted jobs completed, for 36864
-total hardware reads. The hardware pilot observed 6 top-50 reads, 1 top-10
-read, 4 stored Gurobi-pool reads, and 0 reference-optimum reads. The best hardware
-sample was the rank-2 repaired flow with objective 11.8105. With zero
-reference hits, the Wilson 95\% upper bound on the hardware reference-hit rate is about
-$1.04\times 10^{-4}$.
-
-Because calibration, mitigation, and full submitted-job transpilation metadata
-were not retained, the hardware result is used only to validate the
-submission-and-scoring path, not to diagnose a specific noise mechanism. It
-shows a lower observed hit rate than the ideal simulator in this run, but the
-retained metadata are insufficient to attribute the difference to a specific
-noise source. The fake-backend circuits had depths 1442--1557 and 1136--1156
-\texttt{cz} gates, but the fake backend is not a calibrated predictor for the
-executed hardware jobs. These observations make the hardware pilot useful as a
-handoff exercise, not as evidence of hardware superiority.
+As an implementation feasibility check—not a performance benchmark—the highest-concentration fixed-angle QAOA circuit ran on the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001--92003), with 4096 measurement shots per repeat, for 36864 total hardware reads (9 jobs, 73.5 s elapsed including cloud queue).
+The run produced 4 feasible-design reads and no reference-optimum read; the best hardware sample was the second-cheapest feasible flowsheet (objective 11.8105).
+The resulting TTS99-feas is 84.6 s, roughly 14000$\times$ slower than the hill climber's 0.006 s and 1200$\times$ slower than Gurobi's 0.073 s, primarily because elapsed time is dominated by cloud-job overhead rather than circuit-execution time.
+With zero optimum hits, the Wilson 95\% upper bound on the hardware optimum-hit rate is about $1.04\times 10^{-4}$.
+% Because calibration and full transpilation metadata were not retained, this run confirms only that the submission-and-scoring path executes end to end on hardware.
 
 \section{Discussion and Limitations}
 \label{sec:ds-mfg-discussion}
 
-This study answers a narrower but more useful question than whether quantum
-optimization ``solves'' the DS-MFG instance. The instance already has a
-retained Gurobi reference solution, a matching local Gurobi rerun, and an exact
-repaired-QUBO minimizer over the projected flow space. The relevant contribution
-is identifying what has to happen for a QAOA or VQE distribution to produce
-meaningful process-design samples. The answer is not a drop-in solver
-replacement: it requires formulation audit, separation of original and
-auxiliary variables, exact repair, reduced-surrogate construction, tuned
-parameter search, backend-specific execution choices, and postprocessing
-against the original Gurobi flow space.
-The positive result is concentration of a repaired-flow sampling distribution
-after substantial preprocessing, not an end-to-end optimization advantage.
+This study answers a narrower question: not whether quantum optimization solves the DS-MFG instance (Gurobi does in under a second), but what must happen for a QAOA or VQE distribution to yield meaningful process-design samples.
+That engineering path requires variable separation, exact auxiliary repair, a surrogate for the QUBO interface, offline angle search, and scoring in the original flow space.
+The repaired distribution does concentrate on good flowsheets; it does not translate into a runtime advantage over classical methods for this instance.
 
-Because the repaired 19-flow landscape is enumerable in this case, the study
-should be read as a validation and workflow-audit testbed rather than a
-scalable optimization demonstration. The top-10-targeted QAOA diagnostic uses
-knowledge of the repaired low-energy set, reported time-to-target values
-exclude preprocessing and tuning overheads, and stored Gurobi-pool membership
-is not a complete feasibility certificate unless the pool is exhaustive. The
-VQE workflow should also persist optimized ansatz parameters so that any future
-hardware experiment can separate classical optimization from fixed-parameter
-hardware sampling. The artifact package supports inspection and rescoring of
-retained samples and summaries; fully rerunning every stochastic campaign would
-require optimizer-state, simulator-log, and submitted-job hardware metadata
-that are incomplete for some historical runs.
+The main limitations follow directly.
+Exact auxiliary repair is tractable here only because the conditioned auxiliary graph decomposes into 13 independent components (Supplement, Sect.~3); in general, it is NP-hard, and an approximate repair would change the meaning of every reported metric.
+A scalable version of this workflow would require replacing exhaustive surrogate construction and exact repair with approximations whose effect on feasibility and optimality would need to be quantified.
+Read counts exclude the offline preprocessing that dominates the real cost, and meaningful comparison with classical optimization requires accounting for that total cost
+\cite{Abbas2024,Bernal2024-benchmarking}.
 
+\FloatBarrier
 \section{Conclusion}
 \label{sec:ds-mfg-conclusion}
 
-For this DS-MFG case study, QAOA and VQE become interpretable only after the
-QUBO auxiliary variables are separated from the original process-design
-variables and repaired exactly. With that bridge in place, energy-targeted
-transferred-angle QAOA sampled the reference optimum 664 times in 262144
-local Aer reads, and an oracle-aided top-10 diagnostic sampled it 1007 times.
-The historical selected-seed reduced-surrogate VQE follow-up sampled the same
-reference optimum 20 times in 524288 reads; a current metadata rerun is retained
-for optimized-parameter provenance rather than replacing that cached result. A
-small IBM hardware pilot executed the QAOA handoff and found a near-optimal
-stored-pool flow, but no reference-optimum read.
+For this drug-substance manufacturing case study, QAOA and VQE samples become interpretable as process-design decisions only after projection to the flow variables and exact auxiliary repair.
+Transferred-angle QAOA concentrates probability on good flowsheets but does not beat classical baselines on any time-to-solution metric (Table~\ref{tab:ds-mfg-primary-outcomes}).
+The central lesson is that quantum-sample quality must be evaluated after mapping back to the original process decisions; raw QUBO samples can overstate both feasibility and optimization performance, and honest benchmarks must account for the full preprocessing cost.
 
-The main lesson is that quantum optimization samples become process-design
-candidates only after projection, auxiliary repair, and scoring in the
-original decision space. The evidence supports feasibility and interpretation,
-not replacement of Gurobi or a claim of quantum speedup.
+\section{ACKNOWLEDGMENTS}
+This material is based upon work supported by the Center for Quantum Technologies under the Industry-University Cooperative Research Center Program at the US National Science Foundation under Grant No. 2224960.
+Scripts, data files, and circuit records are archived at \url{https://github.com/SECQUOIA/pse-quantum-discrete-optimization}.
+% under \codeid{case-studies/ds-mfg-qubo-qiskitopt/}.
 
-\section*{Artifact Availability}
-\label{sec:ds-mfg-artifact-availability}
+\section{DECLARATION OF USE OF AI}
+The authors used generative AI tools to assist with initial code drafting, data-analysis scripting, and draft visualization design. All code, analyses, visualizations, and manuscript text were reviewed, corrected, and revised by the authors, who take full responsibility for the accuracy and integrity of all results.
 
-Detailed audit tables, campaign summaries, repair components, exact
-reduced-objective data, QAOA and VQE distributions, classical baselines,
-time-to-target reports, hardware manifests, and current VQE metadata are
-retained in the artifact bundle and in \artifact{MANUSCRIPT_FINDINGS.tex};
-selected ansatz vectors are in
-\artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_selected\_metadata/}. The
-repository is
-\url{https://github.com/SECQUOIA/pse-quantum-discrete-optimization}. A final
-archival DOI will be added before camera-ready submission; the review artifact
-is identified by the repository snapshot that contains this manuscript and by
-the checksums in the supplement. Checksums and validation anchors are listed in
-\artifact{case-studies/ds-mfg-qubo-qiskitopt/supplement_standalone.tex}. The bundle
-supports rescoring retained samples, summaries, repair tables, and validation
-outputs; byte-for-byte replay is not claimed because some optimizer states,
-MPS logs, and submitted-job metadata are incomplete.
+\section{author identifiers}
+Author ORCIDs:
+
+Park: 0009-0008-6629-3308
+
+Bernal Neira: 0000-0002-8308-5016
+
 
 \pseprintreferences
+\pseprintcopyright
 
 \end{document}
