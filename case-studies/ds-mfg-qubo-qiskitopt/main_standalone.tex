@@ -2,6 +2,7 @@
 
 \usepackage{psepress}
 \usepackage{enumitem}
+\usepackage{placeins}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
 
@@ -23,7 +24,7 @@
 \addbibresource{bibliography.bib}
 
 % Standalone PSE Press-style wrapper for the DS-MFG manuscript.
-\renewcommand{\PaperTitle}{Challenges of Gate-Based Quantum Optimization for a Discrete Process-Design Problem}
+\renewcommand{\PaperTitle}{Gate-Based Quantum Optimization for Discrete Process Design: A Repair-Aware Benchmark}
 \renewcommand{\PaperAuthors}{%
 Yirang~Park\textsuperscript{a}
 and David~E. Bernal~Neira\textsuperscript{a}}
@@ -79,13 +80,13 @@ Casting a constrained problem as a QUBO introduces auxiliary variables \cite{toq
 The question is: what does it take to turn gate-based quantum samples into process-design decisions, and how does this compare with classical methods?
 
 We answer this through an end-to-end audit on a single drug-substance manufacturing (DS-MFG) instance, chosen to be small enough to enumerate exactly yet large enough to expose the reformulation and interpretation issues that arise at scale.
-Our contribution is not a new QAOA or VQE variant.
+Our contribution is a repair-aware audit of the full path from a constrained process-design model to usable gate-based quantum samples.
 We find:
 (i) raw QUBO samples require projection and exact auxiliary repair before they are interpretable as design candidates; 
 (ii) a quadratic surrogate over the design variables fits the repaired landscape globally but fails as an optimizer;
 (iii) transferred-angle QAOA concentrates probability on good flowsheets but does not beat classical baselines; and
 (iv) a hardware run confirms pipeline feasibility without adding advantage.
-Because the 19-variable surrogate and transferred angles are built using exhaustive repaired enumeration—feasible only for this small instance—this workflow is a diagnostic benchmark of sample interpretation, not a scalable optimization shortcut.
+Because the 19-variable surrogate and transferred angles are built using exhaustive repair enumeration, feasible only for this small instance, this workflow serves as a diagnostic benchmark for sample interpretation, not a scalable optimization shortcut.
 
 For the process systems engineering community, this study is a concrete, reproducible measurement of the engineering burden between a discrete-design model and a usable quantum sample; the conclusions demonstrate feasibility and interpretation, not a runtime advantage over classical computation.
 
@@ -181,7 +182,7 @@ The surrogate is not used to certify solution quality; it serves only as a compa
 We evaluate several workflows over this pipeline.
 The local QAOA and VQE workflows run through \texttt{QiskitOpt.jl}, a Julia wrapper for Qiskit \cite{JavadiAbhari2024}, with QUBO models constructed via the \texttt{QUBO.jl} ecosystem \cite{toqubo:2023}.
 Increasing $p$ makes QAOA more expressive and can be viewed as a finer discretization of an adiabatic path \cite{Farhi2000}, but deeper circuits are more sensitive to noise on current NISQ devices \cite{Preskill2018}.
-Both algorithms have a number of other parameters, also called angles, that are found variationally by an external classical optimizer \cite{Cerezo2021}, in our case COBYLA.
+Both workflows contain variational circuit parameters optimized here with COBYLA \cite{Cerezo2021}.
 Direct full-QUBO QAOA and VQE operate on the 36-variable formulation; reduced-surrogate QAOA and VQE operate on the 19-variable surrogate and are scored by exact repair.
 The best-performing quantum workflow adds an offline parameter-search step: QAOA parameters are optimized on the surrogate with JuliQAOA \cite{Golden2023JuliQAOA} by minimizing the expected surrogate energy $\mathbb{E}_{y \sim p_\theta}[\widehat{F}(y)]$, then transferred to a Qiskit circuit for sampling (\emph{energy-targeted}: angles are optimized offline against the surrogate expected energy; this offline cost is excluded from the sampling times in Table~\ref{tab:ds-mfg-primary-outcomes}).
 The fixed, pre-optimized parameters with the highest local solution concentration are also submitted to the hardware for a feasibility test.
@@ -189,7 +190,8 @@ Reduced-surrogate VQE uses an \texttt{EfficientSU2} ansatz optimized with COBYLA
 
 As classical baselines, we sample the repaired 19-flow objective by uniform random sampling and by single-bit-flip hill climbing with random restarts.
 As a hardware feasibility test, we run the highest-concentration fixed-parameter QAOA circuit on the IBM \texttt{ibm\_fez} quantum computer.
-An independent state-vector calculation predicts the central QAOA reference-optimum probability at $2.63\times 10^{-3}$, consistent with the $2.53\times 10^{-3}$ sampled rate. Software versions, random seeds, simulator settings, circuit depths, and job identifiers are recorded in the artifact bundle.
+An independent state-vector calculation predicts the central QAOA optimum probability at $2.63\times 10^{-3}$, consistent with the $2.53\times 10^{-3}$ sampled rate.
+% Software versions, random seeds, simulator settings, circuit depths, and job identifiers are recorded in the artifact bundle.
 
 For each sampled state $x=(y,z)$ we record the raw QUBO energy $E_{\mathrm{QUBO}}(y,z)$, the repaired objective $F(y)$, and the auxiliary gap.
 A \emph{reference-optimum hit} means the repaired flow equals the certified optimal flowsheet (the unique minimum-cost feasible design).
@@ -289,7 +291,7 @@ The empirical 99\% time-to-solution $\mathrm{TTS}_{99}=\tau\lceil\log(0.01)/\log
 \node[box, below=of sample]  (project) {project to 19 flow bits $y$};
 \node[box, below=of project] (repair)  {exact auxiliary repair\\$z^\star(y)=\arg\min_z E(y,z)$};
 \node[box, below=of repair]  (score)   {score: $F(y)=E(y,z^\star(y))$};
-\node[box, below=of score]   (compare) {compare: optimality \& feasibility};
+\node[box, below=of score]   (compare) {compare: opt.\ \& feasibility\\[-1pt]{\tiny (all table metrics use $F(y)$)}};
 \draw[arr] (sample)  -- (project);
 \draw[arr] (project) -- (repair);
 \draw[arr] (repair)  -- (score);
@@ -336,7 +338,8 @@ VQE benefits from the same reduction but produces a flatter distribution.
 Full-QUBO VQE found no optimum in a five-seed sweep; a selected-seed reduced-surrogate VQE found the optimum 20 times in 524288 reads.
 Hill climbing found the optimum 19 times in 262144 evaluations; despite a lower hit rate than QAOA, its much smaller per-sample cost gives a better TTS99-opt (0.23 s vs.\ 0.37 s for QAOA).
 Random sampling never found the optimum.
-Thus, QAOA gives the highest stochastic feasible-design rate but does not beat classical baselines on time-to-solution; Gurobi remains the dominant exact reference.
+Thus, QAOA gives the highest stochastic feasible-design rate but does not beat classical baselines on time-to-solution.
+% ; Gurobi remains the dominant exact reference.
 
 \begin{table*}[t]
 \centering
@@ -353,7 +356,7 @@ The Gurobi row is a single deterministic solve; its TTS99 cells report the solve
 \hline
 Workflow & Total time (s) & Opt rate [95\% CI] & Feas rate [95\% CI] & TTS99-opt (s) & TTS99-feas (s) \\
 \hline
-Gurobi solution pool & 0.073 & Deterministic & 36/36 (exhaustive) & 0.073 & 0.073 \\
+Gurobi solution pool & 0.073 & Deterministic optimum & 36/36 (exhaustive) & 0.073 & 0.073 \\
 \hline
 Uniform random sampling & 2.08 & $<\!1.5{\times}10^{-5}$ & $8.0\,[5.2,\,12.2]{\times}10^{-5}$ & $\infty$ & 0.46 \\
 \hline
@@ -365,6 +368,7 @@ Reduced-surrogate VQE, seed 74018 & 30.1 & $3.8\,[2.5,\,5.9]{\times}10^{-5}$ & $
 \hline
 IBM \texttt{ibm\_fez} pilot & 73.5 & $<\!1.1{\times}10^{-4}$ & $1.1\,[0.42,\,2.8]{\times}10^{-4}$ & $\infty$ & 84.6 \\
 \hline
+\multicolumn{6}{@{}p{0.99\linewidth}@{}}{\footnotesize\itshape Key counts: QAOA $p{=}5$: 664 opt.\ hits and 32502 feas.\ hits in 262144 reads. IBM \texttt{ibm\_fez}: 0 opt.\ hits and 4 feas.\ hits in 36864 reads.} \\
 \end{tabular}
 \end{table*}
 
@@ -373,9 +377,9 @@ IBM \texttt{ibm\_fez} pilot & 73.5 & $<\!1.1{\times}10^{-4}$ & $1.1\,[0.42,\,2.8
 
 As an implementation feasibility check—not a performance benchmark—the highest-concentration fixed-angle QAOA circuit ran on the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001--92003), with 4096 measurement shots per repeat, for 36864 total hardware reads (9 jobs, 73.5 s elapsed including cloud queue).
 The run produced 4 feasible-design reads and no reference-optimum read; the best hardware sample was the second-cheapest feasible flowsheet (objective 11.8105).
-The resulting TTS99-feas is 84.6 s, roughly 14000$\times$ slower than the hill climber's 0.006 s and 1200$\times$ slower than Gurobi's 0.073 s, primarily because most elapsed time is cloud overhead rather than circuit execution ($\approx$2 ms per shot).
+The resulting TTS99-feas is 84.6 s, roughly 14000$\times$ slower than the hill climber's 0.006 s and 1200$\times$ slower than Gurobi's 0.073 s, primarily because elapsed time is dominated by cloud-job overhead rather than circuit-execution time.
 With zero optimum hits, the Wilson 95\% upper bound on the hardware optimum-hit rate is about $1.04\times 10^{-4}$.
-Because calibration and full transpilation metadata were not retained, this run confirms only that the submission-and-scoring path executes end to end on hardware.
+% Because calibration and full transpilation metadata were not retained, this run confirms only that the submission-and-scoring path executes end to end on hardware.
 
 \section{Discussion and Limitations}
 \label{sec:ds-mfg-discussion}
@@ -390,6 +394,7 @@ A scalable version of this workflow would require replacing exhaustive surrogate
 Read counts exclude the offline preprocessing that dominates the real cost, and meaningful comparison with classical optimization requires accounting for that total cost
 \cite{Abbas2024,Bernal2024-benchmarking}.
 
+\FloatBarrier
 \section{Conclusion}
 \label{sec:ds-mfg-conclusion}
 
@@ -399,7 +404,8 @@ The central lesson is that quantum-sample quality must be evaluated after mappin
 
 \section{ACKNOWLEDGMENTS}
 This material is based upon work supported by the Center for Quantum Technologies under the Industry-University Cooperative Research Center Program at the US National Science Foundation under Grant No. 2224960.
-Scripts, data files, and circuit records are archived at \url{https://github.com/SECQUOIA/pse-quantum-discrete-optimization} under \codeid{case-studies/ds-mfg-qubo-qiskitopt/}.
+Scripts, data files, and circuit records are archived at \url{https://github.com/SECQUOIA/pse-quantum-discrete-optimization}.
+% under \codeid{case-studies/ds-mfg-qubo-qiskitopt/}.
 
 \section{DECLARATION OF USE OF AI}
 The authors used generative AI tools to assist with initial code drafting, data-analysis scripting, and draft visualization design. All code, analyses, visualizations, and manuscript text were reviewed, corrected, and revised by the authors, who take full responsibility for the accuracy and integrity of all results.
