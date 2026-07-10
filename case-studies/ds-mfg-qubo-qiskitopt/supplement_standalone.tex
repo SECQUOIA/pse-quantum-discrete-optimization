@@ -25,13 +25,11 @@ and David E. ~Bernal Neira\textsuperscript{a}}
 \textsuperscript{a} Davidson School of Chemical Engineering, Purdue University, West Lafayette, IN 47907, USA\\
 }
 \renewcommand{\PaperAbstract}{%
-This supplement provides four sections of supporting material for the
-main manuscript. Section~1 describes the computational environment and
-data availability. Section~2 reports numerical validation checks supporting
-the manuscript claims, including the surrogate rank audit. Section~3 derives
-the exact auxiliary-repair decomposition that reduces per-sample repair to
-34 comparisons. Section~4 documents algorithm parameters and hardware
-execution metadata for the variational and IBM~Quantum pilot experiments.
+This supplement provides four sections of supporting material for the main manuscript.
+Section~1 describes the computational environment and data availability.
+Section~2 reports numerical validation checks supporting the manuscript claims, including the surrogate rank audit.
+Section~3 derives the exact auxiliary-repair decomposition that reduces per-sample repair to 34 comparisons.
+Section~4 documents algorithm parameters and hardware execution metadata for the variational and IBM~Quantum pilot experiments.
 }
 \renewcommand{\PaperKeywords}{%
 supplementary material, quantum optimization, process design, reproducibility}
@@ -49,24 +47,16 @@ supplementary material, quantum optimization, process design, reproducibility}
 \section{Computational Environment and Data Availability}
 \label{sec:supp-repository}
 
-All scripts, data files, and circuit records for this case study are archived at
-\url{https://github.com/SECQUOIA/pse-quantum-discrete-optimization} under
-\codeid{case-studies/ds-mfg-qubo-qiskitopt/}.
-The repository environment can be verified with
-\texttt{julia --project=. scripts/smoke\_test.jl}, which imports all packages,
-checks required artifacts, and validates cached summary values against recorded
-checksums.
-Table~\ref{tab:supp-software-env} lists the pinned software versions used
-to produce the results in the main manuscript.
+All scripts, data files, and circuit records for this case study are archived at \url{https://github.com/SECQUOIA/pse-quantum-discrete-optimization} under \codeid{case-studies/ds-mfg-qubo-qiskitopt/}.
+The repository environment can be verified with \texttt{julia --project=. scripts/smoke\_test.jl}, which imports all packages, checks required artifacts, and validates cached summary values against recorded checksums.
+Table~\ref{tab:supp-software-env} lists the pinned software versions used to produce the results in the main manuscript.
 
 \begin{table*}[t]
 \centering
 \footnotesize
-\caption{Pinned software environment for the DS-MFG case study. Version
-         specifications are recorded in
-         \artifact{case-studies/ds-mfg-qubo-qiskitopt/Project.toml},
-         \artifact{Manifest.toml}, and
-         \artifact{CondaPkg.toml}.}
+\caption{Pinned software environment for the DS-MFG case study.
+         Version specifications are recorded in \artifact{case-studies/ds-mfg-qubo-qiskitopt/Project.toml},
+         \artifact{Manifest.toml}, and \artifact{CondaPkg.toml}.}
 \label{tab:supp-software-env}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{L{0.22\linewidth}L{0.45\linewidth}L{0.25\linewidth}}
@@ -179,14 +169,10 @@ $[2.35,2.73]\times10^{-3}$. &
 \addplot[black, dashed, domain=1:50, samples=2] {x};
 \end{axis}
 \end{tikzpicture}
-\caption{Surrogate rank audit for the 50 lowest-cost repaired flows. Exact
-enumeration confirms there are exactly 36 feasible flows (ranks 1--36); the
-remaining 14 shown here are infeasible flows whose penalty values are
-insufficient to place them above all feasible ones. The surrogate has high
-global $R^2$ but imperfect low-energy ordering: the exact optimum is only
-rank 33 under the surrogate, while the surrogate minimum repairs to the
-sixth-best exact flow. Quantum-sampling outcomes are therefore scored using the
-exact repaired objective $F$, not the surrogate $\widehat F$.}
+\caption{Surrogate rank audit for the 50 lowest-cost repaired flows.
+Exact enumeration confirms there are exactly 36 feasible flows (ranks 1--36); the remaining 14 shown here are infeasible flows whose penalty values are insufficient to place them above all feasible ones.
+The surrogate has high global $R^2$ but imperfect low-energy ordering: the exact optimum is only rank 33 under the surrogate, while the surrogate minimum repairs to the sixth-best exact flow.
+Quantum-sampling outcomes are therefore scored using the exact repaired objective $F$, not the surrogate $\widehat F$.}
 \label{fig:supp-surrogate-rank}
 \end{figure*}
 
@@ -226,13 +212,10 @@ The four pair components together represent the complete linearization of this o
 \begin{table*}[t]
 \centering
 \footnotesize
-\caption{Independent auxiliary components for the DS-MFG QUBO repair
-         (source: \artifact{ds\_mfg\_reduced\_flow\_objective/auxiliary\_components.csv}).
-         Variable indices 1--19 are the 19 flow variables~$y$; indices 20--36 are the 17
-         binary auxiliary (slack) variables~$z$.
+\caption{Independent auxiliary components for the DS-MFG QUBO repair (source: \artifact{ds\_mfg\_reduced\_flow\_objective/auxiliary\_components.csv}).
+         Variable indices 1--19 are the 19 flow variables~$y$; indices 20--36 are the 17 binary auxiliary (slack) variables~$z$.
          \emph{Flow neighbors} are the $y$-indices that appear in the local energy $E^{(c)}$.
-         No coupling term links auxiliaries across components, so each
-         sub-problem is solved independently by enumeration.}
+         No coupling term links auxiliaries across components, so each sub-problem is solved independently by enumeration.}
 \label{tab:supp-aux-components}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{L{0.04\linewidth}L{0.08\linewidth}L{0.05\linewidth}L{0.47\linewidth}L{0.05\linewidth}L{0.18\linewidth}}
