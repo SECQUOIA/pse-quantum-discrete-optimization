@@ -31,15 +31,13 @@ and David~E. Bernal~Neira\textsuperscript{a}}
 \textsuperscript{a} Davidson School of Chemical Engineering, Purdue University, West Lafayette, IN 47907, USA\\
 }
 \renewcommand{\PaperAbstract}{%
-Discrete decisions, such as selecting routes, units, and operating modes, are an early and combinatorially hard step in process design.
-Gate-based quantum optimization algorithms, namely the quantum approximate optimization algorithm
-(QAOA) and the variational quantum eigensolver (VQE) are increasingly proposed for such problems, raising a practical question for the process systems engineering community.
-Once a discrete-design model is mapped to the quadratic unconstrained binary optimization (QUBO) form required by these methods, do the resulting samples actually correspond to process-design decisions, and how do they compare with classical methods?
-We study this question on a small but fully enumerable instance of drug-substance manufacturing with 19 binary flow decisions.
-The penalty reformulation needed to obtain a QUBO adds 17 auxiliary variables, so a sampled 36-bit state is not itself a design decision: it becomes one only after projection onto the 19 flow variables and exact repair of the auxiliaries.
-After this preprocessing, energy-targeted transferred-angle QAOA concentrates probability on the optimal flowsheet (664 of 262144 ideal reads), but does not outperform a simple classical hill climber, an exact solver, or exhaustive enumeration.
-A small IBM hardware run completes the same pipeline without adding an advantage.
-We report these results as a workflow-feasibility and interpretation study, not as a claim of quantum speedup.
+Discrete decisions—routes, units, and operating modes—form the first combinatorial barrier in process design.
+We audit what is required to turn gate-based quantum samples into interpretable design candidates on a fully enumerable drug-substance manufacturing instance with 19 binary flow variables.
+The penalty QUBO reformulation adds 17 auxiliary variables; a sampled 36-bit state becomes a design candidate only after projection onto the flow variables and exact auxiliary repair.
+Because the 19-variable surrogate and transferred QAOA angles are built using exhaustive repaired enumeration—feasible only for this small instance—this workflow is a diagnostic benchmark of sample interpretation, not a scalable optimization shortcut.
+After repair-aware preprocessing, energy-targeted transferred-angle QAOA concentrates probability on the optimal flowsheet (664 of 262144 ideal reads) but does not outperform a simple hill climber, an exact solver, or exhaustive enumeration.
+A small IBM hardware run verifies the pipeline without adding advantage.
+These results are a workflow-feasibility and interpretation study, not a claim of quantum speedup.
 }
 \renewcommand{\PaperKeywords}{%
 quantum computing, process design, discrete optimization, QUBO reformulation, pharmaceutical manufacturing}
@@ -71,7 +69,7 @@ generate large discrete search spaces.
 
 Gate-based quantum optimization is one of the emerging tools proposed for this setting.
 A gate-based quantum computer operates on quantum bits (qubits) by applying sequences of parameterized gate operations that form a quantum circuit; measuring the circuit returns a binary string, and the circuit parameters, called angles, are tuned so that low-energy strings appear with high probability.
-The quantum approximate optimization algorithm (QAOA) \cite{Farhi2014} and the variational quantum eigensolver (VQE) \cite{Peruzzo2014, Cerezo2021} follow this variational paradigm: QAOA uses $p$ alternating cost and mixer layers, and VQE uses a parameterized circuit with structure similar to the quantum device, also known as a hardware-efficient ansatz; in both cases, a classical optimizer adjusts the angles.
+The quantum approximate optimization algorithm (QAOA) \cite{Farhi2014} and the variational quantum eigensolver (VQE) \cite{Peruzzo2014, Cerezo2021} follow this variational paradigm: QAOA uses $p$ alternating cost and mixer layers, and VQE uses a parameterized ansatz circuit (here, a hardware-efficient ansatz); in both cases, a classical optimizer adjusts the angles.
 Current hardware is noisy and of intermediate scale \cite{Preskill2018}, and benchmarking surveys stress that a practical quantum advantage for optimization has not yet been established \cite{Abbas2024}; the relevant question is what is required to use these methods today and how their output compares with classical baselines.
 
 Within process systems engineering, quantum computing has been reviewed as an emerging capability \cite{BernalAIChE2022}, and hybrid quantum-classical strategies have been proposed for discrete optimization in process and energy systems \cite{AjagekarYou2019}.
@@ -87,13 +85,9 @@ We find:
 (ii) a quadratic surrogate over the design variables fits the repaired landscape globally but fails as an optimizer;
 (iii) transferred-angle QAOA concentrates probability on good flowsheets but does not beat classical baselines; and
 (iv) a hardware run confirms pipeline feasibility without adding advantage.
+Because the 19-variable surrogate and transferred angles are built using exhaustive repaired enumeration—feasible only for this small instance—this workflow is a diagnostic benchmark of sample interpretation, not a scalable optimization shortcut.
 
-For the process systems engineering community, the value of this study is a
-concrete, reproducible measurement of the engineering burden that sits between a
-discrete-design model and a usable quantum sample, on a problem from a relevant
-application domain. The conclusion is deliberately conservative: the results
-demonstrate feasibility and interpretation, not a runtime or hardware advantage
-over classical computation.
+For the process systems engineering community, this study is a concrete, reproducible measurement of the engineering burden between a discrete-design model and a usable quantum sample; the conclusions demonstrate feasibility and interpretation, not a runtime advantage over classical computation.
 
 \section{Methods}
 \label{sec:ds-mfg-methods}
@@ -103,7 +97,7 @@ over classical computation.
 
 The DS-MFG instance is the discrete subproblem of a drug-substance manufacturing case study introduced by Park and Bernal Neira~\cite{park2026arxiv}, where a mixed-integer nonlinear design problem is decomposed so that the discrete part is handled by combinatorial solvers and the nonlinear part by simulators.
 We keep the same discrete instance but ask what is required to run gate-based optimizers.
-The instance is a binary integer program for capital-expenditure selection in the manufacturing superstructure: the 19 binary variables encode candidate material-flow arcs and unit-operation selections, and the objective function is a normalized capital-cost score.
+The instance is a binary integer program for capital-expenditure selection in the manufacturing superstructure: the 19 binary variables encode candidate material-flow arcs and unit-operation selections, and the objective function is a normalized capital-cost score (lower values indicate lower capital expenditure; scaled as in \cite{park2026arxiv}).
 The discrete problem has the form
 \begin{equation}
 \begin{aligned}
@@ -161,8 +155,7 @@ auxiliary-auxiliary coupling graph splits into 13 independent connected componen
 The singletons correspond to the at-most-one inequality constraints for each decision group and to the downstream flow-balance conditions; the pairs arise from product-linearization inequalities for the Route~B activation rule ($f_{06}=1$ iff Reactor~1 is continuous and Reactor~2 is batch).
 Each component is solved by exhaustive enumeration over its 2 or 4 possible assignments; the $9\!\times\!2+4\!\times\!4=34$ total comparisons replace $2^{17}=131{,}072$ brute-force evaluations.
 The full component table with auxiliary indices, flow neighbors, and constraint roles appears in the Supplement (Sect.~3).
-For a general QUBO, the auxiliary repair is itself
-NP-hard, a limitation we return to in the Discussion.
+This decomposition is instance-specific; for a general QUBO, auxiliary repair can itself be NP-hard, so the present repair step is an exact audit tool rather than a generally cheap postprocessor.
 
 The repaired minimizer over all $2^{19}$ flows recovers the optimum, and the repaired QUBO scores match the integer-program objective to within $3.1\times 10^{-13}$, confirming they encode the same objective.
 Exact enumeration finds exactly 36 feasible flows, as does the solution pool option of \texttt{Gurobi}.
@@ -180,17 +173,17 @@ Rather than using the full 36-variable QUBO (which mixes design variables with a
 \end{equation}
 by least squares over all $2^{19}$ repaired flows.
 The surrogate fits the landscape almost perfectly in aggregate ($R^2 \approx 0.999$), but this global accuracy is misleading for optimization: the surrogate's own minimizer repairs to 14.5505 rather than the true 11.7095, the true optimum ranks only 33rd under the surrogate, and among the 50 lowest-cost repaired flows the surrogate's absolute errors reach 29.4.
-We therefore use $\widehat{F}$ only to generate samples via the quantum algorithms; every reported sample-quality metric is computed with the exact repaired objective $F$, not $\widehat{F}$.
+The surrogate is not used to certify solution quality; it serves only as a compact 19-qubit sampling Hamiltonian, and every reported metric is evaluated after exact repair under $F$.
 
 \subsection{Quantum, Classical, and Hardware Workflows}
 \label{subsec:ds-mfg-workflows}
 
 We evaluate several workflows over this pipeline.
 The local QAOA and VQE workflows run through \texttt{QiskitOpt.jl}, a Julia wrapper for Qiskit \cite{JavadiAbhari2024}, with QUBO models constructed via the \texttt{QUBO.jl} ecosystem \cite{toqubo:2023}.
-In QAOA, we varied the parameter of repetition of mixer and driving Hamiltonians, $p$, which, as it tends to infinity, converges to the adiabatic quantum algorithm \cite{Farhi2000} with convergence guarantees yet yields deeper quantum circuits, more prone to error in current NISQ devices \cite{Preskill2018}.
+Increasing $p$ makes QAOA more expressive and can be viewed as a finer discretization of an adiabatic path \cite{Farhi2000}, but deeper circuits are more sensitive to noise on current NISQ devices \cite{Preskill2018}.
 Both algorithms have a number of other parameters, also called angles, that are found variationally by an external classical optimizer \cite{Cerezo2021}, in our case COBYLA.
 Direct full-QUBO QAOA and VQE operate on the 36-variable formulation; reduced-surrogate QAOA and VQE operate on the 19-variable surrogate and are scored by exact repair.
-The best-performing quantum workflow adds an offline parameter-search step: QAOA parameters are optimized on the surrogate with JuliQAOA \cite{Golden2023JuliQAOA} by minimizing the expected surrogate energy $\mathbb{E}_{y \sim p_\theta}[\widehat{F}(y)]$, then transferred to a Qiskit circuit for sampling (energy-targeted, non-oracle).
+The best-performing quantum workflow adds an offline parameter-search step: QAOA parameters are optimized on the surrogate with JuliQAOA \cite{Golden2023JuliQAOA} by minimizing the expected surrogate energy $\mathbb{E}_{y \sim p_\theta}[\widehat{F}(y)]$, then transferred to a Qiskit circuit for sampling (\emph{energy-targeted}: angles are optimized offline against the surrogate expected energy; this offline cost is excluded from the sampling times in Table~\ref{tab:ds-mfg-primary-outcomes}).
 The fixed, pre-optimized parameters with the highest local solution concentration are also submitted to the hardware for a feasibility test.
 Reduced-surrogate VQE uses an \texttt{EfficientSU2} ansatz optimized with COBYLA.
 
@@ -320,6 +313,8 @@ Cont.\,I/II/III share entry arc $f_{12}$ and exit arc $f_{17}$ (optimal uses $f_
 \section{Results}
 \label{sec:ds-mfg-results}
 
+Across all workflows, exact auxiliary repair is a prerequisite for interpretability; transferred-angle QAOA gives the highest stochastic feasible-design rate, but hill climbing and Gurobi remain faster on every wall-clock metric.
+
 \subsection{Repair Changes the Meaning of a Sample}
 \label{subsec:ds-mfg-repair-meaning}
 
@@ -332,14 +327,16 @@ Without projection and exact repair, a raw QUBO sample cannot be read as a flows
 
 Once the pipeline is in place, reduction to the surrogate and transferred-parameter search are what make QAOA samples concentrate on feasible, optimal flowsheets.
 The energy-targeted $p=5$ transferred workflow sampled the certified optimum 664 times in 262144 ideal reads and matched a feasible flowsheet 32502 times (12.4\%, CI [12.3, 12.5]\%), the highest feasible-design rate of any workflow; see Table~\ref{tab:ds-mfg-primary-outcomes} for TTS99 values.
+The surrogate's near-perfect global $R^2$ did not imply optimization fidelity: its own minimizer repaired to 14.5505, and the true optimum ranked only 33rd under the surrogate.
 
 \subsection{VQE and Classical Baselines Bound the Claim}
 \label{subsec:ds-mfg-vqe-classical-main}
 
 VQE benefits from the same reduction but produces a flatter distribution.
 Full-QUBO VQE found no optimum in a five-seed sweep; a selected-seed reduced-surrogate VQE found the optimum 20 times in 524288 reads.
-Hill climbing found the optimum 19 times in 262144 evaluations; despite a lower hit rate than QAOA, its much smaller per-sample cost gives a better TTS99-opt (0.23 s vs.\ 0.37 s).
+Hill climbing found the optimum 19 times in 262144 evaluations; despite a lower hit rate than QAOA, its much smaller per-sample cost gives a better TTS99-opt (0.23 s vs.\ 0.37 s for QAOA).
 Random sampling never found the optimum.
+Thus, QAOA gives the highest stochastic feasible-design rate but does not beat classical baselines on time-to-solution; Gurobi remains the dominant exact reference.
 
 \begin{table*}[t]
 \centering
@@ -348,7 +345,8 @@ Random sampling never found the optimum.
 Opt rate: empirical probability of sampling the certified optimal flowsheet; feas rate: any feasible-design match among the 36 feasible flows.
 Wilson 95\% CIs are shown as [lo,\,hi] in the same units as the point estimate; zero-hit rows report only the one-sided upper bound.
 Total time: aggregate wall time for all samples (Aer simulation only for local quantum methods, excludes offline preprocessing; total elapsed including cloud job queue for IBM hardware).
-TTS99-opt and TTS99-feas are empirical 99\% time-to-solution (see Methods); $\infty$ if no hits observed.}
+TTS99-opt and TTS99-feas are empirical 99\% time-to-solution (see Methods); $\infty$ if no hits observed.
+The Gurobi row is a single deterministic solve; its TTS99 cells report the solve time as a reference point, not a sampling distribution.}
 \label{tab:ds-mfg-primary-outcomes}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{L{0.19\linewidth}L{0.07\linewidth}L{0.19\linewidth}L{0.18\linewidth}L{0.09\linewidth}L{0.09\linewidth}}
@@ -373,7 +371,7 @@ IBM \texttt{ibm\_fez} pilot & 73.5 & $<\!1.1{\times}10^{-4}$ & $1.1\,[0.42,\,2.8
 \subsection{Hardware Execution Is an Implementation Feasibility Check}
 \label{subsec:ds-mfg-hardware-main}
 
-The highest-concentration fixed-angle QAOA circuit ran on the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001-92003), with 4096 measurement shots per repeat, for 36864 total hardware reads (9 jobs, 73.5 s elapsed including cloud queue).
+As an implementation feasibility check—not a performance benchmark—the highest-concentration fixed-angle QAOA circuit ran on the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001--92003), with 4096 measurement shots per repeat, for 36864 total hardware reads (9 jobs, 73.5 s elapsed including cloud queue).
 The run produced 4 feasible-design reads and no reference-optimum read; the best hardware sample was the second-cheapest feasible flowsheet (objective 11.8105).
 The resulting TTS99-feas is 84.6 s, roughly 14000$\times$ slower than the hill climber's 0.006 s and 1200$\times$ slower than Gurobi's 0.073 s, primarily because most elapsed time is cloud overhead rather than circuit execution ($\approx$2 ms per shot).
 With zero optimum hits, the Wilson 95\% upper bound on the hardware optimum-hit rate is about $1.04\times 10^{-4}$.
@@ -388,24 +386,23 @@ The repaired distribution does concentrate on good flowsheets; it does not trans
 
 The main limitations follow directly.
 Exact auxiliary repair is tractable here only because the conditioned auxiliary graph decomposes into 13 independent components (Supplement, Sect.~3); in general, it is NP-hard, and an approximate repair would change the meaning of every reported metric.
+A scalable version of this workflow would require replacing exhaustive surrogate construction and exact repair with approximations whose effect on feasibility and optimality would need to be quantified.
 Read counts exclude the offline preprocessing that dominates the real cost, and meaningful comparison with classical optimization requires accounting for that total cost
 \cite{Abbas2024,Bernal2024-benchmarking}.
 
 \section{Conclusion}
 \label{sec:ds-mfg-conclusion}
 
-For this drug-substance manufacturing case study, QAOA and VQE samples become interpretable as process-design decisions only after the QUBO auxiliary variables are separated from the flow variables and repaired exactly.
-With that bridge in place, energy-targeted transferred-angle QAOA concentrated probability on the optimal flowsheet (664 of 262144 ideal reads) and returned a feasible flowsheet 32502 times, while a selected-seed VQE follow-up reached the optimum 20 times in 524288 reads.
-A small IBM hardware run completed the same pipeline and found a feasible but non-optimal flowsheet.
-None of these outperforms a simple classical hill climber or the exact solver.
-
-The lesson for the process systems engineering community is that the engineering effort between a discrete-design model and a usable quantum sample is substantial and easy to understate, and that honest evaluations of gate-based quantum optimization for process design require scoring in the original decision space and reporting the full preprocessing cost.
+For this drug-substance manufacturing case study, QAOA and VQE samples become interpretable as process-design decisions only after projection to the flow variables and exact auxiliary repair.
+Transferred-angle QAOA concentrates probability on good flowsheets but does not beat classical baselines on any time-to-solution metric (Table~\ref{tab:ds-mfg-primary-outcomes}).
+The central lesson is that quantum-sample quality must be evaluated after mapping back to the original process decisions; raw QUBO samples can overstate both feasibility and optimization performance, and honest benchmarks must account for the full preprocessing cost.
 
 \section{ACKNOWLEDGMENTS}
 This material is based upon work supported by the Center for Quantum Technologies under the Industry-University Cooperative Research Center Program at the US National Science Foundation under Grant No. 2224960.
+Scripts, data files, and circuit records are archived at \url{https://github.com/SECQUOIA/pse-quantum-discrete-optimization} under \codeid{case-studies/ds-mfg-qubo-qiskitopt/}.
 
 \section{DECLARATION OF USE OF AI}
-The authors used generative AI tools to assist in generating initial code, data analysis workflows, and draft visualizations as described in the relevant sections of the manuscript. All AI-generated outputs were reviewed, tested, and modified by the authors. The authors take full responsibility for the accuracy, validity, and integrity of all results.
+The authors used generative AI tools to assist with initial code drafting, data-analysis scripting, and draft visualization design. All code, analyses, visualizations, and manuscript text were reviewed, corrected, and revised by the authors, who take full responsibility for the accuracy and integrity of all results.
 
 \section{author identifiers}
 Author ORCIDs:
