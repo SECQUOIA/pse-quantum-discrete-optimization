@@ -32,10 +32,10 @@ and David~E. Bernal~Neira\textsuperscript{a}}
 \textsuperscript{a} Davidson School of Chemical Engineering, Purdue University, West Lafayette, IN 47907, USA\\
 }
 \renewcommand{\PaperAbstract}{%
-Discrete decisions—routes, units, and operating modes—form the first combinatorial barrier in process design.
+Discrete choices of routes, units, and operating modes form the first combinatorial barrier in process design.
 We audit what is required to turn gate-based quantum samples into interpretable design candidates on a fully enumerable drug-substance manufacturing instance with 19 binary flow variables.
 The penalty QUBO reformulation adds 17 auxiliary variables; a sampled 36-bit state becomes a design candidate only after projection onto the flow variables and exact auxiliary repair.
-Because the 19-variable surrogate and transferred QAOA angles are built using exhaustive repaired enumeration—feasible only for this small instance—this workflow is a diagnostic benchmark of sample interpretation, not a scalable optimization shortcut.
+The 19-variable surrogate and transferred QAOA angles rely on exhaustive enumeration with repair, which is feasible only for this small instance. The workflow therefore tests how to interpret quantum samples; it does not provide a scalable optimization method.
 After repair-aware preprocessing, energy-targeted transferred-angle QAOA concentrates probability on the optimal flowsheet (664 of 262144 ideal reads) but does not outperform a simple hill climber, an exact solver, or exhaustive enumeration.
 A small IBM hardware run verifies the pipeline without adding advantage.
 These results are a workflow-feasibility and interpretation study, not a claim of quantum speedup.
@@ -313,7 +313,8 @@ A \emph{reference-optimum hit} means the repaired flow equals the certified opti
 A \emph{feasible-design hit} means the repaired flow matches any of the 36 feasible flows.
 We report both hit rates with two-sided Wilson 95\% intervals; zero-hit rows show their upper endpoint.
 The empirical $\mathrm{TTS}_{99}=\tau\lceil\log(0.01)/\log(1-\hat{p})\rceil$ uses the recorded call time per sample $\tau$; zero-hit rows report $\infty$.
-These are conditional sampling-cost normalizations, excluding preprocessing, rather than end-to-end times; correlated heuristic evaluations and heterogeneous VQE seeds also preclude an independent-trial confidence interpretation.
+These values compare sampling costs and exclude preprocessing.
+Heuristic evaluations are correlated, and VQE performance varies with the seed, so the intervals and TTS values do not guarantee success across repeated runs.
 
 \section{Results}
 \label{sec:ds-mfg-results}
@@ -339,7 +340,7 @@ The surrogate's near-perfect global $R^2$ did not imply optimization fidelity: i
 
 VQE benefits from the same reduction but produces a flatter distribution.
 Full-QUBO VQE found no optimum in a five-seed sweep.
-To avoid selecting the best initialization, Table~\ref{tab:ds-mfg-primary-outcomes} now reports the complete reduced-surrogate screen: seeds 74001--74020, 32768 reads each, with 3 optimum and 61 feasible-design hits in 655360 reads.
+Table~\ref{tab:ds-mfg-primary-outcomes} reports all 20 initial reduced-surrogate runs: seeds 74001--74020, 32768 reads each, with 3 optimum and 61 feasible-design hits in 655360 reads.
 Only seeds 74001 and 74007 found the optimum (1 and 2 hits); the other 18 found none.
 Hill climbing found the optimum 19 times in 262144 evaluations; despite a lower hit rate than QAOA, its much smaller per-sample cost gives a better TTS99-opt (0.23 s vs.\ 0.37 s for QAOA).
 Random sampling never found the optimum.
@@ -349,7 +350,7 @@ Thus, QAOA gives the highest stochastic feasible-design rate but does not beat c
 \begin{table*}[t]
 \centering
 \footnotesize
-\caption{Primary outcomes after exact auxiliary repair. Opt rate: certified-optimum hit rate; feas rate: any of the 36 feasible designs. Wilson 95\% intervals [lo,\,hi] use the same units as the rate; zero-hit rows show the upper endpoint. Recorded time is the cached solver-call or hardware-runner interval, excluding prior preprocessing and any scoring outside that interval. TTS99 values are conditional cost normalizations (Methods), not complete workflow costs or confidence guarantees across seeds. Gurobi reports a deterministic solve time.}
+\caption{Primary outcomes after exact auxiliary repair. Opt rate: certified-optimum hit rate; feas rate: any of the 36 feasible designs. Wilson 95\% intervals [lo,\,hi] use the same units as the rate; zero-hit rows show the upper endpoint. Call time covers the recorded solver call or hardware run. It excludes prior preprocessing and any scoring performed after the call. TTS99 uses these call times and does not measure the full workflow or guarantee success across seeds (Methods). Gurobi reports a deterministic solve time.}
 \label{tab:ds-mfg-primary-outcomes}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{L{0.19\linewidth}L{0.07\linewidth}L{0.19\linewidth}L{0.18\linewidth}L{0.09\linewidth}L{0.09\linewidth}}
@@ -375,60 +376,67 @@ IBM \texttt{ibm\_fez} pilot & 73.5 & $<\!1.1{\times}10^{-4}$ & $1.1\,[0.42,\,2.8
 \subsection{Hardware Execution Is an Implementation Feasibility Check}
 \label{subsec:ds-mfg-hardware-main}
 
-As an implementation feasibility check—not a performance benchmark—the highest-concentration fixed-angle QAOA circuit ran on the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001--92003), with 4096 measurement shots per repeat, for 36864 total hardware reads (9 jobs, 73.5 s elapsed including cloud queue).
+To check that the implementation runs on hardware, we submitted the highest-concentration fixed-angle QAOA circuit to the \texttt{ibm\_fez} quantum computer across three repeats and three random transpile seeds (92001--92003), with 4096 measurement shots per repeat, for 36864 total hardware reads (9 jobs, 73.5 s elapsed including cloud queue).
 The run produced 4 feasible-design reads and no reference-optimum read; the best hardware sample was the second-cheapest feasible flowsheet (objective 11.8105).
-The resulting conditional TTS99-feas is 84.6 s, versus 0.006 s for hill climbing and 0.073 s for the deterministic Gurobi solve.
-The queue contribution was not recorded separately, so its share cannot be identified.
-The pilot used oracle-assisted top-10-targeted angles, rather than the energy-targeted angles in Table~\ref{tab:ds-mfg-primary-outcomes}.
+Using this recorded time gives a TTS99-feas of 84.6 s, versus 0.006 s for hill climbing and 0.073 s for the deterministic Gurobi solve.
+Queue time was not recorded separately, so we cannot determine how much it contributed.
+The pilot used angles optimized to favor the known top 10 flows; the energy-targeted QAOA row in Table~\ref{tab:ds-mfg-primary-outcomes} uses different angles.
 With zero optimum hits, the Wilson 95\% upper bound on the hardware optimum-hit rate is about $1.04\times 10^{-4}$.
 % Because calibration and full transpilation metadata were not retained, this run confirms only that the submission-and-scoring path executes end to end on hardware.
 
 \section{Discussion and Limitations}
 \label{sec:ds-mfg-discussion}
 
-This workflow and interpretation study examines how QAOA or VQE distributions yield meaningful process-design samples.
-The required steps are variable separation, exact auxiliary repair, a quadratic surrogate, offline angle search, and scoring in the original flow space.
-Concentration on good flowsheets does not translate into a demonstrated runtime advantage over classical methods for this instance.
+This study asks what is needed to turn QAOA and VQE samples into meaningful process-design decisions.
+The steps are to separate design and auxiliary variables, repair the auxiliaries exactly, fit a quadratic surrogate, optimize the angles offline, and score samples in the original flow space.
+Even when the samples concentrate on good flowsheets, classical methods remain faster for this instance.
 
 \subsection{Robustness and Additional Classical Baselines}
 
-We supplement the cached sweeps with reproducible sensitivity studies; all settings, seeds, per-run results, and timing records are in the repository's \codeid{ds_mfg_revision_audit/} directory.
-First, write the QUBO as capital cost $c(y)$ plus penalty $P(y,z)$ and scale only the latter: $F_\alpha(y)=c(y)+\alpha\min_z P(y,z)$.
-Across $\alpha=0.01,0.05,0.1,0.25,0.5,1,2,4$, exact enumeration preserves the certified optimum for $\alpha\geq0.25$; the three smaller weights produce infeasible minima.
-All feasible designs precede every infeasible design for tested $\alpha\geq0.5$; at the submitted weight ($\alpha=1$), the separation is 31.3717.
-This establishes robustness over a finite range, not a universal penalty rule.
+We tested how the results change with penalty weights, surrogate training data, QAOA depth, optimizer settings, and random seeds.
+The repository's \codeid{ds_mfg_revision_audit/} directory records the settings, seeds, results, and timings for each run.
+For the penalty test, write the QUBO as capital cost $c(y)$ plus penalty $P(y,z)$ and scale only the penalty: $F_\alpha(y)=c(y)+\alpha\min_z P(y,z)$.
+Among the tested values $\alpha=0.01,0.05,0.1,0.25,0.5,1,2,4$, exact enumeration gives the same certified optimum for $\alpha\geq0.25$; the three smaller weights give infeasible minima.
+All feasible designs rank ahead of every infeasible design for tested $\alpha\geq0.5$.
+At the submitted weight ($\alpha=1$), the lowest infeasible score exceeds the highest feasible score by 31.3717.
+These results apply to this instance with all penalty terms scaled together.
 
-Second, unweighted quadratic fits on uniform subsets of 1024, 8192, and 65536 flows, each with three random seeds, achieve global $R^2=0.99884$--$0.99908$, yet their minimizers repair to 14.5505--18.1755.
-None recovers the true optimum; high global fit quality remains insufficient across these construction choices.
-The full-cube fit is reproduced by its degree-two Walsh projection, which is algebraically equivalent to unweighted least squares.
+We also fitted quadratic surrogates to uniform random subsets of 1024, 8192, and 65536 flows, using unweighted least squares and three seeds per size.
+Their global $R^2$ values range from 0.99884 to 0.99908, but their minimizers repair to 14.5505--18.1755.
+None finds the true optimum, despite fitting the overall landscape closely.
+For the fit using all flows, a degree-two Walsh projection reproduces the unweighted least-squares solution.
 
-Third, fresh energy-targeted QAOA searches span $p=1$--5, three random seeds, and one basin-hopping iteration.
+New energy-targeted QAOA runs use $p=1$--5, three random seeds, and one basin-hopping iteration.
 The optimum probability rises from $1.42\times10^{-4}$ at $p=1$ to $(2.63$--$2.81)\times10^{-3}$ at $p=5$ across seeds.
-For seed 91001, increasing basin-hopping iterations from one to five leaves the $p=5$ optimum probability at $2.63\times10^{-3}$, while optimization of the entire $p=1$--5 sequence increases from 103.6 to 300.5~s.
-This is a limited paired setting test, not evidence that more iterations never help.
+For seed 91001, increasing basin-hopping iterations from one to five leaves the $p=5$ optimum probability at $2.63\times10^{-3}$, while the time to optimize the entire $p=1$--5 sequence increases from 103.6 to 300.5~s.
+The effect of increasing the optimizer budget was tested at this one seed.
 
-The VQE seed choice was exploratory: seed 74018 had the highest top-50 count in the 20-seed screen (23 hits), but no optimum hit there.
-Its later 20-hit outcome is therefore not a typical-seed estimate.
-At 524288 reads per seed, the selected historical follow-ups give 5, 3, and 20 optimum hits for seeds 74001, 74007, and 74018; the later metadata reruns give 3, 1, and 0.
-The archive reports all 43 cached VQE seed runs by campaign, without pooling incompatible settings or replacing historical outcomes with reruns.
+The VQE follow-up was exploratory.
+Seed 74018 had the highest top-50 count in the initial 20-seed study (23 hits), but no optimum hit.
+Its later 20-hit result therefore does not represent performance across initializations.
+At 524288 reads per seed, the selected follow-ups give 5, 3, and 20 optimum hits for seeds 74001, 74007, and 74018; later reruns to retain circuit metadata give 3, 1, and 0.
+The archive lists all 43 cached VQE runs, with different settings and later reruns reported separately.
 
-Finally, simulated annealing~\cite{Kirkpatrick1983} with geometric cooling from 100 to 0.01 and a random restart every 4096 evaluations is compared with uniform sampling and hill climbing at 262144 evaluations per run, using five common seeds and fresh repair caches.
+We compared simulated annealing~\cite{Kirkpatrick1983}, uniform sampling, and hill climbing using five common seeds and 262144 evaluations per run, each starting with an empty repair cache.
+Annealing uses geometric cooling from 100 to 0.01 and a random restart every 4096 evaluations.
 Both annealing and hill climbing find the optimum in all five runs; uniform sampling does so in three.
-These are empirical run-success counts on this instance, not independent-sample hit-rate claims.
+These counts describe how often each search found the optimum within its evaluation budget.
 
 \subsection{Computational Cost and Scope}
 
-Complete workflow cost includes reformulation, exhaustive repair, surrogate fitting, offline optimization, circuit construction/compilation, sampling, hardware queue/execution and retrieval, and final repair/scoring.
-Historical preprocessing and offline-search times were not retained; compilation and queue/execution were not separated within the 73.5~s hardware-runner interval.
-Thus a numerical historical end-to-end total cannot be reconstructed, and missing costs must not be treated as zero.
-A separate CPU audit measures exhaustive repair of all flows at 2.3~s, the equivalent full-cube fit at 0.005~s, and logical circuit construction at 0.054~s.
-Offline compilation on FakeFez takes 0.076~s (median of three transpiler seeds); this is a model-based proxy, not recovered hardware timing.
-The archive also records startup/warmup boundaries and the 300.5~s offline search, separately from historical sampling times.
+Total runtime includes model reformulation, exhaustive enumeration and repair, surrogate fitting, offline optimization, circuit construction and compilation, sampling, hardware queue and execution time, result retrieval, and final repair and scoring.
+The original runs did not retain preprocessing or offline-search times, and the 73.5~s hardware record does not separate compilation, queueing, and execution.
+We therefore cannot reconstruct the original total runtime; the missing stages still contribute to the cost.
+Separate CPU reruns took 2.3~s to enumerate and repair all flows, 0.005~s for the equivalent fit using all flows, and 0.054~s to build the logical circuit.
+Compilation on the offline FakeFez model took 0.076~s (median of three transpiler seeds).
+The archive reports what each timer includes, startup and warmup costs, and the 300.5~s offline search.
+These new measurements are kept separate from the original sampling times.
 
-Exact enumeration already identifies the optimum before quantum sampling; this is a diagnostic benchmark, not an optimization shortcut.
-Auxiliary repair is cheap here because of the 13 small components; in general it can be NP-hard.
-A scalable version would require replacing exhaustive construction and repair with validated approximations: the enumeration and dense statevector each grow as $2^n$, and general auxiliary components require $\sum_c2^{|c|}$ local assignments.
-Sensitivity on one 19-flow instance does not establish scaling or an end-to-end advantage on larger process designs~\cite{Abbas2024}.
+Exact enumeration finds the optimum before quantum sampling begins, so these experiments test how to interpret samples after repair.
+Repair is cheap here because the auxiliary graph has 13 small components; in general, it can be NP-hard.
+Enumeration and dense statevector simulation each grow as $2^n$, while repair by component enumeration requires $\sum_c2^{|c|}$ local assignments.
+Larger problems would need approximations whose effects on feasibility and optimality are checked.
+Tests on this one 19-flow instance cannot establish scalability or a total runtime advantage for larger process designs~\cite{Abbas2024}.
 
 \FloatBarrier
 \section{Conclusion}
