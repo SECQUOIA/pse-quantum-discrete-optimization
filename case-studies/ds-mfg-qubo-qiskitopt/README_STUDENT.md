@@ -17,7 +17,7 @@ hardware-performance superiority claim.
 Read these files in order:
 
 1. [main_standalone.pdf](main_standalone.pdf) and
-   [supplement_standalone.pdf](supplement_standalone.pdf) for the submitted
+   [supplement_standalone.pdf](supplement_standalone.pdf) for the revised
    FOCAPO-CPC 2027 paper. See [README.md](README.md#submitted-manuscript) for
    the submission source mapping and PDF build commands.
 2. `MANUSCRIPT_FINDINGS.tex` for the expanded formulation, results, and

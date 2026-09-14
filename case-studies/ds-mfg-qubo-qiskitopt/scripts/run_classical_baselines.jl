@@ -1,8 +1,10 @@
 #!/usr/bin/env julia
 
 import Pkg
-Pkg.activate(joinpath(@__DIR__, ".."))
-Pkg.instantiate()
+if abspath(PROGRAM_FILE) == abspath(@__FILE__)
+    Pkg.activate(joinpath(@__DIR__, ".."))
+    Pkg.instantiate()
+end
 
 using Printf
 using Random
@@ -685,4 +687,6 @@ function main()
     println("Retained flows written to: ", retained_path)
 end
 
-main()
+if abspath(PROGRAM_FILE) == abspath(@__FILE__)
+    main()
+end

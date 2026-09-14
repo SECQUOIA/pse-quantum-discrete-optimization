@@ -29,3 +29,9 @@ jobs:
 
       - name: Run reproducibility bootstrap
         run: scripts/bootstrap_ds_mfg.sh
+
+      - name: Check revision audit mathematics and search budgets
+        run: julia --project=. scripts/test_revision_sensitivity.jl
+
+      - name: Check revision evidence against source records
+        run: python3 scripts/summarize_revision_evidence.py --check

@@ -28,7 +28,7 @@ and David E. ~Bernal Neira\textsuperscript{a}}
 This supplement provides four sections of supporting material for the main manuscript.
 Section~1 describes the computational environment and data availability.
 Section~2 reports numerical validation checks supporting the manuscript claims, including the surrogate rank audit.
-Section~3 derives the exact auxiliary-repair decomposition that reduces per-sample repair to 34 comparisons.
+Section~3 derives the exact auxiliary-repair decomposition that reduces per-sample repair to 34 local assignment evaluations.
 Section~4 documents algorithm parameters and hardware execution metadata for the variational and IBM~Quantum pilot experiments.
 }
 \renewcommand{\PaperKeywords}{%
@@ -122,8 +122,9 @@ Figure~\ref{fig:supp-surrogate-rank}. \\
 \hline
 Low-energy surrogate audit &
 Exact enumeration finds 36 feasible flows. The 50 lowest-cost repaired flows
-include 14 infeasible flows — the penalty weights are insufficient to push all
-infeasible flows above all feasible ones. Spearman rank correlation between
+include 14 infeasible flows at ranks 37--50, after all feasible flows.
+At the submitted weights, the minimum infeasible score exceeds the maximum
+feasible score by 31.3717. Spearman rank correlation between
 exact and surrogate ordering in the lowest 1\% repaired-flow set is 0.901. &
 \artifact{ds\_mfg\_reduced\_flow\_objective/reduced\_exact\_top\_flows.csv};
 \artifact{MANUSCRIPT\_FINDINGS.tex}. \\
@@ -170,7 +171,7 @@ $[2.35,2.73]\times10^{-3}$. &
 \end{axis}
 \end{tikzpicture}
 \caption{Surrogate rank audit for the 50 lowest-cost repaired flows.
-Exact enumeration confirms there are exactly 36 feasible flows (ranks 1--36); the remaining 14 shown here are infeasible flows whose penalty values are insufficient to place them above all feasible ones.
+Exact enumeration confirms there are exactly 36 feasible flows (ranks 1--36); the remaining 14 shown here are infeasible flows at higher repaired energies.
 The surrogate has high global $R^2$ but imperfect low-energy ordering: the exact optimum is only rank 33 under the surrogate, while the surrogate minimum repairs to the sixth-best exact flow.
 Quantum-sampling outcomes are therefore scored using the exact repaired objective $F$, not the surrogate $\widehat F$.}
 \label{fig:supp-surrogate-rank}
@@ -190,7 +191,7 @@ z^\star(y) = \arg\min_{z \in \{0,1\}^{17}} E_{\mathrm{QUBO}}(y, z).
 \end{equation}
 
 Brute-force enumeration over all $2^{17} = 131{,}072$ auxiliary assignments is tractable for a single call but unnecessarily costly when repair is applied to every sampled state across all workflows.
-Once $y$ is fixed, every term in $E_{\mathrm{QUBO}}$ that involves an auxiliary variable $z_k$ is either (i)~a linear term $c_k z_k$, (ii)~an auxiliary-auxiliary coupling $c_{k\ell}\,z_k z_\ell$, or (iii)~a flow-auxiliary coupling $c_{ik}\,y_i z_k$ (a constant given~$y$).
+Once $y$ is fixed, every term in $E_{\mathrm{QUBO}}$ that involves an auxiliary variable $z_k$ is either (i)~a linear term $c_k z_k$, (ii)~an auxiliary-auxiliary coupling $c_{k\ell}\,z_k z_\ell$, or (iii)~a flow-auxiliary coupling $c_{ik}\,y_i z_k$ (linear in $z_k$ for fixed~$y$).
 Consider the \emph{auxiliary coupling graph}: nodes are the 17 auxiliary variables, and an edge connects $z_k$ and $z_\ell$ whenever their quadratic coefficient $c_{k\ell}\neq 0$.
 For this QUBO the graph has 13 connected components: 9 isolated nodes (one auxiliary bit each) and 4 edges (two auxiliary bits each).
 Because there are no edges between components, fixing~$y$ makes the components conditionally independent, and \eqref{eq:supp-repair} decomposes as
@@ -198,7 +199,7 @@ Because there are no edges between components, fixing~$y$ makes the components c
 \min_{z} E_{\mathrm{QUBO}}(y, z) = \mathrm{const}(y) + \sum_{c=1}^{13} \min_{z^{(c)}} E^{(c)}(y, z^{(c)}),
 \end{equation}
 where $z^{(c)}$ are the auxiliary bits in component~$c$ and $E^{(c)}$ contains only the terms that involve those bits (with fixed~$y$ values substituted as constants).
-Each sub-problem is solved by enumerating $2^1=2$ or $2^2=4$ assignments and selecting the minimum energy; the total work is at most $9{\times}2 + 4{\times}4 = 34$ comparisons per repair, a factor of $\sim\!3{,}800\times$ smaller than the brute-force bound.
+Each sub-problem is solved by enumerating $2^1=2$ or $2^2=4$ assignments and selecting the minimum energy; the total is $9{\times}2 + 4{\times}4 = 34$ local assignment evaluations per repair, a factor of $\sim\!3{,}800\times$ fewer assignments than brute-force enumeration, not a measured runtime speedup.
 This procedure is implemented in \artifact{scripts/run\_classical\_baselines.jl}; the component structure is read from \artifact{ds\_mfg\_reduced\_flow\_objective/auxiliary\_components.csv}.
 
 \smallskip
@@ -249,7 +250,7 @@ The four pair components together represent the complete linearization of this o
 13 & 36      & 1 & 16~($f_{15}$, Cont.\,III),\enspace 18~($f_{17}$, cont.\ exit)
    & 2 & Cont.\,III flow balance \\
 \hline
-\multicolumn{6}{l}{$9{\times}2 + 4{\times}4 = 34$ comparisons per repair vs.\ $2^{17}=131{,}072$ brute force (${\sim}3{,}800{\times}$ reduction).} \\
+\multicolumn{6}{l}{$9{\times}2 + 4{\times}4 = 34$ local assignments vs.\ $2^{17}=131{,}072$ brute-force auxiliary states.} \\
 \hline
 \end{tabular}
 \end{table*}
@@ -281,12 +282,13 @@ angles transferred beta-then-gamma to \texttt{QiskitOpt.QAOA}. &
 Reduced-surrogate VQE &
 \texttt{EfficientSU2}; 152 parameters on the 19-flow surrogate. &
 COBYLA through \texttt{QiskitOpt.VQE}; 128 optimizer reads; 25 iterations;
-seeds 74001, 74007, and 74018 in the final follow-up. &
-Sampled distributions and optimized ansatz vectors retained in
-\artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_seed74018\_metadata/} and
-\artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_selected\_metadata/}. &
-Seed 74018: 20 reference hits / 524288 reads; three seeds combined: 28
-reference hits / 1572864 reads. \\
+seeds 74001--74020 in the complete screen. &
+Screen: \artifact{ds\_mfg\_vqe\_reduced\_flow\_objective\_v3/}.
+All 43 cached seed runs and their source paths:
+\artifact{ds\_mfg\_revision\_audit/all\_vqe\_seed\_runs.csv}.
+Historical follow-ups and later metadata reruns are separate campaigns. &
+3 reference hits / 655360 reads; 61 feasible hits.
+18 of 20 seeds have no reference hit. \\
 \hline
 \end{tabular}
 \end{table*}
