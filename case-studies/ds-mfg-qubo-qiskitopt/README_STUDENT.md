@@ -16,11 +16,14 @@ hardware-performance superiority claim.
 
 Read these files in order:
 
-1. `MANUSCRIPT_FINDINGS.tex` for the manuscript-ready introduction, method,
-   results, discussion, conclusion, formulation, reduction, and result
-   narrative.
-2. `ds_mfg_qubo_qiskitopt.ipynb` for the executable analysis record.
-3. `MANUSCRIPT_FINDINGS.md` for a compact summary.
+1. [main_standalone.pdf](main_standalone.pdf) and
+   [supplement_standalone.pdf](supplement_standalone.pdf) for the submitted
+   FOCAPO-CPC 2027 paper. See [README.md](README.md#submitted-manuscript) for
+   the submission source mapping and PDF build commands.
+2. `MANUSCRIPT_FINDINGS.tex` for the expanded formulation, results, and
+   experiment provenance.
+3. `ds_mfg_qubo_qiskitopt.ipynb` for the executable analysis record.
+4. `MANUSCRIPT_FINDINGS.md` for a compact summary.
 
 Open the notebook with:
 

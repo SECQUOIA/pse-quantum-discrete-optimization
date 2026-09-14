@@ -4,7 +4,7 @@ This bundle contains a reproducible DS-MFG QUBO case study using local classical
 emulations of QAOA and VQE through `QiskitOpt.jl` and Qiskit Aer, plus a small
 IBM hardware pilot for the fixed-parameter QAOA handoff. It includes the
 executed notebook, cached distributions, generated figures, hardware pilot
-artifacts, and a manuscript-ready findings draft.
+artifacts, the submitted manuscript and supplement, and expanded findings.
 
 The case study is framed as a practical quantum-optimization audit. Gurobi
 provides the original 19-flow-variable ground truth, local Aer emulation
@@ -14,13 +14,50 @@ IBM hardware-performance superiority.
 
 Start with:
 
+- [main_standalone.pdf](main_standalone.pdf) and
+  [supplement_standalone.pdf](supplement_standalone.pdf): the submitted paper
+  and supplementary material, rebuilt from the submission sources.
 - `README_STUDENT.md`: detailed guide to the notebook, environment, cached
   results, and rerun commands.
 - `ds_mfg_qubo_qiskitopt.ipynb`: executed notebook with the full workflow.
-- `MANUSCRIPT_FINDINGS.tex`: LaTeX manuscript body with introduction, method,
+- `MANUSCRIPT_FINDINGS.tex`: expanded LaTeX findings with introduction, method,
   results, discussion, conclusion, experiment provenance, result tables, and
   the IBM hardware pilot.
 - `MANUSCRIPT_FINDINGS.md`: compact narrative summary.
+
+## Submitted Manuscript
+
+The FOCAPO-CPC 2027 submission is titled *Gate-Based Quantum Optimization for
+Discrete Process Design: A Repair-Aware Benchmark*. Its sources and supporting
+files were imported from `FOCAPO_CPC_2027_YPark (1).zip` (SHA-256:
+`245e18e2d24fa9e3bf6dd7e51995f92158be46fd9faf070b550643cb949adc97`).
+
+| Submission archive | Repository file |
+| --- | --- |
+| `main.tex` | [main_standalone.tex](main_standalone.tex) |
+| `supplement.tex` | [supplement_standalone.tex](supplement_standalone.tex) |
+| All other entries | Same relative paths in this directory |
+
+All imported files retain the archive's contents, including `bibliography.bib`,
+`psepress.sty`, `preprint.cls`, the figures, bundled fonts, `PSEkeywords.txt`,
+and `.vscode/settings.json`. The ZIP itself is a local export excluded by the
+repository's existing ignore rules. The tracked PDFs are local rebuilds; the
+submission ZIP contains no PDFs. `MANUSCRIPT_FINDINGS.tex` and
+`MANUSCRIPT_FINDINGS.md` retain the expanded analysis and experiment provenance
+that support the submitted paper.
+
+To rebuild both PDFs, install LuaLaTeX, Biber, and latexmk, then run from this
+directory:
+
+```bash
+latexmk -lualatex -interaction=nonstopmode -halt-on-error main_standalone.tex
+latexmk -lualatex -interaction=nonstopmode -halt-on-error supplement_standalone.tex
+```
+
+The style loads its fonts from `fonts/`. Intermediate LaTeX files are ignored
+by Git.
+
+## Modeling and Cached Results
 
 The main modeling point is that the QUBO has 36 binary variables, but Gurobi's
 ground truth is defined over the original 19 flow variables. The remaining 17
