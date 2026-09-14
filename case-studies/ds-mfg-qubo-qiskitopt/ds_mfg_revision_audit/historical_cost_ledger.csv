@@ -1,0 +1,16 @@
+stage,seconds,status,source,scope
+environment_initialization,,not_recorded,historical artifact bundle,unknown; do not substitute zero or a later rerun
+IP_to_QUBO_reformulation,,not_recorded,historical artifact bundle,unknown; do not substitute zero or a later rerun
+exhaustive_auxiliary_repair,,not_recorded,historical artifact bundle,unknown; do not substitute zero or a later rerun
+surrogate_fit,,not_recorded,historical artifact bundle,unknown; do not substitute zero or a later rerun
+offline_angle_optimization,,not_recorded,historical artifact bundle,unknown; do not substitute zero or a later rerun
+logical_circuit_construction,,not_recorded,historical artifact bundle,unknown; do not substitute zero or a later rerun
+local_sample_repair_and_scoring,,not_recorded,historical artifact bundle,unknown; do not substitute zero or a later rerun
+circuit_compilation,,not_separately_recorded,ds_mfg_ibm_qaoa_pilot_fez_4096x3/summary.csv,included in the runner aggregate where applicable; no individual timestamps
+hardware_queue,,not_separately_recorded,ds_mfg_ibm_qaoa_pilot_fez_4096x3/summary.csv,included in the runner aggregate where applicable; no individual timestamps
+hardware_execution,,not_separately_recorded,ds_mfg_ibm_qaoa_pilot_fez_4096x3/summary.csv,included in the runner aggregate where applicable; no individual timestamps
+hardware_result_retrieval_and_scoring,,not_separately_recorded,ds_mfg_ibm_qaoa_pilot_fez_4096x3/summary.csv,included in the runner aggregate where applicable; no individual timestamps
+hardware_runner_aggregate,73.488455,recorded,ds_mfg_ibm_qaoa_pilot_fez_4096x3/summary.csv,73.5-second runner interval; does not identify queue share or include offline training
+energy_QAOA_local_solve,53.936006713,recorded,ds_mfg_qaoa_juliqaoa_transfer_highread/qaoa_juliqaoa_transfer_summary.csv,solver call boundary; excludes preceding preprocessing and subsequent scoring
+VQE_20_seed_local_solves,45.38565311200001,recorded,ds_mfg_vqe_reduced_flow_objective_v3/vqe_reduced_top50_sampling_summary.csv,solver call boundary; excludes preceding preprocessing and subsequent scoring
+historical_end_to_end_total,,not_reconstructible,historical artifact bundle,unknown stages prevent a numerical total; sampling TTS is not an end-to-end comparison
