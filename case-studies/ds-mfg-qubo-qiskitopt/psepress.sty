@@ -114,29 +114,16 @@
   urlcolor=PSEBlue
 }
 
-\IfFileExists{fonts/Inter-Regular.ttf}{%
-  \setmainfont{Inter-Regular}[
-    Path=fonts/,
-    Extension=.ttf,
-    UprightFont=*,
-    BoldFont=Inter-Bold,
-    ItalicFont=Inter-Italic
-  ]%
-  \newfontfamily\intermedium{Inter-Medium}[Path=fonts/,Extension=.ttf]%
-}{%
-  \setmainfont{Latin Modern Sans}%
-  \newfontfamily\intermedium{Latin Modern Sans}[FakeBold=1.35]%
-}
-\IfFileExists{fonts/CourierNew.ttf}{%
-  \setmonofont{CourierNew}[Path=fonts/,Extension=.ttf]%
-}{%
-  \setmonofont{Latin Modern Mono}%
-}
-\IfFileExists{fonts/CambriaMath.ttf}{%
-  \setmathfont{CambriaMath}[Path=fonts/,Extension=.ttf]%
-}{%
-  \setmathfont{Latin Modern Math}%
-}
+\setmainfont{Inter-Regular}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*,
+  BoldFont=Inter-Bold,
+  ItalicFont=Inter-Italic
+]
+\newfontfamily\intermedium{Inter-Medium}[Path=fonts/,Extension=.ttf]
+\setmonofont{CourierNew}[Path=fonts/,Extension=.ttf]
+\setmathfont{CambriaMath}[Path=fonts/,Extension=.ttf]
 
 \setlength{\columnsep}{0.586cm}
 \setlength{\parindent}{0.425cm}
