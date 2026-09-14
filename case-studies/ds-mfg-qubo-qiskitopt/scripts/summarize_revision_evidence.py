@@ -63,7 +63,9 @@ def vqe_inventory():
         reads = sum(row["final_reads"] for row in group)
         hits = sum(row["global_hits"] for row in group)
         feasible = sum(row["feasible_hits"] for row in group)
-        seconds = sum(row["solve_seconds"] for row in group)
+        # Explicit accurate summation keeps artifacts stable across Python's
+        # change to the built-in float sum algorithm in Python 3.12.
+        seconds = math.fsum(row["solve_seconds"] for row in group)
         lo,hi = wilson(hits,reads)
         flo,fhi = wilson(feasible,reads)
         cohorts.append(dict(campaign=campaign, runs=len(group), reads=reads, global_hits=hits,
@@ -133,7 +135,7 @@ def historical_costs():
         ("energy_QAOA_local_solve","ds_mfg_qaoa_juliqaoa_transfer_highread/qaoa_juliqaoa_transfer_summary.csv"),
         ("VQE_20_seed_local_solves","ds_mfg_vqe_reduced_flow_objective_v3/vqe_reduced_top50_sampling_summary.csv")):
         sources.append(ROOT/path)
-        add(name,sum(float(r["solve_time_sec"]) for r in read_rows(ROOT/path)),"recorded",path,
+        add(name,math.fsum(float(r["solve_time_sec"]) for r in read_rows(ROOT/path)),"recorded",path,
             "solver call boundary; excludes preceding preprocessing and subsequent scoring")
     add("historical_end_to_end_total","","not_reconstructible","historical artifact bundle",
         "unknown stages prevent a numerical total; sampling TTS is not an end-to-end comparison")
