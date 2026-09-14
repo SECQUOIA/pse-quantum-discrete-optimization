@@ -386,6 +386,10 @@ With zero optimum hits, the Wilson 95\% upper bound on the hardware optimum-hit 
 \section{Discussion and Limitations}
 \label{sec:ds-mfg-discussion}
 
+This workflow and interpretation study examines how QAOA or VQE distributions yield meaningful process-design samples.
+The required steps are variable separation, exact auxiliary repair, a quadratic surrogate, offline angle search, and scoring in the original flow space.
+Concentration on good flowsheets does not translate into a demonstrated runtime advantage over classical methods for this instance.
+
 \subsection{Robustness and Additional Classical Baselines}
 
 We supplement the cached sweeps with reproducible sensitivity studies; all settings, seeds, per-run results, and timing records are in the repository's \codeid{ds_mfg_revision_audit/} directory.
