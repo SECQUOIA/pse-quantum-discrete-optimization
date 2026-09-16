@@ -114,7 +114,7 @@ and adaptations must be shared under the same terms. See
 \draw[alt] (pfr2)  -| (mg3);
 \draw[alt] (cstr2) -- (mg3);
 \draw[opt] (bat2)  -| (mg3);
-% Crystallisation (always active)
+% Crystallization (always active)
 \node[optunit, minimum width=1.1cm] (cryst) at (7.4, 0) {Cryst.};
 \node[lbl, font=\scriptsize, above=2pt] at (7.4, 0.45) {Stage\,3};
 \draw[bbk] (mg3) -- node[above, lbl] {$f_{11}$} (cryst);
@@ -404,8 +404,8 @@ The steps are to separate design and auxiliary variables, repair the auxiliaries
 Even when the samples concentrate on good flowsheets, classical methods remain faster for this instance.
 
 The call times in Table~\ref{tab:ds-mfg-primary-outcomes} cover only the sampling stage.
-A complete quantum workflow also includes reformulation, exhaustive enumeration and repair, surrogate fitting, offline angle optimization, circuit compilation, and, on hardware, queueing and result retrieval.
-Timings for these stages were not retained for the original runs, and the 73.5~s hardware record does not separate compilation, queue, and execution, so an end-to-end runtime cannot be reconstructed and the sampling-only TTS values understate the quantum cost.
+A complete quantum workflow also includes reformulation, exhaustive enumeration and repair, surrogate fitting, offline angle optimization, circuit compilation, and, on hardware, queuing and result retrieval.
+Timings for these stages were not retained for the original runs, and the 73.5~s hardware record does not separate compilation, queuing, and execution, so an end-to-end runtime cannot be reconstructed and the sampling-only TTS values understate the quantum cost.
 Reference reruns of the omitted stages are recorded in the repository; the offline angle search alone (96--300~s) exceeds every call time in Table~\ref{tab:ds-mfg-primary-outcomes}, so a full accounting would only widen the classical margin.
 
 Exact enumeration finds the optimum before quantum sampling begins, so these experiments test how to interpret samples after repair.
