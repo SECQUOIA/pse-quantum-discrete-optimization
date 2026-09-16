@@ -14,9 +14,11 @@ IBM hardware-performance superiority.
 
 Start with:
 
-- [main_standalone.pdf](main_standalone.pdf) and
-  [supplement_standalone.pdf](supplement_standalone.pdf): the submitted paper
-  and supplementary material, including the reviewer robustness and cost revision.
+- [main_standalone.pdf](main_standalone.pdf): the submitted paper, including
+  the reviewer robustness and cost revision. The conference submission has no
+  supplement; [supplement_standalone.pdf](supplement_standalone.pdf) is
+  repository documentation that the paper cites as the shared repository
+  (repair component table, environment, and validation tables).
 - `README_STUDENT.md`: detailed guide to the notebook, environment, cached
   results, and rerun commands.
 - `ds_mfg_qubo_qiskitopt.ipynb`: executed notebook with the full workflow.

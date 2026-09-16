@@ -81,8 +81,10 @@ Then read:
 1. `README_STUDENT.md` for the detailed guide to the notebook, environment,
    cached results, and rerun commands.
 2. [The manuscript](case-studies/ds-mfg-qubo-qiskitopt/main_standalone.pdf)
-   and [supplement](case-studies/ds-mfg-qubo-qiskitopt/supplement_standalone.pdf)
-   for the FOCAPO-CPC 2027 paper and reviewer revision. Source provenance and
+   for the FOCAPO-CPC 2027 paper and reviewer revision, and the
+   [repository supplement](case-studies/ds-mfg-qubo-qiskitopt/supplement_standalone.pdf)
+   (not part of the conference submission) for the repair component table and
+   validation tables. Source provenance and
    PDF build commands are in the [case-study README](case-studies/ds-mfg-qubo-qiskitopt/README.md#submitted-manuscript).
 3. `MANUSCRIPT_FINDINGS.tex` for the expanded formulation, results, and audit notes.
 4. `ds_mfg_qubo_qiskitopt.ipynb` for the executed analysis record.
