@@ -321,6 +321,7 @@ Without projection and exact repair, a raw QUBO sample cannot be read as a flows
 Once the pipeline is in place, reduction to the surrogate and the offline angle search are what make QAOA samples concentrate on feasible, optimal flowsheets.
 Energy-targeted QAOA at $p=5$ sampled the certified optimum 664 times in 262144 ideal reads and matched a feasible flowsheet 32502 times (12.4\%, CI [12.3, 12.5]\%), the highest feasible-design rate of any workflow; an independent state-vector calculation puts the optimum probability of this circuit at $2.63\times 10^{-3}$, consistent with the sampled $2.53\times 10^{-3}$.
 The near-perfect global $R^2$ of the surrogate did not imply optimization fidelity: its own minimizer repairs to 14.5505 rather than 11.7095, the true optimum ranks only 33rd under the surrogate, and among the 50 lowest-cost repaired flows the absolute surrogate errors reach 29.4.
+Refitting the surrogate to uniform random subsets of 1024 to 65536 flows (three seeds per size) changes neither its $R^2$ (0.9988--0.9991) nor this failure (minimizers repair to 14.55--18.18), so the failure is a property of the quadratic form rather than of the training set.
 
 \subsection{VQE and Classical Baselines Bound the Claim}
 \label{subsec:ds-mfg-vqe-classical-main}
@@ -370,31 +371,27 @@ With zero optimum hits, the Wilson 95\% upper bound on the hardware optimum-hit 
 \subsection{Robustness and Additional Classical Baselines}
 \label{subsec:ds-mfg-robustness}
 
-We tested how the results change with penalty weights, surrogate training data, QAOA depth, optimizer budget, and random seeds.
+We tested how the results change with penalty weights, QAOA depth, optimizer budget, and random seeds, and we compared additional classical and annealing baselines.
 The detailed settings, seeds, results, and timings of each run are not included here but are recorded in the shared repository.
 For the penalty test, write the QUBO as capital cost $c(y)$ plus penalty $P(y,z)$ and scale only the penalty, $F_\alpha(y)=c(y)+\alpha\min_z P(y,z)$.
 Among the tested values, $\alpha = 0.01$, $0.05$, $0.1$, $0.25$, $0.5$, $1$, $2$, and $4$, exact enumeration gives the same certified optimum for $\alpha\geq0.25$; the three smaller weights give infeasible minima.
 All feasible designs rank ahead of every infeasible design for tested $\alpha\geq0.5$, and at the submitted weight ($\alpha=1$) the lowest infeasible score exceeds the highest feasible score by 31.3717.
 These results apply to this instance with all penalty terms scaled together.
 
-Because exhaustive enumeration is unavailable at larger scale, we also asked whether a surrogate fitted to a sample of flows behaves differently from the full fit.
-Surrogates fitted to uniform random subsets of 1024, 8192, and 65536 flows (three seeds per size) reach global $R^2$ values of 0.99884--0.99908, yet their minimizers repair to 14.5505--18.1755 and none identifies the true optimum.
-The failure of the surrogate as an optimizer is therefore a property of the quadratic form, not of the training set.
-
-To test the sensitivity of energy-targeted QAOA to circuit depth, initialization, and optimizer budget, we repeated the offline angle search for $p=1$--5 with three random seeds.
-The search builds the depth-$(p{+}1)$ starting point from the depth-$p$ solution, so its cost is recorded for the whole $p=1$--5 ladder rather than per depth.
-The state-vector optimum probability rises from $1.42\times10^{-4}$ at $p=1$ to $(2.63$--$2.81)\times10^{-3}$ at $p=5$ across seeds.
-The optimizer budget is the number of basin-hopping iterations, that is, of random angle perturbations each followed by a BFGS local search; raising it from one to five at one seed leaves the $p=5$ optimum probability at $2.63\times10^{-3}$ while the optimization time for the ladder grows from 103.6 to 300.5~s.
-Depth, not optimizer budget, controls the concentration of the samples.
+Two further tests concern the offline angle search of energy-targeted QAOA.
+The first varies circuit depth: repeating the search for $p=1$ to $5$ with three random seeds, the state-vector optimum probability rises from $1.42\times10^{-4}$ at $p=1$ to $(2.63$--$2.81)\times10^{-3}$ at $p=5$, consistent with the sampled rate in Table~\ref{tab:ds-mfg-primary-outcomes}.
+The second varies the optimizer budget at fixed $p=5$: running the basin-hopping search with five steps (random angle perturbations, each followed by a BFGS local search) instead of a single step leaves the optimum probability at $2.63\times10^{-3}$.
+Depth, not optimizer budget, controls how strongly the samples concentrate.
 
 VQE outcomes, in contrast, depend strongly on the seed.
 Seed 74018, which had the most top-50 hits in the 20-seed screen (23) but no optimum hit, gave 20 optimum hits when extended to 524288 reads, while seeds 74001 and 74007 gave 5 and 3; reruns of the same three seeds that also retained circuit metadata gave 3, 1, and 0.
 A single seed therefore cannot represent VQE performance, and Table~\ref{tab:ds-mfg-primary-outcomes} reports the complete screen.
 
-Finally, we compared simulated annealing~\cite{Kirkpatrick1983}, uniform sampling, and hill climbing using five common seeds and the same 262144-evaluation budget as the QAOA reads in Table~\ref{tab:ds-mfg-primary-outcomes}.
-Annealing and hill climbing find the optimum in all five runs (9--25 and 17--27 hits), and uniform sampling in three (at most 1 hit).
-Energy-targeted QAOA reaches the optimum more than 20 times as often per read, but each classical run finishes in 0.6--2.3~s, the same order as the hill-climb call time in Table~\ref{tab:ds-mfg-primary-outcomes}, whereas the QAOA sampling call took 53.9~s after 96--105~s of offline angle search.
-QAOA therefore yields the most concentrated distribution and the slowest route to the optimum.
+Finally, we compared simulated annealing~\cite{Kirkpatrick1983}, uniform sampling, and hill climbing with energy-targeted QAOA at a common budget of 262144 evaluations or reads, using five seeds for each classical method.
+Annealing found the optimum 9--25 times per run, hill climbing 17--27 times, and uniform sampling at most once, whereas the $p=5$ QAOA circuit returns it about 690 times at its state-vector probability (664 observed in Table~\ref{tab:ds-mfg-primary-outcomes}).
+Each classical run took 0.6--2.3~s, against 53.9~s of QAOA sampling preceded by roughly 100~s of offline angle search, so QAOA gives the most concentrated distribution but the slowest route to the optimum.
+Quantum annealing lies outside the gate-based scope of this paper; our earlier study of the same instance~\cite{park2026arxiv} reports that simulated annealing and the D-Wave Advantage2 annealer each recover all 36 feasible designs in a single run of 1000 reads, with 99\% time-to-optimum of 197.8 and 199.6~s, while Advantage~4.1 recovers 28 designs (311.9~s of quantum processing time).
+Those metrics score raw annealer samples on different hardware and read budgets, so they complement Table~\ref{tab:ds-mfg-primary-outcomes} rather than extend it.
 
 \section{Discussion and Limitations}
 \label{sec:ds-mfg-discussion}
@@ -403,10 +400,10 @@ This study asks what is needed to turn QAOA and VQE samples into meaningful proc
 The steps are to separate design and auxiliary variables, repair the auxiliaries exactly, fit a quadratic surrogate, optimize the angles offline, and score samples in the original flow space.
 Even when the samples concentrate on good flowsheets, classical methods remain faster for this instance.
 
-The call times in Table~\ref{tab:ds-mfg-primary-outcomes} cover only the sampling stage.
-A complete quantum workflow also includes reformulation, exhaustive enumeration and repair, surrogate fitting, offline angle optimization, circuit compilation, and, on hardware, queuing and result retrieval.
-Timings for these stages were not retained for the original runs, and the 73.5~s hardware record does not separate compilation, queuing, and execution, so an end-to-end runtime cannot be reconstructed and the sampling-only TTS values understate the quantum cost.
-Reference reruns of the omitted stages are recorded in the repository; the offline angle search alone (96--300~s) exceeds every call time in Table~\ref{tab:ds-mfg-primary-outcomes}, so a full accounting would only widen the classical margin.
+Table~\ref{tab:ds-mfg-primary-outcomes} is not an end-to-end cost comparison.
+Its call times cover the sampling stage only, whereas a complete quantum workflow also includes reformulation, exhaustive enumeration and repair, surrogate fitting, offline angle optimization, circuit compilation, and, on hardware, queuing and result retrieval.
+Those stage times were not recorded for the original runs, and the 73.5~s hardware record does not separate compilation, queuing, and execution, so the quantum cost cannot be totaled.
+The sampling-only TTS values therefore flatter the quantum rows, and a full accounting could only widen the classical margin.
 
 Exact enumeration finds the optimum before quantum sampling begins, so these experiments test how to interpret samples after repair.
 Repair is cheap here because the auxiliary graph has 13 small components; for a general QUBO, auxiliary repair can itself be NP-hard.
