@@ -1,0 +1,15 @@
+julia_version = "1.10.11"
+cpu = "Intel(R) Xeon(R) w5-2565X"
+original_qubo_sha256 = "aa20d793fc45c25c2bd7cc0a231877f71b225bf80daee11531cef6eb6cac5af2"
+fit_seeds = [97101, 97102, 97103]
+timing_policy = "warm search with per-run empty cache; no enumerated lookup; timers exclude process startup and artifact writing"
+hill_climb_max_steps = 100
+blas_threads = 1
+evaluation_budget = 262144
+created_utc = "2026-09-14T02:20:15.994"
+annealing_temperature_end = 0.01
+annealing_temperature_start = 100.0
+julia_threads = 1
+script_sha256 = "022f6473e899858d2d38855a4e985ead13ecb3a931c11ee1431013c33705d0c2"
+annealing_restart_evaluations = 4096
+baseline_seeds = [97001, 97002, 97003, 97004, 97005]

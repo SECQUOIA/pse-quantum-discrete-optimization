@@ -1,0 +1,3 @@
+stage,seconds,scope
+load_and_validate_original_qubo,0.055672366,includes_first_call_compilation
+enumerate_and_repair_all_524288_flows,2.290645181,warm_repair_kernel_includes_flow_and_cost_construction
