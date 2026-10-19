@@ -1,0 +1,413 @@
+{
+  "summary": {
+    "design_variables": 20,
+    "discrete_variables": 24,
+    "full_qubo_variables": 40,
+    "eliminated_variables": 20,
+    "auxiliary_components": [
+      [
+        20,
+        39
+      ],
+      [
+        21,
+        36
+      ],
+      [
+        22,
+        37
+      ],
+      [
+        23,
+        38
+      ],
+      [
+        24,
+        25
+      ],
+      [
+        26,
+        27
+      ],
+      [
+        28,
+        29
+      ],
+      [
+        30,
+        31
+      ],
+      [
+        32,
+        33
+      ],
+      [
+        34,
+        35
+      ]
+    ],
+    "total_design_assignments": 1048576,
+    "feasible_count": 252,
+    "optimum_objective": 19.080000000000002,
+    "optimum_indices": [
+      677380
+    ],
+    "optimum_design_bits": [
+      "10100101011000000100"
+    ],
+    "recorded_pool_count": 228,
+    "missing_from_recorded_pool": 24,
+    "rmse": 20.296953127255325,
+    "maximum_absolute_error": 56.79750000000047,
+    "r_squared": 0.9845988709743037,
+    "fit_orthogonality_error": 2.176470809134301e-14,
+    "optimum_surrogate_ranks": [
+      178
+    ],
+    "surrogate_minimum_design_bits": "11110100111101110110",
+    "surrogate_minimum_energy": 21.41750000000036,
+    "surrogate_minimum_repaired_energy": 45.40000000000012,
+    "surrogate_minimum_feasible": true,
+    "top50_maximum_absolute_error": 55.82250000000005,
+    "offset": 295.5975,
+    "brute_force_repair_maximum_error": 0.0,
+    "enumeration_seconds": 2.386323184000503,
+    "total_construction_validation_seconds": 9.370394318000763,
+    "coefficients_sha256": {
+      "linear.csv": "f643f2999643ce41ebfe5323fd21cd12b94cc059acc66745d252fbd48c522c4c",
+      "quadratic.csv": "42bd79445ac6339ff50aed68df2a5230489b0de370c7e53c6499ac93044c1845"
+    },
+    "input_provenance_sha256": "c195b16dcedfdc22647058c566d95672d1623503d39aa593a5d07094be6012ba",
+    "model_artifacts_sha256": {
+      "repaired_energies.npy": "6cd7e2272f9672d1134a48f2380518e20d46fa0d5002eb31221699c56ad4d107",
+      "surrogate_energies.npy": "0ed28122fc70f0a7b736f705e5cc9a12a84ae49da191b18c4f6408abf126dcdf",
+      "feasible.npy": "1b7f5cffd386057cd0c36297390c7348ba21413a03390f5e854c5bb0ea7243ef",
+      "objectives.npy": "517e5d964dfc07cf45786c1ab209142dd30a1287ff519759632c85d517d95980",
+      "feasible_selections.csv": "a2e2c265541f35f67357225cb4add754605d89b2d6cf1b4f980e85b8a48ab4af"
+    },
+    "feasible_flow_assignment_count": 252,
+    "feasible_selection_count": 84,
+    "selection_variables": 9,
+    "recorded_pool_selection_count": 84,
+    "legacy_model_artifacts_sha256": {
+      "repaired_energies.npy": "6cd7e2272f9672d1134a48f2380518e20d46fa0d5002eb31221699c56ad4d107",
+      "surrogate_energies.npy": "0ed28122fc70f0a7b736f705e5cc9a12a84ae49da191b18c4f6408abf126dcdf",
+      "feasible.npy": "1b7f5cffd386057cd0c36297390c7348ba21413a03390f5e854c5bb0ea7243ef",
+      "objectives.npy": "517e5d964dfc07cf45786c1ab209142dd30a1287ff519759632c85d517d95980",
+      "variable_map.json": "3e92756651f54c9e2cde7063716b45b7fbdad32aee56e0f2db9c9244d4896467",
+      "feasible_selections.csv": "a2e2c265541f35f67357225cb4add754605d89b2d6cf1b4f980e85b8a48ab4af",
+      "selection_definition.json": "ca5dc62dc5207de28b9bf88949c5fd428ef0d5945f553c3a1e55cbac878894cc"
+    }
+  },
+  "variable_map": {
+    "index_base": 0,
+    "variables": [
+      {
+        "qubo_index": 0,
+        "variable": "y(r1)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 1,
+        "variable": "y(r2)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 2,
+        "variable": "y(s1)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 3,
+        "variable": "y(s2)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 4,
+        "variable": "y(s3)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 5,
+        "variable": "z_cat(1)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 6,
+        "variable": "z_cat(2)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 7,
+        "variable": "z_an(1)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 8,
+        "variable": "z_an(2)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 9,
+        "variable": "f(srce_r1)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 10,
+        "variable": "f(r1_s1)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 11,
+        "variable": "f(r1_s2)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 12,
+        "variable": "f(r1_s3)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 13,
+        "variable": "f(srce_r2)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 14,
+        "variable": "f(r2_s1)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 15,
+        "variable": "f(r2_s2)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 16,
+        "variable": "f(r2_s3)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 17,
+        "variable": "f(s1_sink)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 18,
+        "variable": "f(s2_sink)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 19,
+        "variable": "f(s3_sink)",
+        "role": "design"
+      },
+      {
+        "qubo_index": 20,
+        "variable": "w(1_1)",
+        "role": "derived_product"
+      },
+      {
+        "qubo_index": 21,
+        "variable": "w(2_1)",
+        "role": "derived_product"
+      },
+      {
+        "qubo_index": 22,
+        "variable": "w(1_2)",
+        "role": "derived_product"
+      },
+      {
+        "qubo_index": 23,
+        "variable": "w(2_2)",
+        "role": "derived_product"
+      },
+      {
+        "qubo_index": 24,
+        "variable": "aux_24",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 25,
+        "variable": "aux_25",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 26,
+        "variable": "aux_26",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 27,
+        "variable": "aux_27",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 28,
+        "variable": "aux_28",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 29,
+        "variable": "aux_29",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 30,
+        "variable": "aux_30",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 31,
+        "variable": "aux_31",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 32,
+        "variable": "aux_32",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 33,
+        "variable": "aux_33",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 34,
+        "variable": "aux_34",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 35,
+        "variable": "aux_35",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 36,
+        "variable": "aux_36",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 37,
+        "variable": "aux_37",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 38,
+        "variable": "aux_38",
+        "role": "reformulation_auxiliary"
+      },
+      {
+        "qubo_index": 39,
+        "variable": "aux_39",
+        "role": "reformulation_auxiliary"
+      }
+    ],
+    "design_order": [
+      "y(r1)",
+      "y(r2)",
+      "y(s1)",
+      "y(s2)",
+      "y(s3)",
+      "z_cat(1)",
+      "z_cat(2)",
+      "z_an(1)",
+      "z_an(2)",
+      "f(srce_r1)",
+      "f(r1_s1)",
+      "f(r1_s2)",
+      "f(r1_s3)",
+      "f(srce_r2)",
+      "f(r2_s1)",
+      "f(r2_s2)",
+      "f(r2_s3)",
+      "f(s1_sink)",
+      "f(s2_sink)",
+      "f(s3_sink)"
+    ],
+    "repair_components": [
+      [
+        20,
+        39
+      ],
+      [
+        21,
+        36
+      ],
+      [
+        22,
+        37
+      ],
+      [
+        23,
+        38
+      ],
+      [
+        24,
+        25
+      ],
+      [
+        26,
+        27
+      ],
+      [
+        28,
+        29
+      ],
+      [
+        30,
+        31
+      ],
+      [
+        32,
+        33
+      ],
+      [
+        34,
+        35
+      ]
+    ],
+    "proof": "Independent coefficient-by-coefficient reconstruction from original objective, logic penalties, slack squares, and Rosenberg product reduction"
+  },
+  "selection_definition": {
+    "selection_order": [
+      "y(r1)",
+      "y(r2)",
+      "y(s1)",
+      "y(s2)",
+      "y(s3)",
+      "z_cat(1)",
+      "z_cat(2)",
+      "z_an(1)",
+      "z_an(2)"
+    ],
+    "feasible_selection_count": 84,
+    "feasible_flow_assignment_count": 252,
+    "interpretation": "Unit selections and ionic pair define an option; feasible routes are grouped within it.",
+    "coverage_policy": "Count a selection as covered only when an originally feasible sampled assignment represents it."
+  },
+  "rebuild_verification": {
+    "status": "passed",
+    "identical_artifacts": [
+      "linear.csv",
+      "quadratic.csv",
+      "repaired_energies.npy",
+      "surrogate_energies.npy",
+      "feasible.npy",
+      "objectives.npy",
+      "variable_map.json",
+      "feasible_designs.csv"
+    ],
+    "method": "Rebuilt from frozen inputs in a new output directory; all listed artifacts byte-identical."
+  },
+  "legacy_metadata_sha256": {
+    "summary.json": "128734015559adc11f5eb872416978be382a915a9e96398f1270bd815cd113f0",
+    "variable_map.json": "3e92756651f54c9e2cde7063716b45b7fbdad32aee56e0f2db9c9244d4896467",
+    "selection_definition.json": "ca5dc62dc5207de28b9bf88949c5fd428ef0d5945f553c3a1e55cbac878894cc",
+    "rebuild_verification.json": "4e255d72e28eb21c398fa4feb84d698a83b5488206f8f368d79d897f3b44c348"
+  },
+  "metadata_sections_sha256": {
+    "variable_map": "81f4ea257dd81afcf98c219591eeabf91a80125a994e3ab4c2574920d60189b0",
+    "selection_definition": "cfdecd1303028b72289fb8b5bae8cd3faf1748ef0642785be814db9876a9374a"
+  }
+}

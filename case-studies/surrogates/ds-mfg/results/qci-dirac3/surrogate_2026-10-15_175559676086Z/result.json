@@ -1,0 +1,762 @@
+{
+  "schema_version": 1,
+  "case": "ds-mfg",
+  "formulation": "surrogate",
+  "solver": "qci-dirac3",
+  "variables": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    17,
+    18,
+    16
+  ],
+  "status": "COMPLETED",
+  "solutions": [
+    [
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1
+    ],
+    [
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    [
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1
+    ]
+  ],
+  "energy": [
+    -11.31495624998729,
+    -4.1334812500047065,
+    0.6835187499918902,
+    57.07899374999306,
+    75.20011874999182
+  ],
+  "num_occurrences": [
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "num_samples": 5,
+  "execution_time": 2,
+  "execution_time_basis": "provider device usage seconds; not local wallclock",
+  "timing": {
+    "wallclock_seconds": 1.7951774849934736,
+    "setup_seconds": null,
+    "optimization_seconds": null,
+    "sampling_seconds": null,
+    "postprocessing_seconds": 0.060206355003174394,
+    "queue_seconds": 3188.772,
+    "device_seconds": 2,
+    "remote_turnaround_seconds": 3192.867,
+    "measurement_notes": "Partial local wallclock: earlier invocations were not timed; gaps between invocations excluded.",
+    "device_sample_computation_seconds": 1.719375074,
+    "device_job_wallclock_seconds": 3.701516684,
+    "provider_compute_wallclock_seconds": 3.986256826,
+    "provider_processing_wallclock_seconds": 4.15519514,
+    "provider_queue_seconds": 3188.737390996,
+    "provider_total_wallclock_seconds": 3192.892586136,
+    "device_access_seconds": null,
+    "device_sampling_seconds": null,
+    "details": {
+      "wallclock_seconds": {
+        "unit": "seconds",
+        "scope": "Local elapsed runner work; excludes gaps between invocations and final result-file write; shared batch setup is separate",
+        "availability": "partial",
+        "source": "Saved local runner measurement"
+      },
+      "setup_seconds": {
+        "unit": "seconds",
+        "scope": "Per-run local loading, model conversion and validation",
+        "availability": "not_recorded",
+        "source": null
+      },
+      "optimization_seconds": {
+        "unit": "seconds",
+        "scope": "Local gate parameter optimization",
+        "availability": "not_applicable",
+        "source": null
+      },
+      "sampling_seconds": {
+        "unit": "seconds",
+        "scope": "Local sampler/final gate-sampling call; not device computation time",
+        "availability": "not_applicable",
+        "source": null
+      },
+      "postprocessing_seconds": {
+        "unit": "seconds",
+        "scope": "Local result decoding, exact repair and scoring",
+        "availability": "recorded",
+        "source": "Saved local runner measurement"
+      },
+      "queue_seconds": {
+        "unit": "seconds",
+        "scope": "Provider job-status queued-to-running timestamp interval",
+        "availability": "recorded",
+        "source": "info.provider_response.job_info.job_status"
+      },
+      "device_seconds": {
+        "unit": "seconds",
+        "scope": "Provider-reported device usage; may be rounded/billable, not device elapsed time",
+        "availability": "recorded",
+        "source": "info.provider_response.job_info.job_result.device_usage_s"
+      },
+      "remote_turnaround_seconds": {
+        "unit": "seconds",
+        "scope": "Provider job-status submitted-to-completed timestamp interval",
+        "availability": "recorded",
+        "source": "info.provider_response.job_info.job_status"
+      },
+      "device_sample_computation_seconds": {
+        "unit": "seconds",
+        "scope": "Sum of QCI per-sample runtime values; excludes separately reported device preprocessing/postprocessing",
+        "availability": "derived_from_provider",
+        "source": "info.provider_metrics.job_metrics.time_ns.device.dirac-3_qudit.samples.runtime (sum / 1e9)"
+      },
+      "device_job_wallclock_seconds": {
+        "unit": "seconds",
+        "scope": "QCI device start_job_ts-to-end_job_ts interval",
+        "availability": "derived_from_provider",
+        "source": "info.provider_metrics.job_metrics.time_ns (native interval / 1e9)"
+      },
+      "provider_compute_wallclock_seconds": {
+        "unit": "seconds",
+        "scope": "QCI provider processing.compute interval",
+        "availability": "derived_from_provider",
+        "source": "info.provider_metrics.job_metrics.time_ns (native interval / 1e9)"
+      },
+      "provider_processing_wallclock_seconds": {
+        "unit": "seconds",
+        "scope": "QCI provider processing interval, including provider I/O",
+        "availability": "derived_from_provider",
+        "source": "info.provider_metrics.job_metrics.time_ns (native interval / 1e9)"
+      },
+      "provider_queue_seconds": {
+        "unit": "seconds",
+        "scope": "QCI detailed wall.queue interval; endpoints differ from job-status timestamps",
+        "availability": "derived_from_provider",
+        "source": "info.provider_metrics.job_metrics.time_ns (native interval / 1e9)"
+      },
+      "provider_total_wallclock_seconds": {
+        "unit": "seconds",
+        "scope": "QCI detailed wall.start-to-wall.end interval; endpoints differ from job-status timestamps",
+        "availability": "derived_from_provider",
+        "source": "info.provider_metrics.job_metrics.time_ns (native interval / 1e9)"
+      },
+      "device_access_seconds": {
+        "unit": "seconds",
+        "scope": "D-Wave qpu_access_time: reported charged QPU access interval, including programming and sampling",
+        "availability": "not_applicable",
+        "source": null
+      },
+      "device_sampling_seconds": {
+        "unit": "seconds",
+        "scope": "D-Wave qpu_sampling_time: anneal/readout/delay cycles; not QCI sample-computation scope",
+        "availability": "not_applicable",
+        "source": null
+      }
+    }
+  },
+  "timestamps": {
+    "created_utc": "2026-10-15T17:55:59.676086+00:00",
+    "submission_attempt_utc": "2026-10-15T17:56:13.320694+00:00",
+    "submitted_at_rfc3339nano": "2026-10-15T17:56:13.393Z",
+    "queued_at_rfc3339nano": "2026-10-15T17:56:13.394Z",
+    "running_at_rfc3339nano": "2026-10-15T18:49:22.166Z",
+    "completed_at_rfc3339nano": "2026-10-15T18:49:26.26Z",
+    "first_result_retrieved_utc": "2026-10-16T21:30:53.324458+00:00"
+  },
+  "info": {
+    "provider_response": {
+      "job_info": {
+        "job_id": "6ad113bd358b23d0cb3727ce",
+        "job_submission": {
+          "job_name": "ds-mfg-surrogate-five-sample-pilot",
+          "problem_config": {
+            "qudit_hamiltonian_optimization": {
+              "polynomial_file_id": "6ad113bdd190799f598c3d0e"
+            }
+          },
+          "device_config": {
+            "dirac-3_qudit": {
+              "num_levels": [
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2
+              ],
+              "num_samples": 5,
+              "relaxation_schedule": 1
+            }
+          }
+        },
+        "job_status": {
+          "submitted_at_rfc3339nano": "2026-10-15T17:56:13.393Z",
+          "queued_at_rfc3339nano": "2026-10-15T17:56:13.394Z",
+          "running_at_rfc3339nano": "2026-10-15T18:49:22.166Z",
+          "completed_at_rfc3339nano": "2026-10-15T18:49:26.26Z"
+        },
+        "job_result": {
+          "file_id": "6ad12036d190799f598c3e24",
+          "device_usage_s": 2
+        }
+      },
+      "status": "COMPLETED",
+      "results": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "energies": [
+          -155.91861,
+          -148.73715,
+          -143.92018,
+          -87.524734,
+          -69.40358
+        ],
+        "solutions": [
+          [
+            1,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            1,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            1,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    "polynomial_file_id": "6ad113bdd190799f598c3d0e",
+    "job_submission": {
+      "job_submission": {
+        "problem_config": {
+          "qudit_hamiltonian_optimization": {
+            "polynomial_file_id": "6ad113bdd190799f598c3d0e"
+          }
+        },
+        "device_config": {
+          "dirac-3_qudit": {
+            "num_samples": 5,
+            "num_levels": [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "relaxation_schedule": 1
+          }
+        },
+        "job_name": "ds-mfg-surrogate-five-sample-pilot"
+      }
+    },
+    "provider_metrics": {
+      "job_id": "6ad113bd358b23d0cb3727ce",
+      "job_metrics": {
+        "time_ns": {
+          "wall": {
+            "start": 1792086973394676421,
+            "queue": {
+              "start": 1792086973394676421,
+              "end": 1792090162132067417
+            },
+            "processing": {
+              "start": 1792090162132067417,
+              "io": {
+                "problem_download": {
+                  "start": 1792090162194989034,
+                  "end": 1792090162213191568
+                },
+                "results_upload": {
+                  "start": 1792090166228922885,
+                  "end": 1792090166248685089
+                }
+              },
+              "compute": {
+                "start": 1792090162226010883,
+                "end": 1792090166212267709
+              },
+              "end": 1792090166287262557
+            },
+            "end": 1792090166287262557
+          },
+          "device": {
+            "dirac-3_qudit": {
+              "samples": {
+                "start": 1792090162397185388,
+                "start_job_ts": 1792090162397190569,
+                "end_job_ts": 1792090166098707253,
+                "end": 1792090166098710413,
+                "preprocessing_time": 90023272,
+                "runtime": [
+                  316387981,
+                  316213906,
+                  387251765,
+                  318944186,
+                  380577236
+                ],
+                "postprocessing_time": [
+                  156249732,
+                  149473131,
+                  150278479,
+                  174066067,
+                  161706954
+                ],
+                "calibration_time": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "device_timing_seconds": {
+      "sample_computation_seconds": 1.719375074,
+      "per_sample_computation_seconds": [
+        0.316387981,
+        0.316213906,
+        0.387251765,
+        0.318944186,
+        0.380577236
+      ],
+      "device_job_wallclock_seconds": 3.701516684,
+      "device_preprocessing_seconds": 0.090023272,
+      "device_postprocessing_seconds": 0.791774363,
+      "device_calibration_seconds": 0.0,
+      "provider_compute_wallclock_seconds": 3.986256826,
+      "provider_processing_wallclock_seconds": 4.15519514,
+      "provider_queue_seconds": 3188.737390996,
+      "provider_total_wallclock_seconds": 3192.892586136,
+      "reported_device_usage_seconds": 2,
+      "source": "QCI get_job_metrics for existing job; provider nanosecond intervals converted to seconds",
+      "interpretation": "Sample computation sum, device-job elapsed, provider compute elapsed, and reported device usage have different boundaries; they are not additive."
+    }
+  },
+  "validation": {
+    "surrogate_states_checked": 524288,
+    "maximum_conversion_error": 9.094947017729282e-13,
+    "full_conversion_probes": 100,
+    "brute_force_repair_flows": 3,
+    "cached_top_flows_checked": 50,
+    "feasible_pool_count": 36,
+    "true_optimum_surrogate_rank": 33,
+    "surrogate_minimum": {
+      "flow_bits": "1001110110011100011",
+      "surrogate_energy": -14.838956249999,
+      "repaired_energy": 14.550499999999829,
+      "repaired_full_bits": "100111011001110001100000010101000011",
+      "feasible": true,
+      "feasible_cost": 14.5505,
+      "optimum_hit": false
+    },
+    "qci_polynomial_maximum_error": 4.547473508864641e-13
+  },
+  "scores": [
+    {
+      "sample_bits": "1001110101011100011",
+      "occurrences": 1,
+      "sampled_model_energy": -11.31495624998729,
+      "device_energy": -155.91861,
+      "device_energy_residual": 8.999997629643985e-05,
+      "flow_bits": "1001110101011100011",
+      "surrogate_energy": -11.31495624998729,
+      "repaired_energy": 18.074499999999716,
+      "repaired_full_bits": "100111010101110001100000010101000011",
+      "feasible": true,
+      "feasible_cost": 18.0745,
+      "optimum_hit": false,
+      "design_bits": "1001110101011100011",
+      "selection_bits": "1001110101011100011",
+      "auxiliary_gap": null
+    },
+    {
+      "sample_bits": "1010110110011010011",
+      "occurrences": 1,
+      "sampled_model_energy": -4.1334812500047065,
+      "device_energy": -148.73715,
+      "device_energy_residual": 7.499999369997568e-05,
+      "flow_bits": "1010110110011010011",
+      "surrogate_energy": -4.1334812500047065,
+      "repaired_energy": 14.568899999999985,
+      "repaired_full_bits": "101011011001101001100000010011010101",
+      "feasible": true,
+      "feasible_cost": 14.5689,
+      "optimum_hit": false,
+      "design_bits": "1010110110011010011",
+      "selection_bits": "1010110110011010011",
+      "auxiliary_gap": null
+    },
+    {
+      "sample_bits": "1010110110010000101",
+      "occurrences": 1,
+      "sampled_model_energy": 0.6835187499918902,
+      "device_energy": -143.92018,
+      "device_energy_residual": 4.499999712948011e-05,
+      "flow_bits": "1010110110010000101",
+      "surrogate_energy": 0.6835187499918902,
+      "repaired_energy": 19.385899999999992,
+      "repaired_full_bits": "101011011001000010100000010011010000",
+      "feasible": true,
+      "feasible_cost": 19.3859,
+      "optimum_hit": false,
+      "design_bits": "1010110110010000101",
+      "selection_bits": "1010110110010000101",
+      "auxiliary_gap": null
+    },
+    {
+      "sample_bits": "0000010110010000101",
+      "occurrences": 1,
+      "sampled_model_energy": 57.07899374999306,
+      "device_energy": -87.524734,
+      "device_energy_residual": 1.5999995952142854e-05,
+      "flow_bits": "0000010110010000101",
+      "surrogate_energy": 57.07899374999306,
+      "repaired_energy": 65.0942999999998,
+      "repaired_full_bits": "000001011001000010101000010111000000",
+      "feasible": false,
+      "feasible_cost": null,
+      "optimum_hit": false,
+      "design_bits": "0000010110010000101",
+      "selection_bits": "0000010110010000101",
+      "auxiliary_gap": null
+    },
+    {
+      "sample_bits": "1010110110000010011",
+      "occurrences": 1,
+      "sampled_model_energy": 75.20011874999182,
+      "device_energy": -69.40358,
+      "device_energy_residual": 4.4999997186323526e-05,
+      "flow_bits": "1010110110000010011",
+      "surrogate_energy": 75.20011874999182,
+      "repaired_energy": 93.90249999999992,
+      "repaired_full_bits": "101011011000001001100000010011010101",
+      "feasible": false,
+      "feasible_cost": null,
+      "optimum_hit": false,
+      "design_bits": "1010110110000010011",
+      "selection_bits": "1010110110000010011",
+      "auxiliary_gap": null
+    }
+  ],
+  "metrics": {
+    "optimum_hits": 0,
+    "feasible_hits": 3,
+    "unique_feasible_designs": 3,
+    "best_feasible_cost": 14.5689,
+    "maximum_device_energy_residual": 8.999997629643985e-05
+  },
+  "job_id": "6ad113bd358b23d0cb3727ce",
+  "comparison": {
+    "schema_version": 1,
+    "run": {
+      "run_id": "surrogate_2026-10-15_175559676086Z",
+      "job_id": "6ad113bd358b23d0cb3727ce",
+      "case": "ds-mfg",
+      "formulation": "surrogate",
+      "solver": "qci-dirac3",
+      "status": "COMPLETED",
+      "execution_context": "quantum hardware",
+      "execution_context_source": "Solver label and recorded historical metadata",
+      "historical": false,
+      "device": "dirac-3",
+      "seed": null,
+      "seed_policy": null,
+      "circuit": null
+    },
+    "input": {
+      "file": "input.json",
+      "sha256": "6686a1911c4c8afd3a0bed6ff97c2c5ba639fc92f344c5c6b7d281d05a01f42a",
+      "model_sha256": "6580d7a629718b35fd28fcd2b602d2004eb3cf82fd15865e07487376e36256d4",
+      "num_variables": 19,
+      "num_design_variables": 19,
+      "variable_order": "result.variables matches input.model.variables",
+      "requested_settings": "input.json: settings"
+    },
+    "samples": {
+      "requested": 5,
+      "returned": 5,
+      "distinct_sampled_states": 5,
+      "occurrence_weighting": "Counts and empirical rates include num_occurrences; distinct counts collapse repeated bitstrings"
+    },
+    "quality": {
+      "optimum_hits": 0,
+      "optimum_rate": 0.0,
+      "feasible_hits": 3,
+      "feasible_rate": 0.6,
+      "distinct_feasible_flow_assignments": 3,
+      "total_feasible_flow_assignments": 36,
+      "flow_assignment_coverage": 0.08333333333333333,
+      "distinct_feasible_selections": 3,
+      "total_feasible_selections": 36,
+      "selection_coverage": 0.08333333333333333,
+      "best_feasible_cost": 14.5689,
+      "mean_feasible_cost": 17.3431,
+      "reference_optimum_cost": 11.7095,
+      "best_feasible_cost_gap": 2.859399999999999,
+      "cost_basis": "Original feasible process-design objective; compare costs only within the same case",
+      "selection_definition": "Complete flow design; each reference feasible design is one selection",
+      "reference_source": {
+        "file": "ds-mfg/model/reduced_exact_top_flows.csv",
+        "sha256": "a42d356a999faf92328ec8900714d4ed31e8dbe783c6891128da69d183e6276a",
+        "fields": "flow_bits, repaired_full_bits, match, matched_ip_obj"
+      },
+      "rate_basis": "Observed occurrence-weighted frequencies from this run; not exact gate probabilities or independent-run uncertainty"
+    },
+    "energy": {
+      "minimum_sampled_model_energy": -11.31495624998729,
+      "mean_sampled_model_energy": 23.502838749996954,
+      "minimum_repaired_energy": 14.568899999999985,
+      "mean_repaired_energy": 42.20521999999988,
+      "minimum_surrogate_energy": -11.31495624998729,
+      "mean_surrogate_energy": 23.502838749996954,
+      "maximum_device_energy_residual": 8.999997629643985e-05,
+      "basis": "Canonical binary objective including offset; surrogate/model energy is distinct from original feasible cost"
+    },
+    "optimization": {
+      "applicable": false,
+      "converged": null,
+      "evaluations": null,
+      "exact_optimum_probability": null,
+      "exact_feasible_probability": null,
+      "exact_probability_basis": "Trained ideal-circuit distribution; separate from observed read frequencies"
+    },
+    "timing_reference": "timing: seconds with per-field scope, source and availability; overlapping intervals are not additive"
+  }
+}

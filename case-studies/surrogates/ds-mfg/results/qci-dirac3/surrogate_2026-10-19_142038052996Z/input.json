@@ -1,0 +1,2207 @@
+{
+  "schema_version": 1,
+  "case": "ds-mfg",
+  "formulation": "surrogate",
+  "solver": "qci-dirac3",
+  "model": {
+    "vartype": "BINARY",
+    "variables": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      17,
+      18,
+      16
+    ],
+    "scale": 1.0,
+    "offset": 144.603743749989,
+    "linear": [
+      39.748299999988376,
+      53.46427499997799,
+      53.47527499999342,
+      64.24495000001161,
+      85.4966000000195,
+      10.687074999988226,
+      101.14267500000642,
+      85.4966000000029,
+      81.00252500000056,
+      84.5265249999868,
+      46.10030000001166,
+      91.65960000001382,
+      85.49660000000449,
+      107.60975000001304,
+      107.71075000000224,
+      108.14175000001683,
+      86.82959999999684,
+      -1.3642420526593924e-11,
+      71.11245000001963
+    ],
+    "quadratic": [
+      [
+        0,
+        1,
+        -85.49659999999585
+      ],
+      [
+        0,
+        2,
+        -85.49659999999903
+      ],
+      [
+        0,
+        3,
+        -85.49660000000085
+      ],
+      [
+        0,
+        4,
+        -9.094947017729282e-13
+      ],
+      [
+        0,
+        5,
+        1.8189894035458565e-12
+      ],
+      [
+        0,
+        6,
+        1.3642420526593924e-12
+      ],
+      [
+        0,
+        7,
+        1.3642420526593924e-12
+      ],
+      [
+        0,
+        8,
+        1.8189894035458565e-12
+      ],
+      [
+        0,
+        9,
+        9.094947017729282e-13
+      ],
+      [
+        0,
+        10,
+        1.8189894035458565e-12
+      ],
+      [
+        0,
+        11,
+        -4.547473508864641e-13
+      ],
+      [
+        0,
+        12,
+        9.094947017729282e-13
+      ],
+      [
+        0,
+        13,
+        -9.094947017729282e-13
+      ],
+      [
+        0,
+        14,
+        1.8189894035458565e-12
+      ],
+      [
+        0,
+        15,
+        9.094947017729282e-13
+      ],
+      [
+        0,
+        16,
+        3.183231456205249e-12
+      ],
+      [
+        0,
+        17,
+        4.547473508864641e-12
+      ],
+      [
+        1,
+        2,
+        256.48980000000483
+      ],
+      [
+        1,
+        3,
+        235.11565000000155
+      ],
+      [
+        1,
+        4,
+        -85.49659999999903
+      ],
+      [
+        1,
+        5,
+        21.374150000005102
+      ],
+      [
+        1,
+        6,
+        -21.37415000000101
+      ],
+      [
+        1,
+        7,
+        2.7284841053187847e-12
+      ],
+      [
+        1,
+        8,
+        3.637978807091713e-12
+      ],
+      [
+        1,
+        9,
+        3.637978807091713e-12
+      ],
+      [
+        1,
+        10,
+        21.374150000000554
+      ],
+      [
+        1,
+        11,
+        9.094947017729282e-13
+      ],
+      [
+        1,
+        12,
+        9.094947017729282e-13
+      ],
+      [
+        1,
+        13,
+        1.8189894035458565e-12
+      ],
+      [
+        1,
+        14,
+        3.637978807091713e-12
+      ],
+      [
+        1,
+        15,
+        9.094947017729282e-13
+      ],
+      [
+        1,
+        16,
+        1.3642420526593924e-12
+      ],
+      [
+        1,
+        17,
+        3.183231456205249e-12
+      ],
+      [
+        1,
+        18,
+        1.8189894035458565e-12
+      ],
+      [
+        2,
+        3,
+        235.115649999997
+      ],
+      [
+        2,
+        4,
+        -85.49660000000222
+      ],
+      [
+        2,
+        5,
+        21.374150000000554
+      ],
+      [
+        2,
+        6,
+        -21.37414999999919
+      ],
+      [
+        2,
+        8,
+        1.8189894035458565e-12
+      ],
+      [
+        2,
+        9,
+        1.8189894035458565e-12
+      ],
+      [
+        2,
+        10,
+        21.374149999998735
+      ],
+      [
+        2,
+        11,
+        9.094947017729282e-13
+      ],
+      [
+        2,
+        13,
+        9.094947017729282e-13
+      ],
+      [
+        2,
+        14,
+        3.637978807091713e-12
+      ],
+      [
+        2,
+        15,
+        9.094947017729282e-13
+      ],
+      [
+        2,
+        16,
+        -4.547473508864641e-13
+      ],
+      [
+        2,
+        17,
+        4.547473508864641e-13
+      ],
+      [
+        2,
+        18,
+        1.8189894035458565e-12
+      ],
+      [
+        3,
+        4,
+        -85.49660000000222
+      ],
+      [
+        3,
+        5,
+        9.094947017729282e-13
+      ],
+      [
+        3,
+        6,
+        21.37415000000101
+      ],
+      [
+        3,
+        7,
+        -9.094947017729282e-13
+      ],
+      [
+        3,
+        9,
+        -9.094947017729282e-13
+      ],
+      [
+        3,
+        10,
+        21.374149999996007
+      ],
+      [
+        3,
+        11,
+        -1.8189894035458565e-12
+      ],
+      [
+        3,
+        12,
+        -2.7284841053187847e-12
+      ],
+      [
+        3,
+        13,
+        -9.094947017729282e-13
+      ],
+      [
+        3,
+        14,
+        -1.8189894035458565e-12
+      ],
+      [
+        3,
+        15,
+        -2.7284841053187847e-12
+      ],
+      [
+        3,
+        16,
+        -4.547473508864641e-13
+      ],
+      [
+        3,
+        17,
+        4.547473508864641e-13
+      ],
+      [
+        3,
+        18,
+        -3.637978807091713e-12
+      ],
+      [
+        4,
+        5,
+        -85.4966000000004
+      ],
+      [
+        4,
+        6,
+        -85.49660000000222
+      ],
+      [
+        4,
+        7,
+        -2.2737367544323206e-12
+      ],
+      [
+        4,
+        8,
+        -2.2737367544323206e-12
+      ],
+      [
+        4,
+        9,
+        -4.547473508864641e-13
+      ],
+      [
+        4,
+        10,
+        -2.7284841053187847e-12
+      ],
+      [
+        4,
+        11,
+        -4.092726157978177e-12
+      ],
+      [
+        4,
+        12,
+        -3.183231456205249e-12
+      ],
+      [
+        4,
+        13,
+        -2.7284841053187847e-12
+      ],
+      [
+        4,
+        14,
+        -9.094947017729282e-13
+      ],
+      [
+        4,
+        15,
+        -3.637978807091713e-12
+      ],
+      [
+        4,
+        16,
+        -1.3642420526593924e-12
+      ],
+      [
+        4,
+        17,
+        -1.3642420526593924e-12
+      ],
+      [
+        4,
+        18,
+        -4.547473508864641e-12
+      ],
+      [
+        5,
+        6,
+        213.74150000000054
+      ],
+      [
+        5,
+        7,
+        -85.49659999999767
+      ],
+      [
+        5,
+        8,
+        3.637978807091713e-12
+      ],
+      [
+        5,
+        9,
+        2.7284841053187847e-12
+      ],
+      [
+        5,
+        10,
+        42.7483000000002
+      ],
+      [
+        5,
+        11,
+        4.547473508864641e-13
+      ],
+      [
+        5,
+        12,
+        1.3642420526593924e-12
+      ],
+      [
+        5,
+        14,
+        9.094947017729282e-13
+      ],
+      [
+        5,
+        15,
+        -1.8189894035458565e-12
+      ],
+      [
+        5,
+        16,
+        3.183231456205249e-12
+      ],
+      [
+        5,
+        17,
+        4.092726157978177e-12
+      ],
+      [
+        5,
+        18,
+        -2.7284841053187847e-12
+      ],
+      [
+        6,
+        7,
+        -85.49660000000085
+      ],
+      [
+        6,
+        8,
+        1.3642420526593924e-12
+      ],
+      [
+        6,
+        9,
+        4.547473508864641e-13
+      ],
+      [
+        6,
+        10,
+        -21.37414999999919
+      ],
+      [
+        6,
+        11,
+        -3.637978807091713e-12
+      ],
+      [
+        6,
+        12,
+        -1.8189894035458565e-12
+      ],
+      [
+        6,
+        13,
+        -4.092726157978177e-12
+      ],
+      [
+        6,
+        14,
+        -4.547473508864641e-13
+      ],
+      [
+        6,
+        15,
+        -2.2737367544323206e-12
+      ],
+      [
+        6,
+        16,
+        -4.547473508864641e-13
+      ],
+      [
+        6,
+        17,
+        4.547473508864641e-13
+      ],
+      [
+        6,
+        18,
+        -2.2737367544323206e-12
+      ],
+      [
+        7,
+        8,
+        -85.49660000000222
+      ],
+      [
+        7,
+        9,
+        -85.49659999999722
+      ],
+      [
+        7,
+        10,
+        -85.49659999999994
+      ],
+      [
+        7,
+        11,
+        -3.183231456205249e-12
+      ],
+      [
+        7,
+        12,
+        -4.547473508864641e-13
+      ],
+      [
+        7,
+        13,
+        -9.094947017729282e-13
+      ],
+      [
+        7,
+        15,
+        -1.8189894035458565e-12
+      ],
+      [
+        7,
+        16,
+        -4.547473508864641e-13
+      ],
+      [
+        7,
+        17,
+        4.547473508864641e-13
+      ],
+      [
+        7,
+        18,
+        -1.8189894035458565e-12
+      ],
+      [
+        8,
+        9,
+        235.11565000000155
+      ],
+      [
+        8,
+        10,
+        235.11565000000155
+      ],
+      [
+        8,
+        11,
+        -85.49660000000085
+      ],
+      [
+        8,
+        12,
+        -9.094947017729282e-13
+      ],
+      [
+        8,
+        13,
+        -2.7284841053187847e-12
+      ],
+      [
+        8,
+        14,
+        9.094947017729282e-13
+      ],
+      [
+        8,
+        15,
+        -2.7284841053187847e-12
+      ],
+      [
+        8,
+        16,
+        -1.3642420526593924e-12
+      ],
+      [
+        8,
+        17,
+        -4.547473508864641e-13
+      ],
+      [
+        8,
+        18,
+        -3.637978807091713e-12
+      ],
+      [
+        9,
+        10,
+        235.115649999997
+      ],
+      [
+        9,
+        11,
+        -85.49659999999858
+      ],
+      [
+        9,
+        12,
+        2.7284841053187847e-12
+      ],
+      [
+        9,
+        14,
+        9.094947017729282e-13
+      ],
+      [
+        9,
+        16,
+        5.002220859751105e-12
+      ],
+      [
+        9,
+        17,
+        5.9117155615240335e-12
+      ],
+      [
+        9,
+        18,
+        -9.094947017729282e-13
+      ],
+      [
+        10,
+        11,
+        -85.49660000000176
+      ],
+      [
+        10,
+        12,
+        -9.094947017729282e-13
+      ],
+      [
+        10,
+        13,
+        -2.7284841053187847e-12
+      ],
+      [
+        10,
+        14,
+        -3.637978807091713e-12
+      ],
+      [
+        10,
+        15,
+        -3.637978807091713e-12
+      ],
+      [
+        10,
+        16,
+        4.547473508864641e-13
+      ],
+      [
+        10,
+        17,
+        4.547473508864641e-13
+      ],
+      [
+        10,
+        18,
+        -4.547473508864641e-12
+      ],
+      [
+        11,
+        12,
+        -85.49660000000176
+      ],
+      [
+        11,
+        13,
+        -2.7284841053187847e-12
+      ],
+      [
+        11,
+        14,
+        -1.8189894035458565e-12
+      ],
+      [
+        11,
+        15,
+        -1.8189894035458565e-12
+      ],
+      [
+        11,
+        16,
+        -1.8189894035458565e-12
+      ],
+      [
+        11,
+        17,
+        -4.547473508864641e-13
+      ],
+      [
+        11,
+        18,
+        -85.49660000000358
+      ],
+      [
+        12,
+        13,
+        -85.4966000000004
+      ],
+      [
+        12,
+        14,
+        -85.4966000000004
+      ],
+      [
+        12,
+        15,
+        -85.49660000000131
+      ],
+      [
+        12,
+        16,
+        -4.547473508864641e-13
+      ],
+      [
+        12,
+        17,
+        1.3642420526593924e-12
+      ],
+      [
+        12,
+        18,
+        85.49659999999858
+      ],
+      [
+        13,
+        14,
+        245.80272499999683
+      ],
+      [
+        13,
+        15,
+        245.802724999995
+      ],
+      [
+        13,
+        16,
+        -128.24489999999923
+      ],
+      [
+        13,
+        17,
+        2.2737367544323206e-12
+      ],
+      [
+        13,
+        18,
+        74.80952499999603
+      ],
+      [
+        14,
+        15,
+        245.80272499999683
+      ],
+      [
+        14,
+        16,
+        -128.24490000000014
+      ],
+      [
+        14,
+        17,
+        1.3642420526593924e-12
+      ],
+      [
+        14,
+        18,
+        74.80952499999785
+      ],
+      [
+        15,
+        16,
+        -128.24490000000105
+      ],
+      [
+        15,
+        17,
+        4.547473508864641e-13
+      ],
+      [
+        15,
+        18,
+        74.80952499999512
+      ],
+      [
+        16,
+        17,
+        -85.49659999999767
+      ],
+      [
+        16,
+        18,
+        128.24489999999787
+      ],
+      [
+        17,
+        18,
+        -85.49659999999949
+      ]
+    ],
+    "convention": "offset + linear[i]*x[i] + quadratic[i,j]*x[i]*x[j], i<j"
+  },
+  "settings": {
+    "device_type": "dirac-3",
+    "num_samples": 100,
+    "relaxation_schedule": 1,
+    "num_levels": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  "provenance": {
+    "implementation": {
+      "sha256": "6d93aac8457ba192f1775ac5792f7878227813cbf8294ce7d6a68944c243f4da",
+      "source": "#!/usr/bin/env python3\n\"\"\"Prepare a DS-MFG Dirac-1/Dirac-3 surrogate run, submit once, or collect by job ID.\"\"\"\nimport argparse\nimport importlib.metadata\nimport json\nimport os\nimport shutil\nfrom pathlib import Path\nimport sys\nimport time\n\nimport numpy as np\nfrom run_sa import ROOT, Scorer, assignments, digest, load_models, validate\nfrom run_io import (config, model_dict, create_run, read_json, result_template, save_result,\n                    timing, utc_now, begin_submission, add_samples, check_result, implementation, run_lock)\n\n\ndef prepare(output, device='dirac-3', num_samples=None):\n    if device not in ('dirac-1','dirac-3'):\n        raise ValueError('Unsupported device')\n    num_samples = (100 if device=='dirac-1' else 5) if num_samples is None else num_samples\n    if not 1 <= num_samples <= 100:\n        raise ValueError('Pilot sample count must be in [1, 100]')\n    started = time.perf_counter()\n    full, model = load_models()\n    validation = validate(full, model, Scorer(full, model))\n    x = assignments(model.n)\n    settings = {'device_type':device,'num_samples':num_samples}\n    if device=='dirac-1':\n        from qci_client.optimization.client import data_to_json\n        matrix = np.diag([float(model.bqm.linear[i]) for i in range(model.n)])\n        for (i,j),value in model.bqm.quadratic.items():\n            matrix[i,j] = matrix[j,i] = float(value)/2\n        qubo = {'file_name':'ds_mfg_surrogate_19_dirac1','file_config':{\n            'qubo':{'num_variables':model.n,'data':matrix.tolist()}}}\n        wire_file = data_to_json(file={'file_name':qubo['file_name'],\n                                      'file_config':{'qubo':{'data':matrix}}})\n        # Validate the actual sparse SDK representation, not only the dense matrix.\n        energy = np.zeros(len(x))\n        for term in wire_file['file_config']['qubo']['data']:\n            energy += term['val']*x[:,term['i']]*x[:,term['j']]\n        submission = {'job_type':'sample-qubo','qubo':qubo,'wire_file':wire_file}\n        validation_key = 'qci_qubo_maximum_error'\n        solver = 'qci-dirac1'\n    else:\n        terms = [{'idx':[0,i+1],'val':float(model.bqm.linear[i])} for i in range(model.n)]\n        for (i,j),value in model.bqm.quadratic.items():\n            i,j = sorted((i,j))\n            terms.append({'idx':[i+1,j+1],'val':float(value)})\n        energy = np.zeros(len(x))\n        for term in terms:\n            energy += term['val']*np.prod([x[:,i-1] for i in term['idx'] if i],axis=0)\n        polynomial = {'file_name':'ds_mfg_surrogate_19','file_config':{'polynomial':{\n            'num_variables':model.n,'min_degree':1,'max_degree':2,'data':terms}}}\n        submission = {'job_type':'sample-hamiltonian-integer','polynomial':polynomial}\n        settings.update(relaxation_schedule=1,num_levels=[2]*model.n)\n        validation_key = 'qci_polynomial_maximum_error'\n        solver = 'qci-dirac3'\n    error = float(np.max(np.abs(energy+model.bqm.offset-model.energies(x))))\n    if error > 1e-8:\n        raise AssertionError('QCI export energy mismatch')\n    validation[validation_key] = error\n    inp = config('ds-mfg','surrogate',solver,model_dict(model.bqm),settings,\n                 provenance={'implementation':implementation(__file__),\n                             'qci_client_version':importlib.metadata.version('qci-client'),\n                             'scorer_sha256':digest(Path(__file__).with_name('run_sa.py').read_bytes()),\n                             'full_coefficient_hashes':full.hashes,'surrogate_coefficient_hashes':model.hashes},\n                 submission=submission)\n    path = create_run(output,inp)\n    result = read_json(path/'result.json')\n    result['validation'] = validation\n    result['timing'] = timing(setup_seconds=time.perf_counter()-started,\n                             wallclock_seconds=time.perf_counter()-started,\n                             measurement_notes='Accumulated runner-invocation wallclock; excludes gaps between invocations and final JSON writes.')\n    save_result(path,result)\n    print('Prepared:',path)\n    return path\n\n\ndef client():\n    from qci_client import QciClient\n    return QciClient(url='https://api.qci-prod.com',api_token=os.environ['QCI_TOKEN'],timeout=30)\n\n\ndef add_local_time(result, started):\n    old = result['timing'].get('wallclock_seconds')\n    result['timing']['wallclock_seconds'] = (old or 0) + time.perf_counter()-started\n    if old is None:\n        result['timing']['measurement_notes'] = 'Partial local wallclock: earlier invocations were not timed; gaps between invocations excluded.'\n\n\ndef submit(path, api=None):\n    started = time.perf_counter()\n    inp = read_json(path/'input.json')\n    if inp['solver'] not in ('qci-dirac1','qci-dirac3'):\n        raise ValueError('Not a QCI run')\n    result = begin_submission(path)\n    job_requested = False\n    try:\n        api = api or client()\n        allocation = api.get_allocations()['allocations']['dirac']\n        if allocation['metered'] and allocation['seconds'] <= 0:\n            raise RuntimeError('No available Dirac allocation')\n        if inp['solver']=='qci-dirac1':\n            from qci_client.optimization.client import data_to_json\n            payload = inp['submission']['qubo']\n            payload = {'file_name':payload['file_name'],'file_config':{'qubo':{'data':np.asarray(payload['file_config']['qubo']['data'],dtype=float)}}}\n            if data_to_json(file=payload) != inp['submission']['wire_file']:\n                raise ValueError('SDK serialization differs from validated upload')\n            file_key = 'qubo_file_id'\n        else:\n            payload = inp['submission']['polynomial']\n            file_key = 'polynomial_file_id'\n        uploaded = api.upload_file(file=payload)\n        result['info'][file_key] = uploaded['file_id']\n        save_result(path,result)\n        body = api.build_job_body(job_type=inp['submission']['job_type'],job_params=inp['settings'],\n                                  **{file_key:uploaded['file_id']},job_name=f\"ds-mfg-surrogate-{inp['settings']['device_type']}-{inp['run_id']}\")\n        result['info']['job_submission'] = body\n        result['timestamps']['submitted_utc'] = utc_now()\n        save_result(path,result)\n        job_requested = True\n        submitted = api.submit_job(job_body=body)\n        result.update(job_id=submitted['job_id'],status='SUBMITTED')\n        print('Submitted:',submitted['job_id'])\n    except Exception as error:\n        # A timeout may hide a successful submission. Never automatically submit again.\n        # qci-client 4.5 wraps HTTPError and leaves response on the original cause.\n        cause = error\n        response = None\n        while cause is not None and response is None:\n            response = getattr(cause,'response',None)\n            cause = cause.__cause__\n        code = response.status_code if response is not None else None\n        result['status'] = 'FAILED' if not job_requested else 'REJECTED' if code is not None and 400<=code<500 else 'SUBMISSION_UNCERTAIN'\n        result['info']['failure_type'] = type(error).__name__\n        if code is not None:\n            result['info']['http_status'] = code\n            # Keep only provider error body, never request headers or credentials.\n            message = response.text[:2000]\n            token = os.environ.get('QCI_TOKEN')\n            result['info']['provider_error'] = message.replace(token,'[REDACTED]') if token else message\n        # Known no-job failures are not experiments and do not belong in results.\n        # Preserve ambiguous requests: a timed-out POST may already have created a job.\n        error.qci_status = result['status']\n        error.qci_http_status = result['info'].get('http_status')\n        error.qci_provider_error = result['info'].get('provider_error')\n        if result['status'] in ('FAILED','REJECTED') and not result.get('job_id'):\n            shutil.rmtree(path)\n        raise\n    finally:\n        if path.exists():\n            add_local_time(result,started)\n            save_result(path,result)\n\n\ndef _timestamp(value):\n    from datetime import datetime\n    return datetime.fromisoformat(value.replace('Z','+00:00'))\n\n\ndef provider_timing(result, response):\n    status = response['job_info'].get('job_status',{})\n    result['timestamps'].update(status)\n    def duration(a,b):\n        if not status.get(a) or not status.get(b):return None\n        return max(0.0,(_timestamp(status[b])-_timestamp(status[a])).total_seconds())\n    result['timing']['queue_seconds'] = duration('queued_at_rfc3339nano','running_at_rfc3339nano')\n    result['timing']['remote_turnaround_seconds'] = duration('submitted_at_rfc3339nano','completed_at_rfc3339nano')\n    result['timing']['device_seconds'] = response['job_info'].get('job_result',{}).get('device_usage_s')\n\n\ndef retrieve_metrics(api, result):\n    \"\"\"Get detailed timing for an existing job; timing failure never triggers resubmission.\"\"\"\n    if (result['info'].get('provider_metrics') or {}).get('job_metrics'):\n        return\n    method = getattr(api, 'get_job_metrics', None)\n    if method is None:\n        result['info']['provider_metrics_status'] = 'not supported by client'\n        return\n    try:\n        response = method(job_id=result['job_id'])\n        result['info']['provider_metrics'] = response\n        result['info']['provider_metrics_status'] = 'available' if response.get('job_metrics') else 'not returned by provider'\n        result['info'].pop('provider_metrics_failure_type', None)\n    except Exception as error:\n        result['info']['provider_metrics_status'] = 'unavailable; collection can be retried'\n        result['info']['provider_metrics_failure_type'] = type(error).__name__\n\n\ndef collect(path, api=None):\n    # Serialize collectors so an older QUEUED response cannot overwrite completed samples.\n    with run_lock(path):\n        return _collect(path, api)\n\n\ndef _collect(path, api=None):\n    started = time.perf_counter()\n    inp = read_json(path/'input.json')\n    result = read_json(path/'result.json')\n    if not result.get('job_id'):\n        raise RuntimeError('No saved job ID; reconcile submission before collection')\n    if result['status'] == 'COMPLETED':\n        if not (result['info'].get('provider_metrics') or {}).get('job_metrics'):\n            retrieve_metrics(api or client(), result)\n            add_local_time(result, started)\n        save_result(path, result)\n        print(json.dumps({'run':str(path),'status':'COMPLETED','metrics':result['metrics']}))\n        return result\n    api = api or client()\n    try:\n        response = api.get_job_results(job_id=result['job_id'])\n        result['info']['provider_response'] = response\n        provider_timing(result,response)\n        result['status'] = response['status']\n        if response['status'] == 'COMPLETED':\n            retrieve_metrics(api, result)\n            result['status'] = 'COLLECTING'\n            # Save the provider evidence before local scoring; collection remains retryable.\n            save_result(path,result)\n            post = time.perf_counter()\n            full, model = load_models()\n            provenance = inp['provenance']\n            if full.hashes != provenance['full_coefficient_hashes'] or model.hashes != provenance.get('surrogate_coefficient_hashes',provenance.get('coefficient_hashes')):\n                raise RuntimeError('Scoring coefficients changed since preparation')\n            if model_dict(model.bqm) != inp['model']:\n                raise RuntimeError('Sampling model changed since preparation')\n            scorer = Scorer(full,model)\n            rows = []\n            data = response['results']\n            for bits, energy, count in zip(data['solutions'],data['energies'],data['counts'],strict=True):\n                if len(bits)!=model.n or any(v not in (0,1) for v in bits) or int(count)!=count or count<=0:\n                    raise ValueError('Invalid returned sample')\n                bits=list(map(int,bits));local=float(model.energies(np.array([bits]))[0])\n                rows.append(dict(sample_bits=''.join(map(str,bits)),occurrences=int(count),\n                                 sampled_model_energy=local,device_energy=float(energy),\n                                 device_energy_residual=float(energy)+inp['model']['offset']-local,\n                                 **scorer.score(bits)))\n            if sum(r['occurrences'] for r in rows)!=inp['settings']['num_samples']:\n                raise ValueError('Sample count mismatch')\n            feasible=[r for r in rows if r['feasible']]\n            summary=dict(optimum_hits=sum(r['occurrences'] for r in rows if r['optimum_hit']),\n                         feasible_hits=sum(r['occurrences'] for r in feasible),\n                         unique_feasible_designs=len({r['flow_bits'] for r in feasible}),\n                         best_feasible_cost=min((r['feasible_cost'] for r in feasible),default=None),\n                         maximum_device_energy_residual=max(abs(r['device_energy_residual']) for r in rows))\n            add_samples(result,rows,summary)\n            result['execution_time']=result['timing']['device_seconds']\n            result['execution_time_basis']='provider device usage seconds; not local wallclock'\n            result['timing']['postprocessing_seconds']=time.perf_counter()-post\n            result['timestamps'].setdefault('first_result_retrieved_utc',utc_now())\n            result['status']='COMPLETED'\n            check_result(result)\n        print(json.dumps({'run':str(path),'status':result['status'],'metrics':result['metrics']}))\n    except Exception as error:\n        result['info']['collection_failure_type']=type(error).__name__\n        if result['status']=='COLLECTING':result['status']='COLLECTION_FAILED'\n        raise\n    finally:\n        add_local_time(result,started)\n        save_result(path,result)\n    return result\n\n\ndef main():\n    parser=argparse.ArgumentParser(description=__doc__)\n    parser.add_argument('--output',type=Path,default=ROOT/'results',help='Results root for preparation')\n    parser.add_argument('--device',choices=['dirac-1','dirac-3'],default='dirac-3',help='Device for preparation; existing runs use saved settings')\n    parser.add_argument('--num-samples',type=int,help='Pilot sample count: default 100 for Dirac-1, 5 for Dirac-3')\n    parser.add_argument('--run',type=Path,help='Existing generated run directory for submission/collection')\n    modes=parser.add_mutually_exclusive_group()\n    modes.add_argument('--submit',action='store_true')\n    modes.add_argument('--collect',action='store_true')\n    args=parser.parse_args()\n    if args.submit or args.collect:\n        if args.run is None:parser.error('--run is required for submission/collection')\n        (submit if args.submit else collect)(args.run)\n    else:\n        if args.run is not None:parser.error('--run is only used with --submit or --collect')\n        prepare(args.output,args.device,args.num_samples)\n\n\nif __name__=='__main__':\n    main()\n"
+    },
+    "qci_client_version": "4.5.0",
+    "scorer_sha256": "a6ad3cee944e499d3f38c99c00a0313d64c8667161c7a794319eb2dd0973ff4e",
+    "full_coefficient_hashes": {
+      "scalars.csv": "bbbbfb96ee95ea4c258c11e6fe92277d2c85dd72f84dc2c6050b9b48b7270970",
+      "L_vector.csv": "3118cdea19fd0c8edad6e946fe1240037ce7d4c8f6193ae4b6f810cd9e57e741",
+      "Q_matrix.csv": "8268aa515da0abfbcae31009c0cdef0b6b3ca9134ccc6b6a5a2efa708d3989bf"
+    },
+    "surrogate_coefficient_hashes": {
+      "scalars.csv": "646905475d8b0eecf8223d333c6a8392be0b63ca771e97b030602dc07a3c271c",
+      "L_vector.csv": "937cdf6cf4f5e8ae8bcd8a257a7cc7d05bf78bbfa0bffe4159d64607b5ebeb73",
+      "Q_matrix.csv": "50c2c4b032fa665507d7c1226819f2dadf97dac5698ccaca858feb28b98e83de"
+    },
+    "run_io_sha256": "de58b6b0819e49a5fd186fb50dd8af6d20ff926ff02c53f1beb5a5803c9ad96d"
+  },
+  "submission": {
+    "job_type": "sample-hamiltonian-integer",
+    "polynomial": {
+      "file_name": "ds_mfg_surrogate_19",
+      "file_config": {
+        "polynomial": {
+          "num_variables": 19,
+          "min_degree": 1,
+          "max_degree": 2,
+          "data": [
+            {
+              "idx": [
+                0,
+                1
+              ],
+              "val": 39.748299999988376
+            },
+            {
+              "idx": [
+                0,
+                2
+              ],
+              "val": 53.46427499997799
+            },
+            {
+              "idx": [
+                0,
+                3
+              ],
+              "val": 53.47527499999342
+            },
+            {
+              "idx": [
+                0,
+                4
+              ],
+              "val": 64.24495000001161
+            },
+            {
+              "idx": [
+                0,
+                5
+              ],
+              "val": 85.4966000000195
+            },
+            {
+              "idx": [
+                0,
+                6
+              ],
+              "val": 10.687074999988226
+            },
+            {
+              "idx": [
+                0,
+                7
+              ],
+              "val": 101.14267500000642
+            },
+            {
+              "idx": [
+                0,
+                8
+              ],
+              "val": 85.4966000000029
+            },
+            {
+              "idx": [
+                0,
+                9
+              ],
+              "val": 81.00252500000056
+            },
+            {
+              "idx": [
+                0,
+                10
+              ],
+              "val": 84.5265249999868
+            },
+            {
+              "idx": [
+                0,
+                11
+              ],
+              "val": 46.10030000001166
+            },
+            {
+              "idx": [
+                0,
+                12
+              ],
+              "val": 91.65960000001382
+            },
+            {
+              "idx": [
+                0,
+                13
+              ],
+              "val": 85.49660000000449
+            },
+            {
+              "idx": [
+                0,
+                14
+              ],
+              "val": 107.60975000001304
+            },
+            {
+              "idx": [
+                0,
+                15
+              ],
+              "val": 107.71075000000224
+            },
+            {
+              "idx": [
+                0,
+                16
+              ],
+              "val": 108.14175000001683
+            },
+            {
+              "idx": [
+                0,
+                17
+              ],
+              "val": 71.11245000001963
+            },
+            {
+              "idx": [
+                0,
+                18
+              ],
+              "val": 86.82959999999684
+            },
+            {
+              "idx": [
+                0,
+                19
+              ],
+              "val": -1.3642420526593924e-11
+            },
+            {
+              "idx": [
+                1,
+                2
+              ],
+              "val": -85.49659999999585
+            },
+            {
+              "idx": [
+                1,
+                3
+              ],
+              "val": -85.49659999999903
+            },
+            {
+              "idx": [
+                2,
+                3
+              ],
+              "val": 256.48980000000483
+            },
+            {
+              "idx": [
+                1,
+                4
+              ],
+              "val": -85.49660000000085
+            },
+            {
+              "idx": [
+                2,
+                4
+              ],
+              "val": 235.11565000000155
+            },
+            {
+              "idx": [
+                3,
+                4
+              ],
+              "val": 235.115649999997
+            },
+            {
+              "idx": [
+                1,
+                5
+              ],
+              "val": -9.094947017729282e-13
+            },
+            {
+              "idx": [
+                2,
+                5
+              ],
+              "val": -85.49659999999903
+            },
+            {
+              "idx": [
+                3,
+                5
+              ],
+              "val": -85.49660000000222
+            },
+            {
+              "idx": [
+                4,
+                5
+              ],
+              "val": -85.49660000000222
+            },
+            {
+              "idx": [
+                1,
+                6
+              ],
+              "val": 1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                2,
+                6
+              ],
+              "val": 21.374150000005102
+            },
+            {
+              "idx": [
+                3,
+                6
+              ],
+              "val": 21.374150000000554
+            },
+            {
+              "idx": [
+                4,
+                6
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                5,
+                6
+              ],
+              "val": -85.4966000000004
+            },
+            {
+              "idx": [
+                1,
+                7
+              ],
+              "val": 1.3642420526593924e-12
+            },
+            {
+              "idx": [
+                2,
+                7
+              ],
+              "val": -21.37415000000101
+            },
+            {
+              "idx": [
+                3,
+                7
+              ],
+              "val": -21.37414999999919
+            },
+            {
+              "idx": [
+                4,
+                7
+              ],
+              "val": 21.37415000000101
+            },
+            {
+              "idx": [
+                5,
+                7
+              ],
+              "val": -85.49660000000222
+            },
+            {
+              "idx": [
+                6,
+                7
+              ],
+              "val": 213.74150000000054
+            },
+            {
+              "idx": [
+                1,
+                8
+              ],
+              "val": 1.3642420526593924e-12
+            },
+            {
+              "idx": [
+                2,
+                8
+              ],
+              "val": 2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                4,
+                8
+              ],
+              "val": -9.094947017729282e-13
+            },
+            {
+              "idx": [
+                5,
+                8
+              ],
+              "val": -2.2737367544323206e-12
+            },
+            {
+              "idx": [
+                6,
+                8
+              ],
+              "val": -85.49659999999767
+            },
+            {
+              "idx": [
+                7,
+                8
+              ],
+              "val": -85.49660000000085
+            },
+            {
+              "idx": [
+                1,
+                9
+              ],
+              "val": 1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                2,
+                9
+              ],
+              "val": 3.637978807091713e-12
+            },
+            {
+              "idx": [
+                3,
+                9
+              ],
+              "val": 1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                5,
+                9
+              ],
+              "val": -2.2737367544323206e-12
+            },
+            {
+              "idx": [
+                6,
+                9
+              ],
+              "val": 3.637978807091713e-12
+            },
+            {
+              "idx": [
+                7,
+                9
+              ],
+              "val": 1.3642420526593924e-12
+            },
+            {
+              "idx": [
+                8,
+                9
+              ],
+              "val": -85.49660000000222
+            },
+            {
+              "idx": [
+                1,
+                10
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                2,
+                10
+              ],
+              "val": 3.637978807091713e-12
+            },
+            {
+              "idx": [
+                3,
+                10
+              ],
+              "val": 1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                4,
+                10
+              ],
+              "val": -9.094947017729282e-13
+            },
+            {
+              "idx": [
+                5,
+                10
+              ],
+              "val": -4.547473508864641e-13
+            },
+            {
+              "idx": [
+                6,
+                10
+              ],
+              "val": 2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                7,
+                10
+              ],
+              "val": 4.547473508864641e-13
+            },
+            {
+              "idx": [
+                8,
+                10
+              ],
+              "val": -85.49659999999722
+            },
+            {
+              "idx": [
+                9,
+                10
+              ],
+              "val": 235.11565000000155
+            },
+            {
+              "idx": [
+                1,
+                11
+              ],
+              "val": 1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                2,
+                11
+              ],
+              "val": 21.374150000000554
+            },
+            {
+              "idx": [
+                3,
+                11
+              ],
+              "val": 21.374149999998735
+            },
+            {
+              "idx": [
+                4,
+                11
+              ],
+              "val": 21.374149999996007
+            },
+            {
+              "idx": [
+                5,
+                11
+              ],
+              "val": -2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                6,
+                11
+              ],
+              "val": 42.7483000000002
+            },
+            {
+              "idx": [
+                7,
+                11
+              ],
+              "val": -21.37414999999919
+            },
+            {
+              "idx": [
+                8,
+                11
+              ],
+              "val": -85.49659999999994
+            },
+            {
+              "idx": [
+                9,
+                11
+              ],
+              "val": 235.11565000000155
+            },
+            {
+              "idx": [
+                10,
+                11
+              ],
+              "val": 235.115649999997
+            },
+            {
+              "idx": [
+                1,
+                12
+              ],
+              "val": -4.547473508864641e-13
+            },
+            {
+              "idx": [
+                2,
+                12
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                3,
+                12
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                4,
+                12
+              ],
+              "val": -1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                5,
+                12
+              ],
+              "val": -4.092726157978177e-12
+            },
+            {
+              "idx": [
+                6,
+                12
+              ],
+              "val": 4.547473508864641e-13
+            },
+            {
+              "idx": [
+                7,
+                12
+              ],
+              "val": -3.637978807091713e-12
+            },
+            {
+              "idx": [
+                8,
+                12
+              ],
+              "val": -3.183231456205249e-12
+            },
+            {
+              "idx": [
+                9,
+                12
+              ],
+              "val": -85.49660000000085
+            },
+            {
+              "idx": [
+                10,
+                12
+              ],
+              "val": -85.49659999999858
+            },
+            {
+              "idx": [
+                11,
+                12
+              ],
+              "val": -85.49660000000176
+            },
+            {
+              "idx": [
+                1,
+                13
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                2,
+                13
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                4,
+                13
+              ],
+              "val": -2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                5,
+                13
+              ],
+              "val": -3.183231456205249e-12
+            },
+            {
+              "idx": [
+                6,
+                13
+              ],
+              "val": 1.3642420526593924e-12
+            },
+            {
+              "idx": [
+                7,
+                13
+              ],
+              "val": -1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                8,
+                13
+              ],
+              "val": -4.547473508864641e-13
+            },
+            {
+              "idx": [
+                9,
+                13
+              ],
+              "val": -9.094947017729282e-13
+            },
+            {
+              "idx": [
+                10,
+                13
+              ],
+              "val": 2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                11,
+                13
+              ],
+              "val": -9.094947017729282e-13
+            },
+            {
+              "idx": [
+                12,
+                13
+              ],
+              "val": -85.49660000000176
+            },
+            {
+              "idx": [
+                1,
+                14
+              ],
+              "val": -9.094947017729282e-13
+            },
+            {
+              "idx": [
+                2,
+                14
+              ],
+              "val": 1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                3,
+                14
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                4,
+                14
+              ],
+              "val": -9.094947017729282e-13
+            },
+            {
+              "idx": [
+                5,
+                14
+              ],
+              "val": -2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                7,
+                14
+              ],
+              "val": -4.092726157978177e-12
+            },
+            {
+              "idx": [
+                8,
+                14
+              ],
+              "val": -9.094947017729282e-13
+            },
+            {
+              "idx": [
+                9,
+                14
+              ],
+              "val": -2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                11,
+                14
+              ],
+              "val": -2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                12,
+                14
+              ],
+              "val": -2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                13,
+                14
+              ],
+              "val": -85.4966000000004
+            },
+            {
+              "idx": [
+                1,
+                15
+              ],
+              "val": 1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                2,
+                15
+              ],
+              "val": 3.637978807091713e-12
+            },
+            {
+              "idx": [
+                3,
+                15
+              ],
+              "val": 3.637978807091713e-12
+            },
+            {
+              "idx": [
+                4,
+                15
+              ],
+              "val": -1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                5,
+                15
+              ],
+              "val": -9.094947017729282e-13
+            },
+            {
+              "idx": [
+                6,
+                15
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                7,
+                15
+              ],
+              "val": -4.547473508864641e-13
+            },
+            {
+              "idx": [
+                9,
+                15
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                10,
+                15
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                11,
+                15
+              ],
+              "val": -3.637978807091713e-12
+            },
+            {
+              "idx": [
+                12,
+                15
+              ],
+              "val": -1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                13,
+                15
+              ],
+              "val": -85.4966000000004
+            },
+            {
+              "idx": [
+                14,
+                15
+              ],
+              "val": 245.80272499999683
+            },
+            {
+              "idx": [
+                1,
+                16
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                2,
+                16
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                3,
+                16
+              ],
+              "val": 9.094947017729282e-13
+            },
+            {
+              "idx": [
+                4,
+                16
+              ],
+              "val": -2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                5,
+                16
+              ],
+              "val": -3.637978807091713e-12
+            },
+            {
+              "idx": [
+                6,
+                16
+              ],
+              "val": -1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                7,
+                16
+              ],
+              "val": -2.2737367544323206e-12
+            },
+            {
+              "idx": [
+                8,
+                16
+              ],
+              "val": -1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                9,
+                16
+              ],
+              "val": -2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                11,
+                16
+              ],
+              "val": -3.637978807091713e-12
+            },
+            {
+              "idx": [
+                12,
+                16
+              ],
+              "val": -1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                13,
+                16
+              ],
+              "val": -85.49660000000131
+            },
+            {
+              "idx": [
+                14,
+                16
+              ],
+              "val": 245.802724999995
+            },
+            {
+              "idx": [
+                15,
+                16
+              ],
+              "val": 245.80272499999683
+            },
+            {
+              "idx": [
+                1,
+                18
+              ],
+              "val": 3.183231456205249e-12
+            },
+            {
+              "idx": [
+                2,
+                18
+              ],
+              "val": 1.3642420526593924e-12
+            },
+            {
+              "idx": [
+                3,
+                18
+              ],
+              "val": -4.547473508864641e-13
+            },
+            {
+              "idx": [
+                4,
+                18
+              ],
+              "val": -4.547473508864641e-13
+            },
+            {
+              "idx": [
+                5,
+                18
+              ],
+              "val": -1.3642420526593924e-12
+            },
+            {
+              "idx": [
+                6,
+                18
+              ],
+              "val": 3.183231456205249e-12
+            },
+            {
+              "idx": [
+                7,
+                18
+              ],
+              "val": -4.547473508864641e-13
+            },
+            {
+              "idx": [
+                8,
+                18
+              ],
+              "val": -4.547473508864641e-13
+            },
+            {
+              "idx": [
+                9,
+                18
+              ],
+              "val": -1.3642420526593924e-12
+            },
+            {
+              "idx": [
+                10,
+                18
+              ],
+              "val": 5.002220859751105e-12
+            },
+            {
+              "idx": [
+                11,
+                18
+              ],
+              "val": 4.547473508864641e-13
+            },
+            {
+              "idx": [
+                12,
+                18
+              ],
+              "val": -1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                13,
+                18
+              ],
+              "val": -4.547473508864641e-13
+            },
+            {
+              "idx": [
+                14,
+                18
+              ],
+              "val": -128.24489999999923
+            },
+            {
+              "idx": [
+                15,
+                18
+              ],
+              "val": -128.24490000000014
+            },
+            {
+              "idx": [
+                16,
+                18
+              ],
+              "val": -128.24490000000105
+            },
+            {
+              "idx": [
+                1,
+                19
+              ],
+              "val": 4.547473508864641e-12
+            },
+            {
+              "idx": [
+                2,
+                19
+              ],
+              "val": 3.183231456205249e-12
+            },
+            {
+              "idx": [
+                3,
+                19
+              ],
+              "val": 4.547473508864641e-13
+            },
+            {
+              "idx": [
+                4,
+                19
+              ],
+              "val": 4.547473508864641e-13
+            },
+            {
+              "idx": [
+                5,
+                19
+              ],
+              "val": -1.3642420526593924e-12
+            },
+            {
+              "idx": [
+                6,
+                19
+              ],
+              "val": 4.092726157978177e-12
+            },
+            {
+              "idx": [
+                7,
+                19
+              ],
+              "val": 4.547473508864641e-13
+            },
+            {
+              "idx": [
+                8,
+                19
+              ],
+              "val": 4.547473508864641e-13
+            },
+            {
+              "idx": [
+                9,
+                19
+              ],
+              "val": -4.547473508864641e-13
+            },
+            {
+              "idx": [
+                10,
+                19
+              ],
+              "val": 5.9117155615240335e-12
+            },
+            {
+              "idx": [
+                11,
+                19
+              ],
+              "val": 4.547473508864641e-13
+            },
+            {
+              "idx": [
+                12,
+                19
+              ],
+              "val": -4.547473508864641e-13
+            },
+            {
+              "idx": [
+                13,
+                19
+              ],
+              "val": 1.3642420526593924e-12
+            },
+            {
+              "idx": [
+                14,
+                19
+              ],
+              "val": 2.2737367544323206e-12
+            },
+            {
+              "idx": [
+                15,
+                19
+              ],
+              "val": 1.3642420526593924e-12
+            },
+            {
+              "idx": [
+                16,
+                19
+              ],
+              "val": 4.547473508864641e-13
+            },
+            {
+              "idx": [
+                18,
+                19
+              ],
+              "val": -85.49659999999767
+            },
+            {
+              "idx": [
+                2,
+                17
+              ],
+              "val": 1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                3,
+                17
+              ],
+              "val": 1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                4,
+                17
+              ],
+              "val": -3.637978807091713e-12
+            },
+            {
+              "idx": [
+                5,
+                17
+              ],
+              "val": -4.547473508864641e-12
+            },
+            {
+              "idx": [
+                6,
+                17
+              ],
+              "val": -2.7284841053187847e-12
+            },
+            {
+              "idx": [
+                7,
+                17
+              ],
+              "val": -2.2737367544323206e-12
+            },
+            {
+              "idx": [
+                8,
+                17
+              ],
+              "val": -1.8189894035458565e-12
+            },
+            {
+              "idx": [
+                9,
+                17
+              ],
+              "val": -3.637978807091713e-12
+            },
+            {
+              "idx": [
+                10,
+                17
+              ],
+              "val": -9.094947017729282e-13
+            },
+            {
+              "idx": [
+                11,
+                17
+              ],
+              "val": -4.547473508864641e-12
+            },
+            {
+              "idx": [
+                12,
+                17
+              ],
+              "val": -85.49660000000358
+            },
+            {
+              "idx": [
+                13,
+                17
+              ],
+              "val": 85.49659999999858
+            },
+            {
+              "idx": [
+                14,
+                17
+              ],
+              "val": 74.80952499999603
+            },
+            {
+              "idx": [
+                15,
+                17
+              ],
+              "val": 74.80952499999785
+            },
+            {
+              "idx": [
+                16,
+                17
+              ],
+              "val": 74.80952499999512
+            },
+            {
+              "idx": [
+                17,
+                18
+              ],
+              "val": 128.24489999999787
+            },
+            {
+              "idx": [
+                17,
+                19
+              ],
+              "val": -85.49659999999949
+            }
+          ]
+        }
+      }
+    }
+  },
+  "run_id": "surrogate_2026-10-19_142038052996Z",
+  "created_utc": "2026-10-19T14:20:38.053325+00:00"
+}

@@ -1,0 +1,697 @@
+{
+  "schema_version": 1,
+  "case": "ds-mfg",
+  "formulation": "full_qubo",
+  "solver": "sa",
+  "model": {
+    "vartype": "BINARY",
+    "variables": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      10,
+      20,
+      24,
+      25,
+      30,
+      31,
+      26,
+      27,
+      28,
+      29,
+      7,
+      21,
+      32,
+      8,
+      9,
+      11,
+      22,
+      12,
+      16,
+      13,
+      14,
+      15,
+      17,
+      23,
+      33,
+      34,
+      35,
+      18,
+      19
+    ],
+    "scale": 1.0,
+    "offset": 601.4761999999997,
+    "linear": [
+      39.74829999999999,
+      -42.71939999999999,
+      -42.70839999999999,
+      -85.37409999999997,
+      85.49659999999999,
+      -42.74829999999999,
+      175.95219999999998,
+      -210.38949999999997,
+      -42.74829999999999,
+      -42.74829999999999,
+      -42.74829999999999,
+      128.24489999999997,
+      128.24489999999997,
+      -42.74829999999999,
+      -42.74829999999999,
+      -128.24489999999997,
+      -128.24489999999997,
+      85.49659999999999,
+      -42.74829999999999,
+      128.24489999999997,
+      48.94129999999999,
+      52.46529999999999,
+      91.65959999999998,
+      -42.74829999999999,
+      85.49659999999999,
+      6.990000000000002,
+      86.23559999999998,
+      86.33659999999998,
+      86.76759999999999,
+      172.32619999999997,
+      -42.74829999999999,
+      42.74829999999999,
+      42.74829999999999,
+      42.74829999999999,
+      0.0,
+      -42.74829999999999
+    ],
+    "quadratic": [
+      [
+        0,
+        1,
+        -85.49659999999999
+      ],
+      [
+        0,
+        2,
+        -85.49659999999999
+      ],
+      [
+        0,
+        3,
+        -85.49659999999999
+      ],
+      [
+        1,
+        2,
+        341.98639999999995
+      ],
+      [
+        1,
+        3,
+        256.48979999999995
+      ],
+      [
+        1,
+        4,
+        -85.49659999999999
+      ],
+      [
+        1,
+        5,
+        85.49659999999999
+      ],
+      [
+        1,
+        6,
+        -85.49659999999999
+      ],
+      [
+        1,
+        7,
+        85.49659999999999
+      ],
+      [
+        1,
+        8,
+        85.49659999999999
+      ],
+      [
+        1,
+        9,
+        85.49659999999999
+      ],
+      [
+        1,
+        10,
+        85.49659999999999
+      ],
+      [
+        1,
+        11,
+        -85.49659999999999
+      ],
+      [
+        1,
+        12,
+        -85.49659999999999
+      ],
+      [
+        2,
+        3,
+        256.48979999999995
+      ],
+      [
+        2,
+        4,
+        -85.49659999999999
+      ],
+      [
+        2,
+        5,
+        85.49659999999999
+      ],
+      [
+        2,
+        6,
+        -85.49659999999999
+      ],
+      [
+        2,
+        7,
+        85.49659999999999
+      ],
+      [
+        2,
+        8,
+        85.49659999999999
+      ],
+      [
+        2,
+        11,
+        -85.49659999999999
+      ],
+      [
+        2,
+        12,
+        -85.49659999999999
+      ],
+      [
+        2,
+        13,
+        85.49659999999999
+      ],
+      [
+        2,
+        14,
+        85.49659999999999
+      ],
+      [
+        3,
+        4,
+        -85.49659999999999
+      ],
+      [
+        3,
+        6,
+        85.49659999999999
+      ],
+      [
+        3,
+        7,
+        85.49659999999999
+      ],
+      [
+        3,
+        8,
+        85.49659999999999
+      ],
+      [
+        3,
+        15,
+        85.49659999999999
+      ],
+      [
+        3,
+        16,
+        85.49659999999999
+      ],
+      [
+        4,
+        5,
+        -85.49659999999999
+      ],
+      [
+        4,
+        6,
+        -85.49659999999999
+      ],
+      [
+        5,
+        6,
+        256.48979999999995
+      ],
+      [
+        5,
+        7,
+        85.49659999999999
+      ],
+      [
+        5,
+        11,
+        -85.49659999999999
+      ],
+      [
+        5,
+        12,
+        -85.49659999999999
+      ],
+      [
+        5,
+        17,
+        -85.49659999999999
+      ],
+      [
+        5,
+        18,
+        85.49659999999999
+      ],
+      [
+        5,
+        19,
+        -85.49659999999999
+      ],
+      [
+        6,
+        7,
+        -85.49659999999999
+      ],
+      [
+        6,
+        9,
+        -85.49659999999999
+      ],
+      [
+        6,
+        10,
+        -85.49659999999999
+      ],
+      [
+        6,
+        13,
+        -85.49659999999999
+      ],
+      [
+        6,
+        14,
+        -85.49659999999999
+      ],
+      [
+        6,
+        15,
+        85.49659999999999
+      ],
+      [
+        6,
+        16,
+        85.49659999999999
+      ],
+      [
+        6,
+        17,
+        -85.49659999999999
+      ],
+      [
+        6,
+        18,
+        85.49659999999999
+      ],
+      [
+        7,
+        9,
+        85.49659999999999
+      ],
+      [
+        7,
+        10,
+        85.49659999999999
+      ],
+      [
+        7,
+        13,
+        85.49659999999999
+      ],
+      [
+        7,
+        14,
+        85.49659999999999
+      ],
+      [
+        7,
+        15,
+        85.49659999999999
+      ],
+      [
+        7,
+        16,
+        85.49659999999999
+      ],
+      [
+        7,
+        17,
+        -85.49659999999999
+      ],
+      [
+        7,
+        19,
+        -85.49659999999999
+      ],
+      [
+        7,
+        20,
+        256.48979999999995
+      ],
+      [
+        7,
+        21,
+        256.48979999999995
+      ],
+      [
+        7,
+        22,
+        -85.49659999999999
+      ],
+      [
+        7,
+        23,
+        85.49659999999999
+      ],
+      [
+        9,
+        10,
+        85.49659999999999
+      ],
+      [
+        11,
+        12,
+        85.49659999999999
+      ],
+      [
+        13,
+        14,
+        85.49659999999999
+      ],
+      [
+        15,
+        16,
+        85.49659999999999
+      ],
+      [
+        17,
+        20,
+        -85.49659999999999
+      ],
+      [
+        17,
+        21,
+        -85.49659999999999
+      ],
+      [
+        20,
+        21,
+        256.48979999999995
+      ],
+      [
+        20,
+        22,
+        -85.49659999999999
+      ],
+      [
+        20,
+        23,
+        85.49659999999999
+      ],
+      [
+        21,
+        22,
+        -85.49659999999999
+      ],
+      [
+        21,
+        23,
+        85.49659999999999
+      ],
+      [
+        22,
+        24,
+        -85.49659999999999
+      ],
+      [
+        22,
+        25,
+        -85.49659999999999
+      ],
+      [
+        24,
+        25,
+        85.49659999999999
+      ],
+      [
+        24,
+        26,
+        -85.49659999999999
+      ],
+      [
+        24,
+        27,
+        -85.49659999999999
+      ],
+      [
+        24,
+        28,
+        -85.49659999999999
+      ],
+      [
+        25,
+        26,
+        85.49659999999999
+      ],
+      [
+        25,
+        27,
+        85.49659999999999
+      ],
+      [
+        25,
+        28,
+        85.49659999999999
+      ],
+      [
+        25,
+        29,
+        170.99319999999997
+      ],
+      [
+        25,
+        30,
+        85.49659999999999
+      ],
+      [
+        25,
+        34,
+        -85.49659999999999
+      ],
+      [
+        25,
+        35,
+        85.49659999999999
+      ],
+      [
+        26,
+        27,
+        256.48979999999995
+      ],
+      [
+        26,
+        28,
+        256.48979999999995
+      ],
+      [
+        26,
+        29,
+        -170.99319999999997
+      ],
+      [
+        26,
+        30,
+        85.49659999999999
+      ],
+      [
+        26,
+        31,
+        85.49659999999999
+      ],
+      [
+        27,
+        28,
+        256.48979999999995
+      ],
+      [
+        27,
+        29,
+        -170.99319999999997
+      ],
+      [
+        27,
+        30,
+        85.49659999999999
+      ],
+      [
+        27,
+        32,
+        85.49659999999999
+      ],
+      [
+        28,
+        29,
+        -170.99319999999997
+      ],
+      [
+        28,
+        30,
+        85.49659999999999
+      ],
+      [
+        28,
+        33,
+        85.49659999999999
+      ],
+      [
+        29,
+        31,
+        -85.49659999999999
+      ],
+      [
+        29,
+        32,
+        -85.49659999999999
+      ],
+      [
+        29,
+        33,
+        -85.49659999999999
+      ],
+      [
+        29,
+        34,
+        -85.49659999999999
+      ],
+      [
+        29,
+        35,
+        85.49659999999999
+      ]
+    ],
+    "convention": "offset + linear[i]*x[i] + quadratic[i,j]*x[i]*x[j], i<j"
+  },
+  "settings": {
+    "num_reads": 1000
+  },
+  "provenance": {
+    "legacy_manifest": {
+      "created_utc": "2026-10-04T19:08:28.184006+00:00",
+      "protocol_revision": "a2cb3124e07df04d984454034f913e33ef5adcfd",
+      "quantum_execution": "disabled; no quantum runner",
+      "python": "3.12.1",
+      "executable": "/home/yirangpark/miniconda3/envs/opti/bin/python",
+      "packages": {
+        "numpy": "1.26.4",
+        "dimod": "0.12.21",
+        "dwave-neal": "0.6.0",
+        "dwave-samplers": "1.7.0"
+      },
+      "sampler_signature": "(self, bqm: dimod.binary.binary_quadratic_model.BinaryQuadraticModel, beta_range: Union[List[float], Tuple[float, float], NoneType] = None, num_reads: Optional[int] = None, num_sweeps: Optional[int] = None, num_sweeps_per_beta: int = 1, beta_schedule_type: Literal['linear', 'geometric', 'custom'] = 'geometric', seed: Optional[int] = None, interrupt_function=None, beta_schedule: Union[Sequence[float], numpy.ndarray, NoneType] = None, initial_states: Union[collections.abc.Sequence[Union[float, numpy.floating, numpy.integer]], collections.abc.Mapping[collections.abc.Hashable, Union[float, numpy.floating, numpy.integer]], tuple[collections.abc.Sequence[Union[float, numpy.floating, numpy.integer]], collections.abc.Sequence[collections.abc.Hashable]], tuple[numpy.ndarray, collections.abc.Sequence[collections.abc.Hashable]], numpy.ndarray, collections.abc.Sequence[collections.abc.Sequence[Union[float, numpy.floating, numpy.integer]]], tuple[collections.abc.Sequence[collections.abc.Sequence[Union[float, numpy.floating, numpy.integer]]], collections.abc.Sequence[collections.abc.Hashable]], collections.abc.Sequence[Union[collections.abc.Sequence[Union[float, numpy.floating, numpy.integer]], collections.abc.Mapping[collections.abc.Hashable, Union[float, numpy.floating, numpy.integer]], tuple[collections.abc.Sequence[Union[float, numpy.floating, numpy.integer]], collections.abc.Sequence[collections.abc.Hashable]], tuple[numpy.ndarray, collections.abc.Sequence[collections.abc.Hashable]], numpy.ndarray]], collections.abc.Iterator[Union[collections.abc.Sequence[Union[float, numpy.floating, numpy.integer]], collections.abc.Mapping[collections.abc.Hashable, Union[float, numpy.floating, numpy.integer]], tuple[collections.abc.Sequence[Union[float, numpy.floating, numpy.integer]], collections.abc.Sequence[collections.abc.Hashable]], tuple[numpy.ndarray, collections.abc.Sequence[collections.abc.Hashable]], numpy.ndarray]], NoneType] = None, initial_states_generator: Literal['none', 'tile', 'random'] = 'random', randomize_order: bool = False, proposal_acceptance_criteria: str = 'Metropolis', **kwargs) -> dimod.sampleset.SampleSet",
+      "sampler_source_sha256": "cb6c90e1511f0ee550254380ff70293a0495d88ef06992750e6f6d036e38e4d6",
+      "runner_sha256": "0df007269df03b2a3a264524102ced7a2a95751f2ee17677d5df4a98f81c9c2c",
+      "ip_scorer_sha256": "acfb7f509af4a075ab7549734e851141a2ce26c9450a80e74654abe0d2338e93",
+      "auxiliary_components_sha256": "ac5b758ae6d27dd9bd8e2c5264304b5921da68dc507ca3e99c5d1b6d30757d51",
+      "full_coefficient_hashes": {
+        "scalars.csv": "bbbbfb96ee95ea4c258c11e6fe92277d2c85dd72f84dc2c6050b9b48b7270970",
+        "L_vector.csv": "3118cdea19fd0c8edad6e946fe1240037ce7d4c8f6193ae4b6f810cd9e57e741",
+        "Q_matrix.csv": "8268aa515da0abfbcae31009c0cdef0b6b3ca9134ccc6b6a5a2efa708d3989bf"
+      },
+      "surrogate_coefficient_hashes": {
+        "scalars.csv": "646905475d8b0eecf8223d333c6a8392be0b63ca771e97b030602dc07a3c271c",
+        "L_vector.csv": "937cdf6cf4f5e8ae8bcd8a257a7cc7d05bf78bbfa0bffe4159d64607b5ebeb73",
+        "Q_matrix.csv": "50c2c4b032fa665507d7c1226819f2dadf97dac5698ccaca858feb28b98e83de"
+      },
+      "baseline_audit": {
+        "path": "/home/yirangpark/repos/secquoia/pd_ising",
+        "revision": "2ffd2aa01f5fab7743e8724a44975fa4ef573807",
+        "worktree_dirty": true,
+        "coefficient_match": true,
+        "coefficient_hashes": {
+          "scalars.csv": "bbbbfb96ee95ea4c258c11e6fe92277d2c85dd72f84dc2c6050b9b48b7270970",
+          "L_vector.csv": "3118cdea19fd0c8edad6e946fe1240037ce7d4c8f6193ae4b6f810cd9e57e741",
+          "Q_matrix.csv": "8268aa515da0abfbcae31009c0cdef0b6b3ca9134ccc6b6a5a2efa708d3989bf"
+        },
+        "results": [
+          {
+            "file": "Dwave_QA_results_1_20250819_114708.json",
+            "sha256": "3769c6d505fcf603fa354f921f6103f5ca51358c2b943c86b381f5989f4b7d3e",
+            "solver": "dwave_qpu",
+            "num_samples": 1000,
+            "has_assignments": false
+          },
+          {
+            "file": "Dwave_QA_results_20251121_170656.json",
+            "sha256": "e14c50a20e0f956a9a0ae16ca3dad556a7019b5a726745b160eda5b5181d11a6",
+            "solver": "dwave_qpu_Advantage2_system1.8",
+            "num_samples": 1000,
+            "has_assignments": false
+          },
+          {
+            "file": "Dwave_QA_results_20260626_143653.json",
+            "sha256": "c66e4206d41b2170b01707041cd67c1f5e0c8461e9f86ce95e1af7d418206be4",
+            "solver": "dwave_qpu_Advantage2_system1",
+            "num_samples": 1000,
+            "has_assignments": false
+          },
+          {
+            "file": "Dwave_QA_results_20260626_143707.json",
+            "sha256": "9de959ced8980b932216662fb58181194a7dbb6c506dd5b30ac2c908d6f750d1",
+            "solver": "dwave_qpu_Advantage_system4",
+            "num_samples": 1000,
+            "has_assignments": false
+          },
+          {
+            "file": "Dwave_QA_results_ds_default_20260624_063641.json",
+            "sha256": "7bc0400a036e7beb99a8a099e0f621dc7f9fe0e192ec49e26c2ecf472f29ebb9",
+            "solver": "dwave_qpu_Advantage2_system1",
+            "num_samples": 1000,
+            "has_assignments": false
+          },
+          {
+            "file": "Dwave_QA_results_ds_zephyr_20260624_063654.json",
+            "sha256": "4089e88ed099ee7184e78f2c81ed22acb38b0ff0ad9c2da3f766cc802c1dab33",
+            "solver": "dwave_qpu_Advantage2_system1",
+            "num_samples": 1000,
+            "has_assignments": false
+          },
+          {
+            "file": "SA_results_20250819_163847.json",
+            "sha256": "2f7545fefd43177b451603e90b1a35950f75afc0a03e2fb9857ccde153889d22",
+            "solver": "simulated_annealing",
+            "num_samples": 1000,
+            "has_assignments": false
+          }
+        ]
+      },
+      "historical_environment_match": "unverified",
+      "validation_and_setup_seconds": 1.5598650190004264,
+      "seed_policy": "sampler default",
+      "repeats": 1
+    },
+    "sampler_implementation": "    def sample(self, bqm: dimod.BinaryQuadraticModel,\n               beta_range: Optional[Union[List[float], Tuple[float, float]]] = None,\n               num_reads: Optional[int] = None,\n               num_sweeps: Optional[int] = None,\n               num_sweeps_per_beta: int = 1,\n               beta_schedule_type: BetaScheduleType = \"geometric\",\n               seed: Optional[int] = None,\n               interrupt_function = None,\n               beta_schedule: Optional[Union[Sequence[float], np.ndarray]] = None,\n               initial_states: Optional[dimod.typing.SamplesLike] = None,\n               initial_states_generator: InitialStateGenerator = \"random\",\n               randomize_order: bool = False,\n               proposal_acceptance_criteria: str = 'Metropolis',\n               **kwargs) -> dimod.SampleSet:\n        \"\"\"Sample from a binary quadratic model.\n\n        Args:\n            bqm: Binary quadratic model to be sampled.\n\n            beta_range:\n                A 2-tuple or list defining the beginning and end of the\n                :math:`\\\\beta`\\ [#]_ schedule. The schedule is\n                interpolated within this range according to the value specified\n                by ``beta_schedule_type``. Default range is set based on the\n                total bias associated with each node.\n\n            num_reads:\n                Number of reads. Each read is generated by one run of the\n                simulated annealing algorithm. If ``num_reads`` is not explicitly\n                given, it is selected to match the number of initial states\n                given. If initial states are not provided, only one read is\n                performed.\n\n            num_sweeps:\n                Number of sweeps used in annealing. If no value is provided\n                and ``beta_schedule`` is None, the value defaults to 1000.\n\n            num_sweeps_per_beta (int, optional, default=1)\n                Number of sweeps to perform at each :math:`\\\\beta`. One sweep\n                consists of a sequential Metropolis update of all spins.\n\n            beta_schedule_type:\n                :math:`\\\\beta` schedule type, or how the :math:`\\\\beta` values\n                are interpolated  between the given ``beta_range``. Supported\n                values are:\n\n                * \"linear\"\n\n                * \"geometric\"\n\n                * \"custom\"\n\n                \"custom\" is recommended for high-performance applications, which\n                typically require optimizing :math:`\\\\beta` schedules beyond those\n                of the \"linear\" and \"geometric\" options, with bounds beyond those\n                provided by default. ``num_sweeps_per_beta`` and\n                ``beta_schedule`` fully specify a custom schedule.\n\n            beta_schedule:\n                Sequence of :math:`\\\\beta` values swept. Format must be compatible\n                with ``numpy.array(beta_schedule, dtype=float)``. Values should\n                be non-negative.\n\n            seed:\n                Seed to use for the PRNG. Specifying a particular seed with a\n                constant set of parameters produces identical results. If not\n                provided, a random seed is chosen.\n\n            initial_states:\n                One or more samples, each defining an initial state for all the\n                problem variables. Initial states are given one per read, but\n                if fewer than ``num_reads`` initial states are defined,\n                additional values are generated as specified by\n                ``initial_states_generator``. See :func:`~dimod.as_samples` for a\n                description of \"samples-like\".\n\n            initial_states_generator:\n                Defines the expansion of ``initial_states`` if fewer than\n                ``num_reads`` are specified:\n\n                * \"none\":\n                    If the number of initial states specified is smaller than\n                    ``num_reads``, raises ``ValueError``.\n\n                * \"tile\":\n                    Reuses the specified initial states if fewer than\n                    ``num_reads`` or truncates if greater.\n\n                * \"random\":\n                    Expands the specified initial states with randomly generated\n                    states if fewer than ``num_reads`` or truncates if greater.\n\n            randomize_order:\n                When `True`, each spin update selects a variable uniformly at random.\n                This method is ergodic, obeys detailed balance and preserves symmetries\n                of the model.\n\n                When `False`, updates proceed sequentially through the labeled variables\n                on each sweep so that all variables are updated once per sweep. This method:\n\n                * can be non-ergodic in special cases when used with ``proposal_acceptance_critera==\"Metropolis\"``.\n\n                * can introduce a dynamical bias as a function of variable order.\n\n                * has faster per spin update than the True method.\n\n            proposal_acceptance_criteria:\n                When \"Gibbs\", each spin flip proposal is accepted according\n                to the Gibbs criteria.\n                When \"Metropolis\", each spin flip proposal is accepted according\n                to the Metropolis-Hastings criteria.\n\n            interrupt_function (function, optional):\n                A function called with no parameters between each sample of\n                simulated annealing. If the function returns True, simulated\n                annealing terminates and returns with all of the samples and\n                energies found so far.\n\n        Returns:\n            A `dimod.SampleSet` for the binary quadratic model.\n\n            The `info` field of the sample set contains information about the sampling procedure:\n            1. the beta range used,\n            2. the beta schedule type used, and\n            3. timing information (details below).\n\n            Timing information is categorized into three: preprocessing, sampling, and\n            postprocessing time. All timings are reported in units of nanoseconds.\n\n            Preprocessing time is the total time spent converting the BQM variable type (if\n            required), parsing input arguments, and determining an annealing schedule. Sampling time\n            is the total time the algorithm spent in sampling states of the binary quadratic model.\n            Postprocessing time is the total time spent reverting variable type and creating a\n            `dimod.SampleSet`.\n\n        Examples:\n            This example runs simulated annealing on a binary quadratic model\n            with various input parameters.\n\n            >>> import dimod\n            >>> from dwave.samplers import SimulatedAnnealingSampler\n            ...\n            >>> sampler = SimulatedAnnealingSampler()\n            >>> bqm = dimod.BinaryQuadraticModel({'a': .5, 'b': -.5},\n            ...                                  {('a', 'b'): -1}, 0.0,\n            ...                                  dimod.SPIN)\n            >>> # Run with default parameters\n            >>> sampleset = sampler.sample(bqm)\n            >>> # Run with specified parameters\n            >>> sampleset = sampler.sample(bqm, seed=1234,\n            ...                            beta_range=[0.1, 4.2],\n            ...                            num_sweeps=20,\n            ...                            beta_schedule_type='geometric')\n            >>> # Reuse a seed\n            >>> a1 = next((sampler.sample(bqm, seed=88)).samples())['a']\n            >>> a2 = next((sampler.sample(bqm, seed=88)).samples())['a']\n            >>> assert a1 == a2\n\n            .. [#] :math:`\\\\beta` represents the inverse temperature, :math:`1/(k_B T)`, of a\n               `Boltzmann distribution <https://en.wikipedia.org/wiki/Boltzmann_distribution>`_\n               where :math:`T` is the thermodynamic temperature in kelvin and :math:`k_B` is\n               Boltzmann's constant.\n\n        \"\"\"\n        timestamp_preprocess = perf_counter_ns()\n        # get the original vartype so we can return consistently\n        original_vartype = bqm.vartype\n\n        # convert to spin (if needed)\n        if bqm.vartype is not dimod.SPIN:\n            bqm = bqm.change_vartype(dimod.SPIN, inplace=False)\n\n        # parse_initial_states could handle seed generation, but because we're\n        # sharing it with the SA algo, we handle it out here\n        if seed is None:\n            seed = randint(2**31)\n        elif not isinstance(seed, Integral):\n            error_msg = (\"'seed' should be None or an integer between 0 and 2^32 \"\n                         \"- 1: value = {}\".format(seed))\n            raise TypeError(error_msg)\n        elif not (0 <= seed < 2**31):\n            error_msg = (\"'seed' should be an integer between 0 and 2^32 - 1: \"\n                         \"value = {}\".format(seed))\n            raise ValueError(error_msg)\n\n        # parse the inputs\n        parsed = self.parse_initial_states(\n            bqm,\n            num_reads=num_reads,\n            initial_states=initial_states,\n            initial_states_generator=initial_states_generator,\n            seed=seed)\n\n        num_reads = parsed.num_reads\n\n        # read out the initial states and the variable order\n        initial_states_array = np.ascontiguousarray(\n            parsed.initial_states.record.sample)\n\n        variable_order = parsed.initial_states.variables\n\n        # read out the BQM\n        ldata, (irow, icol, qdata), off = bqm.to_numpy_vectors(\n            variable_order=variable_order)\n\n        if interrupt_function and not callable(interrupt_function):\n            raise TypeError(\"'interrupt_function' should be a callable\")\n\n        if not isinstance(num_sweeps_per_beta, Integral):\n            error_msg = \"'num_sweeps_per_beta' should be a positive integer: value = {}\".format(num_sweeps_per_beta)\n            raise TypeError(error_msg)\n        if num_sweeps_per_beta < 1:\n            error_msg = \"'num_sweeps_per_beta' should be a positive integer: value = {}\".format(num_sweeps_per_beta)\n            raise ValueError(error_msg)\n\n        # handle beta_schedule et al\n        if beta_schedule_type == \"custom\":\n\n\n            if beta_schedule is None:\n                error_msg = \"'beta_schedule' must be provided for beta_schedule_type = 'custom': value is None\"\n                raise ValueError(error_msg)\n            else:\n                try:\n                    beta_schedule = np.array(beta_schedule,dtype=float)\n                except:\n                    raise ValueError('beta_schedule cannot be case as a numpy array of dtype=float')\n                if num_sweeps is not None and num_sweeps!=len(beta_schedule)*num_sweeps_per_beta:\n                    error_msg = \"'num_sweeps' should be set to None, or a value consistent with 'beta_schedule' and 'num_sweeps_per_beta' for 'beta_schedule_type' = 'custom': value = \".format(num_sweeps)\n                    raise ValueError(error_msg)\n                if beta_range is not None and (beta_range[0]!=beta_schedule[0] or beta_range[-1]!=beta_schedule[-1]):\n                    error_msg = \"'beta_range' should be set to None, or a value consistent with 'beta_schedule', for 'beta_schedule_type'='custom'.\"\n                    raise ValueError(error_msg)\n                if np.min(beta_schedule)<0:\n                    error_msg = \"'beta_schedule' cannot include negative values.\"\n                    raise ValueError(error_msg)\n        else:\n            if beta_schedule is not None:\n                error_msg = \"'beta_schedule' must be set to None for 'beta_schedule_type' not equal to 'custom'\"\n                raise ValueError(error_msg)\n            if num_sweeps is None:\n                num_sweeps = 1000\n\n            num_betas, rem = divmod(num_sweeps,num_sweeps_per_beta)\n\n            if rem > 0 or num_betas < 0:\n                error_msg = \"'num_sweeps' must be a non-negative value divisible by 'num_sweeps_per_beta'.\"\n                raise ValueError(error_msg)\n\n            if beta_range is None:\n                beta_range = _default_ising_beta_range(bqm.linear, bqm.quadratic)\n            elif len(beta_range) != 2 or min(beta_range) < 0:\n                error_msg = \"'beta_range' should be a 2-tuple, or 2 element list of positive numbers. The latter value is the target value.\"\n                raise ValueError(error_msg)\n\n            if num_betas == 1:\n                #One sweep in the target model\n                beta_schedule = np.array([beta_range[-1]],dtype=float)\n            else:\n                if beta_schedule_type == \"linear\":\n                    # interpolate a linear beta schedule\n                    beta_schedule = np.linspace(*beta_range, num=num_betas)\n                elif beta_schedule_type == \"geometric\":\n                    if min(beta_range) <= 0:\n                        error_msg = \"'beta_range' must contain non-zero values for 'beta_schedule_type' = 'geometric'\"\n                        raise ValueError(error_msg)\n                    # interpolate a geometric beta schedule\n                    beta_schedule = np.geomspace(*beta_range, num=num_betas)\n                else:\n                    raise ValueError(\"Beta schedule type {} not implemented\".format(beta_schedule_type))\n\n        timestamp_sample = perf_counter_ns()\n\n        # run the simulated annealing algorithm\n        samples, energies = simulated_annealing(\n            num_reads, ldata, irow, icol, qdata,\n            num_sweeps_per_beta, beta_schedule,\n            seed, initial_states_array,\n            randomize_order, proposal_acceptance_criteria,\n            interrupt_function)\n        timestamp_postprocess = perf_counter_ns()\n\n        info = {\n            \"beta_range\": beta_range,\n            \"beta_schedule_type\": beta_schedule_type\n        }\n        response = dimod.SampleSet.from_samples(\n            (samples, variable_order),\n            energy=energies+bqm.offset,  # add back in the offset\n            info=info,\n            vartype=dimod.SPIN\n        )\n\n        response.change_vartype(original_vartype, inplace=True)\n\n        # Developer note: the specific keys of the timing dict are chosen to be consistent with\n        #                 other samplers' timing dict.\n        response.info.update(dict(timing=dict(\n            preprocessing_ns=timestamp_sample - timestamp_preprocess,\n            sampling_ns=timestamp_postprocess - timestamp_sample,\n            # Update timing info last to capture the full postprocessing time\n            postprocessing_ns=perf_counter_ns() - timestamp_postprocess,\n        )))\n\n        return response\n"
+  },
+  "created_utc": "2026-10-04T19:08:28.184006+00:00",
+  "run_id": "full_qubo_2026-10-04_190828184006Z"
+}

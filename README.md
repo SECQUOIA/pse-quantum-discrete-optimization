@@ -20,6 +20,10 @@ instances can be added without changing the existing DS-MFG artifact paths.
   distributions, generated figures, scripts, and manuscript-ready findings for
   the DS-MFG QUBO case.
 
+- [Process-design surrogate experiments](case-studies/surrogates/README.md): DS-MFG and ILRS full-QUBO/surrogate comparisons, local SA/QAOA/VQE, historical samples, and the authorized DS-MFG QCI pilot.
+
+The [shared plan](case-studies/surrogates/PLAN.md) and [results report](case-studies/surrogates/reports/RESULTS.md) describe scope and evidence. Each solver run saves a dated formulation folder with one `input.json` and one `result.json`, including explicit computation timing. New D-Wave and other hardware experiments remain deferred beyond the authorized QCI pilot.
+
 ## Start Here
 
 Clone the repository and enter the current DS-MFG case study:

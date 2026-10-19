@@ -1,0 +1,5 @@
+numpy==1.26.4
+dimod==0.12.21
+dwave-neal==0.6.0
+dwave-samplers==1.7.0
+matplotlib==3.8.3
