@@ -1,0 +1,11 @@
+qiskit_version = "2.3.1"
+logical_circuit_construction_seconds = 0.053731415
+julia_version = "1.10.11"
+environment_load_seconds = 17.976597086
+pilot_builder_sha256 = "30eb8092b275645504b815486cc8c4fd58af534089dd3c7f74f0aec11e4a6ff8"
+scope = "new offline FakeFez proxy; not historical ibm_fez compilation or queue time"
+created_utc = "2026-09-14T02:15:23.147"
+runtime_version = "0.46.1"
+load_and_fake_backend_seconds = 0.719902163
+script_sha256 = "b834afb2d9ce95dbe71cde547d457a56f21ccf20b22a5f93dbf455d89ff314cc"
+transpilation_warmup_seconds = 0.261779674

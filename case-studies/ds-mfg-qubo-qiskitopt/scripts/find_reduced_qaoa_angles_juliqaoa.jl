@@ -6,8 +6,10 @@ const STUDENT_ROOT = normpath(abspath(joinpath(@__DIR__, "..")))
 const DEFAULT_JULIQAOA_PROJECT = abspath(joinpath(@__DIR__, "..", "..", "..", "..", "JuliQAOA.jl"))
 const JULIQAOA_PROJECT = get(ENV, "JULIQAOA_PROJECT", DEFAULT_JULIQAOA_PROJECT)
 
-Pkg.activate(JULIQAOA_PROJECT)
-Pkg.instantiate()
+if abspath(PROGRAM_FILE) == abspath(@__FILE__)
+    Pkg.activate(JULIQAOA_PROJECT)
+    Pkg.instantiate()
+end
 
 using JuliQAOA
 using Printf
@@ -272,4 +274,6 @@ function main()
     println("JuliQAOA angle summary written to: ", summary_path)
 end
 
-main()
+if abspath(PROGRAM_FILE) == abspath(@__FILE__)
+    main()
+end

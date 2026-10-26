@@ -4,7 +4,7 @@ This bundle contains a reproducible DS-MFG QUBO case study using local classical
 emulations of QAOA and VQE through `QiskitOpt.jl` and Qiskit Aer, plus a small
 IBM hardware pilot for the fixed-parameter QAOA handoff. It includes the
 executed notebook, cached distributions, generated figures, hardware pilot
-artifacts, the submitted manuscript and supplement, and expanded findings.
+artifacts, the manuscript and supplement, and expanded findings.
 
 The case study is framed as a practical quantum-optimization audit. Gurobi
 provides the original 19-flow-variable ground truth, local Aer emulation
@@ -14,9 +14,11 @@ IBM hardware-performance superiority.
 
 Start with:
 
-- [main_standalone.pdf](main_standalone.pdf) and
-  [supplement_standalone.pdf](supplement_standalone.pdf): the submitted paper
-  and supplementary material, rebuilt from the submission sources.
+- [main_standalone.pdf](main_standalone.pdf): the submitted paper, including
+  the reviewer robustness and cost revision. The conference submission has no
+  supplement; [supplement_standalone.pdf](supplement_standalone.pdf) is
+  repository documentation that the paper cites as the shared repository
+  (repair component table, environment, and validation tables).
 - `README_STUDENT.md`: detailed guide to the notebook, environment, cached
   results, and rerun commands.
 - `ds_mfg_qubo_qiskitopt.ipynb`: executed notebook with the full workflow.
@@ -38,11 +40,15 @@ files were imported from `FOCAPO_CPC_2027_YPark (1).zip` (SHA-256:
 | `supplement.tex` | [supplement_standalone.tex](supplement_standalone.tex) |
 | All other entries | Same relative paths in this directory |
 
-All imported files retain the archive's contents, including `bibliography.bib`,
+Commit `93c4f97e13936c2434c84afe5ebf8b8a4794d722` preserves all imported files
+exactly, including `bibliography.bib`,
 `psepress.sty`, `preprint.cls`, the figures, bundled fonts, `PSEkeywords.txt`,
 and `.vscode/settings.json`. The ZIP itself is a local export excluded by the
 repository's existing ignore rules. The tracked PDFs are local rebuilds; the
-submission ZIP contains no PDFs. `MANUSCRIPT_FINDINGS.tex` and
+submission ZIP contains no PDFs. The current manuscripts extend that submission
+with the [reviewer robustness and cost audit](ds_mfg_revision_audit/README.md),
+within one additional main-manuscript page (six pages to seven).
+`MANUSCRIPT_FINDINGS.tex` and
 `MANUSCRIPT_FINDINGS.md` retain the expanded analysis and experiment provenance
 that support the submitted paper.
 

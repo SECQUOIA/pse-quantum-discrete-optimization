@@ -1,0 +1,21 @@
+{
+  "ds_mfg_fixed_angle_sweep/fixed_angle_qaoa_summary.csv": "d9e22e235c93da710fb5ca62a94f05398cc91e499a7fdf70e620d0b9323daacd",
+  "ds_mfg_ibm_qaoa_pilot_fez_4096x3/summary.csv": "8f5e8927742bd104114874a79452e360f0dac97e124e1bdc813194a47c6f9688",
+  "ds_mfg_iteration_sweep/sweep_summary.csv": "d6a01d37c35dfb5b039d51d8247f3e0911267b66bcbb1a8cd4367dff6bb49ace",
+  "ds_mfg_p2_perturbation_sweep_v3/p2_perturbation_summary.csv": "29b726d0664d971fe70116467c9e106c6adf0085975cfa318b552c7fa9ab4107",
+  "ds_mfg_qaoa_juliqaoa_angle_search/juliqaoa_angle_summary.csv": "2b8d722e7d49768e60f9a30ced35d0d01f8ff5ce52d4b2f3c3d761d59350d3d8",
+  "ds_mfg_qaoa_juliqaoa_transfer_highread/qaoa_juliqaoa_transfer_summary.csv": "10bb3bc9b746fb12a87eadc1fd2b819c1a3cacbc84025c9bd54797c1088c34b7",
+  "ds_mfg_reduced_flow_objective/reduced_exact_top_flows.csv": "a42d356a999faf92328ec8900714d4ed31e8dbe783c6891128da69d183e6276a",
+  "ds_mfg_saved_distributions/run_metadata.csv": "3d4ed95bc8a4ce9acf45e8feba3d06a956721b599a5f64c1fc793601f63ded60",
+  "ds_mfg_saved_distributions/vqe_distribution.csv": "522f0b82853b5fa75b57298cfc221097fc5c7b3b606715a656bdb50b5f8283e7",
+  "ds_mfg_vqe_final_sampling_sweep/vqe_final_sampling_summary.csv": "cdd817b03fd70c9122eaf1e606dbafe430e7de609b5fa14aa2c920d6eab49f99",
+  "ds_mfg_vqe_final_sampling_sweep_v2/vqe_final_sampling_summary.csv": "b5d17bc965b809b96a4e424a30a6e7fb7e034b34819adda9d6203ba0c15a4211",
+  "ds_mfg_vqe_reduced_flow_objective/vqe_reduced_flow_summary.csv": "51a63e70bda37511fbbf2a8a83413ab6b2496d893871cb717ea83856d2bec90a",
+  "ds_mfg_vqe_reduced_flow_objective_final/vqe_reduced_top50_sampling_summary.csv": "aac0299d49314b8d0e4d54b088f50cc728f1d212540613348ab62d209a132ee1",
+  "ds_mfg_vqe_reduced_flow_objective_seed74018_metadata/vqe_reduced_top50_sampling_summary.csv": "76f8d05b7258683170f4bd80628d0de5bbff8cceebc9795989bc922f7d3bc2ca",
+  "ds_mfg_vqe_reduced_flow_objective_selected_metadata/vqe_reduced_top50_sampling_summary.csv": "df82de49b921e3b70d5d24f0896e77b6da64477c3a13cffc0a0761d6e9ebd2db",
+  "ds_mfg_vqe_reduced_flow_objective_v2/vqe_reduced_flow_summary.csv": "02c5b1871d103467b3e7866b764664ee7a831318120f214d8339e33936a062a0",
+  "ds_mfg_vqe_reduced_flow_objective_v3/vqe_reduced_top50_sampling_summary.csv": "f1e59323d9096fb38812eff8b19130248375554bc5b42b4f7070865b57b9538f",
+  "ds_mfg_vqe_reduced_flow_objective_v4/vqe_reduced_top50_sampling_summary.csv": "d4987a4f3d9cb6bd20b65db61d2161d49b21f2ec6e4bdfcd1cbf2e8831d8c0f1",
+  "scripts/summarize_revision_evidence.py": "c2898f3b4557cc34cad9f2cfdc2450cda064a568fc7c31aaea33be3491e96a09"
+}

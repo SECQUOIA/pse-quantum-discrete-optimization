@@ -1,0 +1,12 @@
+juliqaoa_manifest_sha256 = "297e2e8fad82ee7e0928a41124cd535f55978f196f34bf58fac7d7e8301f0177"
+optimizer_warmup_seconds = 11.241963323
+julia_version = "1.10.11"
+environment_load_seconds = 21.707986835
+cpu = "Intel(R) Xeon(R) w5-2565X"
+surrogate_enumeration_and_setup_seconds = 1.525768132
+timing_policy = "new warm CPU rerun; each optimization timer includes the complete p=1..5 ladder; not a reconstruction of historical times"
+wall_seconds_since_script_entry = 641.427916381
+created_utc = "2026-09-14T02:13:36.200"
+julia_threads = 1
+angle_helper_sha256 = "0dfb791d4f4d525216cdcce09d55498aa3ec77d7a35d5575d7595eea19496786"
+script_sha256 = "d14dc9e3e5a58a5cd7484811ff8f24b327a382c30f64516db229d7b497160dc2"
